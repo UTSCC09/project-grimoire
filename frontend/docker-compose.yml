@@ -5,9 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "3000:3000"
     volumes:
-      - .:/app
+      - ./src/:/app/src/
+      - ./public/:/app/public
+      - ./.env/:/app/.env
     environment:
       - NODE_ENV=development
     env_file:

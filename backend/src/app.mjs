@@ -7,7 +7,7 @@ import { User } from "./schemas.mjs";
 
 dotenv.config();
 
-const PORT = 6000;
+const PORT = 8000;
 await mongoose.connect(process.env.MONGO_URL)
 
 const app = express();

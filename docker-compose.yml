@@ -1,0 +1,29 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/.:/app
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./backend/.env
+  frontend:
+    build:
+      context: ./frontend/.
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src/:/app/src/
+      - ./frontend/public/:/app/public
+      - ./frontend/.env/:/app/.env
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./frontend/.env
+  
