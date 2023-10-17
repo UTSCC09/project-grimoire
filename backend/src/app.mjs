@@ -4,6 +4,7 @@ import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, { model } from 'mongoose'
 import { User } from "./schemas.mjs";
+import { saltHashPassword } from "./helper.mjs";
 
 dotenv.config();
 
@@ -16,16 +17,11 @@ app.use(express.json())
 
 app.use(
     session({
-      secret: "this secret should be hidden in an .env file",
+      secret: process.env.SESSION_KEY,
       resave: false,
       saveUninitialized: true,
     })
 );
-
-function isAuthenticated(req, res, next) {
-    if (!req.username) return res.status(401).end("access denied");
-    next();
-};
 
 app.use(function (req, res, next) {
     req.username = req.session.username ? req.session.username : null
@@ -40,14 +36,35 @@ app.get("/", (req, res, next) => {
 
 //MEANT FOR TESTING PURPOSES
 //BASIC API TO INSERT TEST CLASS INTO DB
-app.post('/user', async (req, res, next) => {
+app.post('/users/signup', async (req, res, next) => {
     const json = req.body
-    const user = new User({
-        username: json.username,
+    if(!json.username){
+        return res.status(400).json({body: "Missing user: id"})
+    }
+    if(!json.password){
+        return res.status(400).json({body: "Missing user: password"})
+    }
+
+    const sameUser = User.findOne({username: json.username}).exec()
+    if(sameUser){
+        return res.status(409).json({body:  "username " + json.username + " already exists"});
+    }
+
+    saltHashPassword(json.password, async (err, hash, salt) => {
+        if(err)
+            throw err
+
+        const user = newUser({
+            username: json.username,
+            password: hash,
+            salt: salt
+        }) 
+        const newUser = await user.save()
+        req.session.user = newUser.username
+        res.status(201).json({username: user})
     })
-    const newUser = await user.save()
-    res.status(201).json(newUser)
 })
+
 
 //BASIC API TO GET TEST CLASSES FROM DB
 app.get('/user', async (req, res, next) => {

@@ -7,7 +7,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/.:/app
+      - ./backend/src/.:/app/src/.
+      - ./backend/.env:/app/.env
     environment:
       - NODE_ENV=development
     env_file:
@@ -19,11 +20,13 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/src/:/app/src/
-      - ./frontend/public/:/app/public
-      - ./frontend/.env/:/app/.env
+      - ./frontend/src/.:/app/src/.
+      - ./frontend/public/.:/app/public/.
+      - ./frontend/.env:/app/.env
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
     env_file:
       - ./frontend/.env
+      
   

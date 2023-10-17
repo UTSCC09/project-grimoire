@@ -7,7 +7,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - ./src/.:/app/src/.
+      - ./.env:/app/.env
     environment:
       - NODE_ENV=development
     env_file:
