@@ -25,7 +25,9 @@ services:
       - ./frontend/.env:/app/.env
     environment:
       - NODE_ENV=development
+      - WDS_SOCKET_HOST=127.0.0.1 
       - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true 
     env_file:
       - ./frontend/.env
       
