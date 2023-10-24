@@ -3,7 +3,7 @@ import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, { model } from 'mongoose'
-import { User } from "./schemas.mjs";
+import { CharacterSheet, DISMutation, DISOrigin, DeathInSpaceSheet, Game, User } from "./schemas.mjs";
 import { saltHashPassword } from "./helper.mjs";
 
 dotenv.config();
@@ -33,6 +33,85 @@ app.get("/", (req, res, next) => {
     return res.json({body: "This is the grimoire backend :D"})
 })
 
+app.post("/game", async (req, res, next) => {
+    const json = req.body
+    const newGame = new Game({name: json.name, mainDie: json.mainDie})
+    console.log('newGame', newGame)
+    const result = await newGame.save()
+    return res.json({body: "success!", result: result})
+})
+
+app.post("/dis/random", async (req, res, next) => {
+    const json = req.body
+    const user = await User.findOne().exec()
+    const game = await Game.findOne({name: "Death In Space"}).exec()
+
+    //querying origns now to wait for them later
+    //choose a random origin
+
+    let origins = DISOrigin.find({}).exec()
+
+    //calculating dexterity score ahead of time since used in defense rating
+    const dexScore = Math.floor(Math.random() * 7) - 3 
+
+    const baseSheet = new CharacterSheet(
+        {
+        owner: user._id, 
+        game: game._id, 
+        characterName: json.name,
+
+        stats: [{
+            name: "Body",
+            value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+            },
+            {
+            name: "Dexterity",
+            value: dexScore, //random number between 3 and -3
+            },{
+                name: "Savy",
+                value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+            },
+            {
+                name: "Technology",
+                value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+            }
+        ],
+        inventory: [{
+            name: "Shitty Code",
+            description: "Not even sure if it works"
+        }]
+    })
+
+    const hitPoints = Math.floor(Math.random() * 8) + 1
+
+    //resolving our await
+    origins = await origins
+
+    const randomOrigin = Math.floor(Math.random() * origins.length)
+    
+    const randomBenefit = Math.floor(Math.random() * origins[randomOrigin].benefits.length)
+
+    //pick a random origin in between it and its length
+
+    const deathInSpaceSheet = new DeathInSpaceSheet({
+        baseCharacterSheet : baseSheet,
+        mutations: [],
+        voidPoints: 0,
+        defenseRating: 12 + dexScore,
+        maxHitPoints: hitPoints,
+        hitPoints: hitPoints,
+        origin: origins[randomOrigin],
+        originBenefit: randomBenefit
+    })
+    const saved = await deathInSpaceSheet.save()
+    return res.json({body: "Success", result: saved})
+})
+
+app.get("/dis/get/:id", async (req, res, next) => {
+    let charSheet = await DeathInSpaceSheet.findById(req.params.id).populate(['mutations', "origin"]).exec()
+
+    return res.json(charSheet)
+})
 
 //MEANT FOR TESTING PURPOSES
 //BASIC API TO INSERT TEST CLASS INTO DB
