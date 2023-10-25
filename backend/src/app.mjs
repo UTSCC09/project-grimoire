@@ -3,8 +3,10 @@ import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, { model } from 'mongoose'
-import { CharacterSheet, DISMutation, DISOrigin, DeathInSpaceSheet, Game, User } from "./schemas.mjs";
-import { saltHashPassword } from "./helper.mjs";
+import { DISMutation, DISOrigin, DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
+import { CharacterSheet, Game, User } from "./schemas.mjs";
+import { randomNumberBetween, rollNSidedDie, saltHashPassword } from "./helper.mjs";
+import { addStartingBonus } from "./deathInSpace/sheets.mjs";
 
 dotenv.config();
 
@@ -52,7 +54,7 @@ app.post("/dis/random", async (req, res, next) => {
     let origins = DISOrigin.find({}).exec()
 
     //calculating dexterity score ahead of time since used in defense rating
-    const dexScore = Math.floor(Math.random() * 7) - 3 
+    const dexScore = randomNumberBetween(3, -3)
 
     const baseSheet = new CharacterSheet(
         {
@@ -62,18 +64,18 @@ app.post("/dis/random", async (req, res, next) => {
 
         stats: [{
             name: "Body",
-            value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+            value: randomNumberBetween(3, -3), //random number between 3 and -3
             },
             {
             name: "Dexterity",
             value: dexScore, //random number between 3 and -3
             },{
                 name: "Savy",
-                value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+                value: randomNumberBetween(3, -3), //random number between 3 and -3
             },
             {
                 name: "Technology",
-                value: Math.floor(Math.random() * 7) - 3, //random number between 3 and -3
+                value: randomNumberBetween(3, -3), //random number between 3 and -3
             }
         ],
         inventory: [{
@@ -82,14 +84,14 @@ app.post("/dis/random", async (req, res, next) => {
         }]
     })
 
-    const hitPoints = Math.floor(Math.random() * 8) + 1
+    const hitPoints = rollNSidedDie(8)
 
     //resolving our await
     origins = await origins
 
-    const randomOrigin = Math.floor(Math.random() * origins.length)
+    const randomOrigin = randomNumberBetween(origins.length - 1)
     
-    const randomBenefit = Math.floor(Math.random() * origins[randomOrigin].benefits.length)
+    const randomBenefit = randomNumberBetween(origins[randomOrigin].benefits.length - 1)
 
     //pick a random origin in between it and its length
 
@@ -103,6 +105,16 @@ app.post("/dis/random", async (req, res, next) => {
         origin: origins[randomOrigin],
         originBenefit: randomBenefit
     })
+
+    //check if needed to add anything else to the character sheet because of poor roles
+    //(p.20) of the rule book
+
+    //if have negative net value for stats
+    if(baseSheet.stats.reduce((sum, stat) => sum + stat.value, 0) < 0){
+        //add starting bonus
+        deathInSpaceSheet = addStartingBonus(deathInSpaceSheet)
+    }
+
     const saved = await deathInSpaceSheet.save()
     return res.json({body: "Success", result: saved})
 })
@@ -111,6 +123,13 @@ app.get("/dis/get/:id", async (req, res, next) => {
     let charSheet = await DeathInSpaceSheet.findById(req.params.id).populate(['mutations', "origin"]).exec()
 
     return res.json(charSheet)
+})
+
+app.post('/dis/:id/bonus', async(req, res, next) => {
+    let charSheet = await DeathInSpaceSheet.findById(req.params.id).populate(['mutations', "origin"]).exec()
+    addStartingBonus(charSheet)
+
+    return res.json({body: "starting bonus added"})
 })
 
 //MEANT FOR TESTING PURPOSES
