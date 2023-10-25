@@ -1,0 +1,31 @@
+Goals for Beta: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Looking for Group:
+Page where users can post groups looking for games or users can post their availability for games.
+User can declare their desire for different types of games (exploration, action, suspense,...)
+Groups can declare their game type (action, suspense, horror,...)
+Users are referred to groups based on their preferences.
+MongoDB implementation of database
+Use vector norms ( :( ) to compare users and recommend how close they are 
+Group owners should be able to change the games, add players, remove players, promote to Owner, and promote to DM.
+
+
+
+Character Sheets:
+Players can create character sheets, which are stored on DB, and are returned to them.
+Players should be able to send character sheets to other players to see (whitelist people to be able to see their character sheets, only they are allowed to edit)
+When players join a group, the DM of the group will be able to see the character sheet associated with that 
+Character sheets are displayed on each page and can be seen and accessed by users.
+Users can perform skill tests by typing a command in some sort of terminal (Ex: Body Check) (MaterialUI) (Physical Dice Rolling?)
+
+
+
+
+Kyle:
+Endpoints (Specific to each game?) and database design
+
+Jason:
+Start Looking for Groups Endpoints
+
+Casper:
+Start the frontend. Set terminal to allow users to roll different stats using commands like test Strength....
+
