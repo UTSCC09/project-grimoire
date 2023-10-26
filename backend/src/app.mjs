@@ -2,11 +2,12 @@ import { createServer } from "http";
 import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
-import mongoose, { model } from 'mongoose'
+import mongoose, {mongo} from 'mongoose'
 import { DISMutation, DISOrigin, DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
-import { CharacterSheet, Game, User } from "./schemas.mjs";
+import { Game, User, UserSheetMapping } from "./schemas.mjs";
 import { randomNumberBetween, rollNSidedDie, saltHashPassword } from "./helper.mjs";
 import { addStartingBonus } from "./deathInSpace/sheets.mjs";
+import sanitize from "mongo-sanitize";
 
 dotenv.config();
 
@@ -35,101 +36,140 @@ app.get("/", (req, res, next) => {
     return res.json({body: "This is the grimoire backend :D"})
 })
 
-app.post("/game", async (req, res, next) => {
-    const json = req.body
-    const newGame = new Game({name: json.name, mainDie: json.mainDie})
-    console.log('newGame', newGame)
-    const result = await newGame.save()
-    return res.json({body: "success!", result: result})
-})
-
 app.post("/dis/random", async (req, res, next) => {
-    const json = req.body
+    let json = req.body
     const user = await User.findOne().exec()
     const game = await Game.findOne({name: "Death In Space"}).exec()
+    //pick a random origin in between it and its length
+        
+    const dex = randomNumberBetween(3, -3)
+    const hitPoints = rollNSidedDie(8)
 
-    //querying origns now to wait for them later
-    //choose a random origin
-
-    let origins = DISOrigin.find({}).exec()
-
-    //calculating dexterity score ahead of time since used in defense rating
-    const dexScore = randomNumberBetween(3, -3)
-
-    const baseSheet = new CharacterSheet(
-        {
+    const origins = await DISOrigin.find({}).exec()
+    const randomOrigin = origins[randomNumberBetween(origins.length - 1)]
+    const stats = {
+        bdy: randomNumberBetween(3, -3), //random number between 3 and -3
+        dex: dex,
+        svy: randomNumberBetween(3, -3),
+        tech: randomNumberBetween(3, -3),
+    } 
+    let deathInSpaceSheet = new DeathInSpaceSheet({
         owner: user._id, 
         game: game._id, 
         characterName: json.name,
 
-        stats: [{
-            name: "Body",
-            value: randomNumberBetween(3, -3), //random number between 3 and -3
-            },
-            {
-            name: "Dexterity",
-            value: dexScore, //random number between 3 and -3
-            },{
-                name: "Savy",
-                value: randomNumberBetween(3, -3), //random number between 3 and -3
-            },
-            {
-                name: "Technology",
-                value: randomNumberBetween(3, -3), //random number between 3 and -3
-            }
-        ],
-        inventory: [{
-            name: "Shitty Code",
-            description: "Not even sure if it works"
-        }]
-    })
-
-    const hitPoints = rollNSidedDie(8)
-
-    //resolving our await
-    origins = await origins
-
-    const randomOrigin = randomNumberBetween(origins.length - 1)
-    
-    const randomBenefit = randomNumberBetween(origins[randomOrigin].benefits.length - 1)
-
-    //pick a random origin in between it and its length
-
-    const deathInSpaceSheet = new DeathInSpaceSheet({
-        baseCharacterSheet : baseSheet,
+        stats: stats,
+        inventory: [],
         mutations: [],
         voidPoints: 0,
-        defenseRating: 12 + dexScore,
+        defenseRating: 12 + dex,
         maxHitPoints: hitPoints,
         hitPoints: hitPoints,
-        origin: origins[randomOrigin],
-        originBenefit: randomBenefit
+        origin: randomOrigin._id,
+        originBenefit: randomNumberBetween(randomOrigin.benefits.length - 1)
     })
 
-    //check if needed to add anything else to the character sheet because of poor roles
+    const errors = deathInSpaceSheet.validateSync()
+    if(errors && errors.errors.length > 0){
+        return res.status(403).json({errors: errors.errors})
+    }
+    //check if needed to add anything else to the character sheet because of poor roles 
     //(p.20) of the rule book
 
     //if have negative net value for stats
-    if(baseSheet.stats.reduce((sum, stat) => sum + stat.value, 0) < 0){
+    if(Object.keys(stats).reduce((sum, stat) => sum + stats[stat], 0) < 0){
         //add starting bonus
-        deathInSpaceSheet = addStartingBonus(deathInSpaceSheet)
+        deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
     }
+    deathInSpaceSheet.save().then((saved) => {
+        //creating the user-game-sheet mapping
+        const mapping = new UserSheetMapping({
+            game: saved.game,
+            user: saved.owner,
+            sheet: saved._id,
+            sheetModel: deathInSpaceSheet.constructor.modelName
+        })
+        mapping.save().then(savedMap => {
+            return res.status(201).json({body: "Success", result: saved})
+        }).catch(err => {
+            deathInSpaceSheet.delete()
+            throw err
+        })
+    }).catch(err => {
+        if(err.name === "ValidationError"){
+            return res.status(403).json({error: err.errors})
+        }
+        return res.status(500).json(err.errors)
+    })
+})
 
-    const saved = await deathInSpaceSheet.save()
-    return res.json({body: "Success", result: saved})
+
+app.post("/api/dis/create", async(req, res, next) => {
+    let json = req.body
+    const user = await User.findOne().exec()
+    const game = await Game.findOne({name: "Death In Space"}).exec()
+    //pick a random origin in between it and its length
+
+    const stats = !json.stats ? {} : {
+        bdy: json.stats.bdy, //random number between 3 and -3
+        dex: json.stats.dex,
+        svy: json.stats.svy,
+        tech: json.stats.tech,
+    }
+        
+    let deathInSpaceSheet = new DeathInSpaceSheet({
+        owner: user._id, 
+        game: game._id, 
+        characterName: json.name,
+
+        stats: stats,
+        inventory: json.inventory,
+        mutations: json.mutations,
+        voidPoints: 0,
+        defenseRating: 12 + json.stats.dex,
+        maxHitPoints: json.hitPoints,
+        hitPoints: json.hitPoints,
+        origin: json.origin,
+        originBenefit: json.originBenefit
+    })
+
+    const errors = deathInSpaceSheet.validateSync()
+    if(errors && errors.errors.length > 0){
+        return res.status(403).json({errors: errors.errors})
+    }
+    //check if needed to add anything else to the character sheet because of poor roles 
+    //(p.20) of the rule book
+
+    //if have negative net value for stats
+    if(!json.addedBonus && Object.keys(stats).reduce((sum, stat) => sum + stats[stat], 0) < 0){
+        //add starting bonus
+        deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
+    }
+    deathInSpaceSheet.save().then((saved) => {
+        //creating the user-game-sheet mapping
+        const mapping = new UserSheetMapping({
+            game: saved.game,
+            user: saved.owner,
+            sheet: saved._id,
+            sheetModel: deathInSpaceSheet.constructor.modelName
+        })
+        mapping.save().then(savedMap => {
+            return res.status(201).json({body: "Success", result: saved})
+        }).catch(err => {
+            deathInSpaceSheet.delete()
+            throw err
+        })
+    }).catch(err => {
+        if(err.name === "ValidationError"){
+            return res.status(403).json({error: err.errors})
+        }
+        return res.status(500).json(err.errors)
+    })
 })
 
 app.get("/dis/get/:id", async (req, res, next) => {
-    let charSheet = await DeathInSpaceSheet.findById(req.params.id).populate(['mutations', "origin"]).exec()
-
+    let charSheet = await DeathInSpaceSheet.findById(sanitize(req.params.id)).populate(['mutations', "origin"]).exec()
     return res.json(charSheet)
-})
-
-app.post('/dis/:id/bonus', async(req, res, next) => {
-    let charSheet = await DeathInSpaceSheet.findById(req.params.id).populate(['mutations', "origin"]).exec()
-    addStartingBonus(charSheet)
-
-    return res.json({body: "starting bonus added"})
 })
 
 //MEANT FOR TESTING PURPOSES
@@ -143,7 +183,7 @@ app.post('/users/signup', async (req, res, next) => {
         return res.status(400).json({body: "Missing user: password"})
     }
 
-    const sameUser = User.findOne({username: json.username}).exec()
+    const sameUser = User.findOne({username: sanitize(json.username)}).exec()
     if(sameUser){
         return res.status(409).json({body:  "username " + json.username + " already exists"});
     }

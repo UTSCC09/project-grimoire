@@ -2,12 +2,15 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 import mongoose, { mongo } from 'mongoose';
-import { InventoryItemSchema, CharacterSheetSchema } from '../schemas.mjs';
 
 const DISInventorySchema = new Schema({
-    basicInfo: {
-        type: InventoryItemSchema,
-        required: true
+    name: {
+        type: String,
+        required: true   
+    },
+    description: {
+        type: String,
+        required: false
     },
     condition: {
         type: Number,
@@ -50,6 +53,10 @@ const DISWeaponSchema = new Schema({
     type: {
         type: String,
         required: false
+    },
+    equipped: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -69,6 +76,10 @@ const DISArmorSchema = new Schema({
     },
     type: {
         type: String
+    },
+    equipped: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -104,13 +115,53 @@ const DISOriginSchema = new Schema({
 export const DISOrigin = new mongoose.model("DISOrigin", DISOriginSchema)
 
 const DISSheetSchema = new Schema({
-    baseCharacterSheet : {
-        type: CharacterSheetSchema,
+    owner: {
+        type: ObjectId,
+        ref: "User",
         required: true
+    },
+    game : {
+        type: ObjectId,
+        ref: "Game",
+        required: true
+    },
+    characterName: {
+        type: String,
+        required: true
+    },
+    characterPortrait: {
+        type: String, //string will be a path to the uploaded picture
+        required: false
+    },
+    stats: {
+        type: {
+            bdy : {
+                type: Number,
+                required: true
+            },
+            dex : {
+                type: Number,
+                required: true
+            },
+            svy : {
+                type: Number,
+                required: true
+            },
+            tech : {
+                type: Number,
+                required: true
+            },
+        },
+        required: true
+    },
+    notes: {
+        type: String,
+        required: false
     },
     mutations : {
         type: [ObjectId],
         ref: "DISMutation",
+        default: [],
         required: false
     },
     voidPoints: {
@@ -143,7 +194,9 @@ const DISSheetSchema = new Schema({
     //index in the origin's benefit array
     originBenefit: {
         type: Number,
-        required: true
+        required: true,
+        max: 1,
+        min: 0
     },
     lifeSupport: {
         type: Number,
@@ -164,9 +217,18 @@ const DISSheetSchema = new Schema({
         min: 0,
         default: 0
     },
-    inventory: [DISInventorySchema],
-    weapons: [DISWeaponSchema],
-    armor: [DISArmorSchema]
+    inventory: {
+        type: [DISInventorySchema],
+        default: []
+    },
+    weapons: {
+        type: [DISWeaponSchema],
+        default: []
+    },
+    armor: {
+        type: [DISArmorSchema],
+        default: []
+    }
 })
 
 export const DeathInSpaceSheet = new mongoose.model('DISSheet', DISSheetSchema) 

@@ -47,58 +47,28 @@ export const GameSchema = new Schema({
 
 export const Game = mongoose.model("Game", GameSchema)
 
-export const StatSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    value: {
-        type: Number,
-        required: true
-    },
-    bonus: {
-        type: String,
-        required: false
-    }
-})
-
-export const InventoryItemSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    description : {
-        type: String,
-        required: false
-    }
-})
-
-export const CharacterSheetSchema = new Schema({
-    owner: {
+const sheetUserMappingSchema = new Schema({
+    user: {
         type: ObjectId,
-        ref: "User",
-        required: true
+        required: true,
+        ref : "User"
     },
     game : {
         type: ObjectId,
-        ref: "Game",
-        required: true
+        required: true,
+        ref: "Game"
     },
-    characterName: {
+    sheet: {
+        type: ObjectId,
+        required: true,
+        refPath: "sheetModel"
+    },
+    //should be the string form of the model that the sheet is
+    sheetModel : {
         type: String,
-        required: true
-    },
-    characterPortrait: {
-        type: String, //string will be a path to the uploaded picture
-        required: false
-    },
-    stats: {
-        type: [StatSchema],
-        required: false
-    },
-    notes: {
-        type: String
+        required: true,
+        enum : ['DISSheet']
     }
 })
 
-export const CharacterSheet = new mongoose.model("CharacterSheet", CharacterSheetSchema)
+export const UserSheetMapping = new mongoose.model("UserSheetMapping", sheetUserMappingSchema)
