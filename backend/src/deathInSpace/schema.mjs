@@ -217,6 +217,26 @@ const DISSheetSchema = new Schema({
         min: 0,
         default: 0
     },
+    background: {
+        type: String,
+        required: false
+    },
+    drive: {
+        type: String,
+        required: false
+    },
+    looks: {
+        type: String,
+        required: false
+    },
+    pastAllegiance: {
+        type: String,
+        required: false
+    },
+    corruption: {
+        type: [String],
+        required: false
+    },
     inventory: {
         type: [DISInventorySchema],
         default: []
@@ -228,7 +248,7 @@ const DISSheetSchema = new Schema({
     armor: {
         type: [DISArmorSchema],
         default: []
-    }
+    },
 })
 
 export const DeathInSpaceSheet = new mongoose.model('DISSheet', DISSheetSchema) 

@@ -1,7 +1,6 @@
 import mongoose, { mongo } from 'mongoose';
 import { randomNumberBetween, rollNSidedDie } from "../helper.mjs";
 import { DISArmor, DISInventoryItem, DISWeapon, DISMutation} from "./schema.mjs";
-import sanitize from 'mongo-sanitize';
 
 export async function addStartingBonus(sheet){
     //getting index in Bonus table
@@ -55,7 +54,7 @@ export async function rollCosmicMutation(prexistingMutations){
     if(!(prexistingMutations instanceof Array)){
         prexistingMutations = []
     }
-    const availableMutations = await DISMutation.find({_id: {$nin : sanitize(prexistingMutations)}}).exec()
+    const availableMutations = await DISMutation.find({_id: {$nin : prexistingMutations}}).exec()
     if(availableMutations.length == 0)
         return null
     return availableMutations[randomNumberBetween(availableMutations.length)]

@@ -7,7 +7,9 @@ export const UserSchema = new Schema({
     username: {
         type: String,
         lowercase: true,
-        required: true
+        required: true,
+        index: true,
+        unqiue: true
     },
     password: {
         type: String,
@@ -28,7 +30,7 @@ export const UserSchema = new Schema({
     }
 });
 
-export const User = mongoose.model("User", UserSchema)
+export const User = new mongoose.model("User", UserSchema)
 
 
 export const GameSchema = new Schema({
@@ -45,7 +47,7 @@ export const GameSchema = new Schema({
     }
 })
 
-export const Game = mongoose.model("Game", GameSchema)
+export const Game = new mongoose.model("Game", GameSchema)
 
 const sheetUserMappingSchema = new Schema({
     user: {

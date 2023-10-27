@@ -1,13 +1,14 @@
 import { createServer } from "http";
-import express from "express";
+import express, { urlencoded } from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
 import { DISMutation, DISOrigin, DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
 import { Game, User, UserSheetMapping } from "./schemas.mjs";
+import { compare } from "bcrypt";
 import { randomNumberBetween, rollNSidedDie, saltHashPassword } from "./helper.mjs";
 import { addStartingBonus } from "./deathInSpace/sheets.mjs";
-import sanitize from "mongo-sanitize";
+import mongoSanitize from "express-mongo-sanitize"
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ await mongoose.connect(process.env.MONGO_URL)
 const app = express();
 
 app.use(express.json())
+app.use(mongoSanitize())
 
 app.use(
     session({
@@ -27,18 +29,25 @@ app.use(
 );
 
 app.use(function (req, res, next) {
-    req.username = req.session.username ? req.session.username : null
-    console.log("HTTP request", req.username, req.method, req.url, req.body);
+    req.user = req.session.user ? req.session.user : null
+    req.userId = req.session.userId ? req.session.userId : null
+    console.log("HTTP request", req.user, req.method, req.url, req.body);
     next();
 });
+
+function isAuthenticated(req, res, next) {
+    if (!req.user) return res.status(401).json({body:"access denied"});
+    next();
+};
 
 app.get("/", (req, res, next) => {
     return res.json({body: "This is the grimoire backend :D"})
 })
 
-app.post("/dis/random", async (req, res, next) => {
+app.post("/dis/random", isAuthenticated, async (req, res, next) => {
+
     let json = req.body
-    const user = await User.findOne().exec()
+    const user = await User.findById(req.userId).exec()
     const game = await Game.findOne({name: "Death In Space"}).exec()
     //pick a random origin in between it and its length
         
@@ -81,6 +90,8 @@ app.post("/dis/random", async (req, res, next) => {
         //add starting bonus
         deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
     }
+    const session = await mongoose.startSession();
+    session.startTransaction();
     deathInSpaceSheet.save().then((saved) => {
         //creating the user-game-sheet mapping
         const mapping = new UserSheetMapping({
@@ -89,22 +100,25 @@ app.post("/dis/random", async (req, res, next) => {
             sheet: saved._id,
             sheetModel: deathInSpaceSheet.constructor.modelName
         })
-        mapping.save().then(savedMap => {
-            return res.status(201).json({body: "Success", result: saved})
-        }).catch(err => {
-            deathInSpaceSheet.delete()
-            throw err
+        mapping.save().then(async (savedMap) => {
+            session.commitTransaction()
+            .then(() => session.endSession())
+            .then(() => res.status(201).json({saved}))
+        }).catch(async (err) => {
+            session.abortTransaction()
+            .then(() => session.endSession())
+            .then(() => res.status(400).json({errors: err}))
         })
     }).catch(err => {
         if(err.name === "ValidationError"){
-            return res.status(403).json({error: err.errors})
+            return res.status(400).json({error: err.errors})
         }
         return res.status(500).json(err.errors)
     })
 })
 
 
-app.post("/api/dis/create", async(req, res, next) => {
+app.post("/api/sheet/dis/create", isAuthenticated, async(req, res, next) => {
     let json = req.body
     const user = await User.findOne().exec()
     const game = await Game.findOne({name: "Death In Space"}).exec()
@@ -145,18 +159,24 @@ app.post("/api/dis/create", async(req, res, next) => {
         //add starting bonus
         deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
     }
+    //starting a transaction to make sure both sheets get saved
+    const session = await mongoose.startSession();
+    session.startTransaction();
     deathInSpaceSheet.save().then((saved) => {
         //creating the user-game-sheet mapping
         const mapping = new UserSheetMapping({
             game: saved.game,
             user: saved.owner,
             sheet: saved._id,
-            sheetModel: deathInSpaceSheet.constructor.modelName
+            sheetModel: "DISSheet"
         })
-        mapping.save().then(savedMap => {
-            return res.status(201).json({body: "Success", result: saved})
-        }).catch(err => {
-            deathInSpaceSheet.delete()
+        mapping.save().then(async (savedMap) => {
+            await session.commitTransaction()
+            await session.endSession()
+            return res.status(201).json({saved})
+        }).catch(async (err) => {
+            await session.abortTransaction()
+            await session.endSession()
             throw err
         })
     }).catch(err => {
@@ -167,9 +187,47 @@ app.post("/api/dis/create", async(req, res, next) => {
     })
 })
 
-app.get("/dis/get/:id", async (req, res, next) => {
-    let charSheet = await DeathInSpaceSheet.findById(sanitize(req.params.id)).populate(['mutations', "origin"]).exec()
-    return res.json(charSheet)
+//WIP need to figure out how to populate fields of sheet
+//without know what fields are keys, maybe add custom function?
+app.get("/api/sheet/:id", async (req, res, next) => {
+    UserSheetMapping.findOne({sheet: req.params.id}).exec()
+    .then((mapping) => {
+        if(!mapping)
+            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+        const tempModel = new mongoose.model(mapping.sheetModel)
+        return tempModel.findById(mapping.sheet).then(charSheet => res.json(charSheet))
+    }).catch(err => {console.log(err); res.status(400).json(err.errors)})
+})
+
+
+//endpoint that will delete any character sheet, so long as its mapping
+//is properly set up
+app.delete('/api/sheet/:id', isAuthenticated, async (req, res, next) => {
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    UserSheetMapping.findOne({sheet: req.params.id}).exec()
+    .then((mapping) => {
+        if(!mapping)
+            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+        if(req.userId != mapping.user.toString()){
+            return res.status(403).json({body: "user doesn't have permission to delete given sheet"})
+        }
+        const tempModel = new mongoose.model(mapping.sheetModel)
+        return tempModel.deleteOne({_id: mapping.sheet})
+        .then(async() => {
+            await UserSheetMapping.deleteOne(mapping._id)
+            session.commitTransaction()
+            session.endSession()
+            return res.json({body: `sheet ${mapping.sheet} deleted`})
+        }).catch(err => {
+            session.abortTransaction()
+            session.endSession()
+            res.status(400).json(err.errors)    
+        })
+    }).catch(err => {
+        session.abortTransaction()
+        session.endSession()
+        res.status(400).json(err.errors)})
 })
 
 //MEANT FOR TESTING PURPOSES
@@ -183,23 +241,51 @@ app.post('/users/signup', async (req, res, next) => {
         return res.status(400).json({body: "Missing user: password"})
     }
 
-    const sameUser = User.findOne({username: sanitize(json.username)}).exec()
-    if(sameUser){
-        return res.status(409).json({body:  "username " + json.username + " already exists"});
-    }
+    User.findOne({username: json.username}).exec().then((sameUser) => {
+        if(sameUser){
+            return res.status(409).json({body:  "username " + json.username + " already exists"});
+        }
+    
+        saltHashPassword(json.password).then(async ([hash, salt])=> {
+            const user = new User({
+                username: json.username,
+                password: hash,
+                salt: salt
+            }) 
+            const newUser = await user.save()
+            req.session.user = newUser.username
+            req.session.userId = newUser._id
+            res.status(201).json({username: user.username})
+        }).catch((err) => {
+            res.status(500).json({errors: err})
+        })
+    })
+})
 
-    saltHashPassword(json.password, async (err, hash, salt) => {
-        if(err)
-            throw err
+app.post("/api/signin", (req, res, next) => {
+    const username = req.body.username
+    const password = req.body.password
+    User.findOne({username:username}).exec().then((doc) => {
+        if(!doc)
+            return res.status(404).json({body: `User with username ${username} not found`})
 
-        const user = newUser({
-            username: json.username,
-            password: hash,
-            salt: salt
-        }) 
-        const newUser = await user.save()
-        req.session.user = newUser.username
-        res.status(201).json({username: user})
+        compare(password, doc.password).then(result =>  {
+            // result is true is the password matches the salted hash from the database
+            if (!result) return res.status(401).json({body: "access denied"});
+            //write username into session
+            req.session.user = username;
+            req.session.userId = doc._id
+            return res.json(username);
+        });
+    }).catch(err => {
+        return res.status(400).json({errors: err})
+    })
+        
+})
+
+app.post('/api/signout', (req, res, next) => {
+    req.session.destroy((err) => {
+        res.status(200).json({body: "logout successful"})
     })
 })
 

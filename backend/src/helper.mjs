@@ -1,10 +1,18 @@
 import { compare, genSalt, hash } from "bcrypt";
 
-export function saltHashPassword(password, callback){
-    genSalt(saltRounds, function (errS, salt) {
-      hash(password, salt, function (errH, hash) {
-          callback(errH || errS, hash, salt)
-      })
+export function saltHashPassword(password, saltRounds=10){
+    return new Promise((resolve, reject) => {
+        genSalt(saltRounds, function(err, salt) {
+            if(err){
+                reject(err)
+            }else{
+                hash(password, salt, function(err, hash) {
+                    if(err)
+                        reject(err)
+                    resolve([hash, salt])
+                });
+            }
+        });
     })
 }
 
