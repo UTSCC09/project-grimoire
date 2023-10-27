@@ -156,4 +156,18 @@ disRouter.post("/create", isAuthenticated, async(req, res, next) => {
     })
 })
 
+disRouter.patch('/edit/:id', isAuthenticated, async (req, res, next) => {
+    const sheet = await DeathInSpaceSheet.findById(req.params.id).exec()
+    if(!sheet)
+        return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+    if(sheet.owner != req.userId)
+        return res.status(403).json(`user ${req.userId} does not have permission to edit this sheet`)
+    
+    DeathInSpaceSheet.findByIdAndUpdate(req.params.id, req.body, {returnDocument: 'after', runValidators:true}).then(result => {
+        return res.json(result)
+    }).catch(err => {
+        return res.status(400).json(err)
+    })
+})
+
 export default disRouter
