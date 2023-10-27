@@ -8,12 +8,24 @@ import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
-import { DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
+import multer, {MulterError} from 'multer'
+import { resolve } from "path";
 
 dotenv.config();
 
 const PORT = 8000;
 await mongoose.connect(process.env.MONGO_URL)
+
+const MAXPORTRAITSIZE = 52428800 //50MB
+const sheetPortraitUpload = multer({dest: resolve("uploads/characterPortraits"), limits: {fileSize : MAXPORTRAITSIZE},
+fileFilter: function(req, file, cb){
+    if((file.mimetype == "image/jpeg" || file.mimetype == "image/jpg" || file.mimetype == "image/gif" || file.mimetype == 'image/png')){
+          //correct format
+          return cb(null, true);
+     } else{ 
+          //wrong format
+          return cb(null, false);
+     }}})
 
 const app = express();
 
@@ -43,7 +55,7 @@ app.get("/", (req, res, next) => {
 
 //gets charactersheet regardless of game, provided that it has been linked
 //to UserSheetMappings and its schema has properly implemented getPopulationFields
-app.get("/api/sheet/:id", async (req, res, next) => {
+app.get("/api/sheets/:id", async (req, res, next) => {
     UserSheetMapping.findOne({sheet: req.params.id}).exec()
     .then(async (mapping) => {
         if(!mapping)
@@ -59,7 +71,7 @@ app.get("/api/sheet/:id", async (req, res, next) => {
 
 //endpoint that will delete any character sheet, so long as its mapping
 //is properly set up
-app.delete('/api/sheet/:id', isAuthenticated, async (req, res, next) => {
+app.delete('/api/sheets/:id', isAuthenticated, async (req, res, next) => {
     const session = await mongoose.startSession()
     session.startTransaction()
     UserSheetMapping.findOne({sheet: req.params.id}).exec()
@@ -85,6 +97,58 @@ app.delete('/api/sheet/:id', isAuthenticated, async (req, res, next) => {
         session.abortTransaction()
         session.endSession()
         res.status(400).json(err.errors)})
+})
+
+//endpoint where, if a sheet has a picture field, will upload a picture
+//again, provided proper mapping
+app.post('/api/sheets/:id/pic', isAuthenticated, async(req, res, next) => {
+    const mapping = await UserSheetMapping.findOne({sheet: req.params.id}).exec()
+    if(!mapping)
+        return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+
+    if(mapping.user != req.userId)
+        return res.status(403).json({body: `user ${req.userId} does not have permission for this sheet`})
+
+    const up = sheetPortraitUpload.single('image')
+    up(req, res, err => {
+        if(err instanceof MulterError){
+            if(err.message === 'File too large')
+                return res.status(422).json({body: "file too large"})
+            throw err
+        }
+        if(!req.file)
+            return res.status(422).json({body: "missing image"})
+        const tempModel = new mongoose.model(mapping.sheetModel)
+        tempModel.findOneAndUpdate({_id: mapping.sheet}, {characterPortrait: req.file}, 
+            {returnDocument: 'after', runValidators:true}).then((doc) => {
+            return res.status(201).json({body: "image successfully uploaded"})
+        }).catch(err => {
+            console.log('errors', err)
+            return res.status(400).json({errors: err})
+        })
+    })
+})
+
+app.get('/api/sheets/:id/pic', async (req, res, next) => {
+    const sheetId = req.params.id
+
+    if(!sheetId){
+        res.status(422).json({body: "missing sheet: id"})
+        return
+    }
+
+    const mapping = await UserSheetMapping.findOne({sheet: req.params.id}).exec()
+    if(!mapping)
+        return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+
+    const tempModel = new mongoose.model(mapping.sheetModel)
+    tempModel.findById(sheetId).exec().then((doc) => {
+        const img = doc.characterPortrait
+        res.setHeader("Content-Type", img.mimetype);
+        res.sendFile(resolve(img.path));
+    }).catch(err => {
+        res.status(500).json(err)
+    })
 })
 
 app.post('/api/signup', async (req, res, next) => {

@@ -2,6 +2,7 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 import mongoose, { mongo } from 'mongoose';
+import { ImageSchema } from '../schemas.mjs';
 
 const DISInventorySchema = new Schema({
     name: {
@@ -130,7 +131,7 @@ const DISSheetSchema = new Schema({
         required: true
     },
     characterPortrait: {
-        type: String, //string will be a path to the uploaded picture
+        type: ImageSchema, //string will be a path to the uploaded picture
         required: false
     },
     stats: {

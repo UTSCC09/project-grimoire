@@ -74,3 +74,22 @@ const sheetUserMappingSchema = new Schema({
 })
 
 export const UserSheetMapping = new mongoose.model("UserSheetMapping", sheetUserMappingSchema)
+
+export const ImageSchema = new Schema({
+    mimetype: {
+        type: String,
+        required: true
+    },
+    path: {
+        type: String,
+        required: true
+    },
+    encoding: {
+        type: String,
+        required: false
+    },
+    originalname: {
+        type: String,
+        required: false
+    } 
+})
