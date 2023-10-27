@@ -248,7 +248,13 @@ const DISSheetSchema = new Schema({
     armor: {
         type: [DISArmorSchema],
         default: []
-    },
+    }
+}, {
+    methods: {
+        getPopulationFields(){
+            return ['origin', 'mutations']
+        }
+    }
 })
 
 export const DeathInSpaceSheet = new mongoose.model('DISSheet', DISSheetSchema) 

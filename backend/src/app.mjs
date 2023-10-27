@@ -1,14 +1,14 @@
 import { createServer } from "http";
-import express, { urlencoded } from "express";
+import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
-import { DISMutation, DISOrigin, DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
 import { Game, User, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
-import { randomNumberBetween, rollNSidedDie, saltHashPassword } from "./helper.mjs";
-import { addStartingBonus } from "./deathInSpace/sheets.mjs";
+import {saltHashPassword, isAuthenticated } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
+import disRouter from "./deathInSpace/routes.mjs";
+import { DeathInSpaceSheet } from "./deathInSpace/schema.mjs";
 
 dotenv.config();
 
@@ -35,168 +35,25 @@ app.use(function (req, res, next) {
     next();
 });
 
-function isAuthenticated(req, res, next) {
-    if (!req.user) return res.status(401).json({body:"access denied"});
-    next();
-};
+app.use('/api/sheets/dis', disRouter)
 
 app.get("/", (req, res, next) => {
     return res.json({body: "This is the grimoire backend :D"})
 })
 
-app.post("/dis/random", isAuthenticated, async (req, res, next) => {
-
-    let json = req.body
-    const user = await User.findById(req.userId).exec()
-    const game = await Game.findOne({name: "Death In Space"}).exec()
-    //pick a random origin in between it and its length
-        
-    const dex = randomNumberBetween(3, -3)
-    const hitPoints = rollNSidedDie(8)
-
-    const origins = await DISOrigin.find({}).exec()
-    const randomOrigin = origins[randomNumberBetween(origins.length - 1)]
-    const stats = {
-        bdy: randomNumberBetween(3, -3), //random number between 3 and -3
-        dex: dex,
-        svy: randomNumberBetween(3, -3),
-        tech: randomNumberBetween(3, -3),
-    } 
-    let deathInSpaceSheet = new DeathInSpaceSheet({
-        owner: user._id, 
-        game: game._id, 
-        characterName: json.name,
-
-        stats: stats,
-        inventory: [],
-        mutations: [],
-        voidPoints: 0,
-        defenseRating: 12 + dex,
-        maxHitPoints: hitPoints,
-        hitPoints: hitPoints,
-        origin: randomOrigin._id,
-        originBenefit: randomNumberBetween(randomOrigin.benefits.length - 1)
-    })
-
-    const errors = deathInSpaceSheet.validateSync()
-    if(errors && errors.errors.length > 0){
-        return res.status(403).json({errors: errors.errors})
-    }
-    //check if needed to add anything else to the character sheet because of poor roles 
-    //(p.20) of the rule book
-
-    //if have negative net value for stats
-    if(Object.keys(stats).reduce((sum, stat) => sum + stats[stat], 0) < 0){
-        //add starting bonus
-        deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
-    }
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    deathInSpaceSheet.save().then((saved) => {
-        //creating the user-game-sheet mapping
-        const mapping = new UserSheetMapping({
-            game: saved.game,
-            user: saved.owner,
-            sheet: saved._id,
-            sheetModel: deathInSpaceSheet.constructor.modelName
-        })
-        mapping.save().then(async (savedMap) => {
-            session.commitTransaction()
-            .then(() => session.endSession())
-            .then(() => res.status(201).json({saved}))
-        }).catch(async (err) => {
-            session.abortTransaction()
-            .then(() => session.endSession())
-            .then(() => res.status(400).json({errors: err}))
-        })
-    }).catch(err => {
-        if(err.name === "ValidationError"){
-            return res.status(400).json({error: err.errors})
-        }
-        return res.status(500).json(err.errors)
-    })
-})
-
-
-app.post("/api/sheet/dis/create", isAuthenticated, async(req, res, next) => {
-    let json = req.body
-    const user = await User.findOne().exec()
-    const game = await Game.findOne({name: "Death In Space"}).exec()
-    //pick a random origin in between it and its length
-
-    const stats = !json.stats ? {} : {
-        bdy: json.stats.bdy, //random number between 3 and -3
-        dex: json.stats.dex,
-        svy: json.stats.svy,
-        tech: json.stats.tech,
-    }
-        
-    let deathInSpaceSheet = new DeathInSpaceSheet({
-        owner: user._id, 
-        game: game._id, 
-        characterName: json.name,
-
-        stats: stats,
-        inventory: json.inventory,
-        mutations: json.mutations,
-        voidPoints: 0,
-        defenseRating: 12 + json.stats.dex,
-        maxHitPoints: json.hitPoints,
-        hitPoints: json.hitPoints,
-        origin: json.origin,
-        originBenefit: json.originBenefit
-    })
-
-    const errors = deathInSpaceSheet.validateSync()
-    if(errors && errors.errors.length > 0){
-        return res.status(403).json({errors: errors.errors})
-    }
-    //check if needed to add anything else to the character sheet because of poor roles 
-    //(p.20) of the rule book
-
-    //if have negative net value for stats
-    if(!json.addedBonus && Object.keys(stats).reduce((sum, stat) => sum + stats[stat], 0) < 0){
-        //add starting bonus
-        deathInSpaceSheet = await addStartingBonus(deathInSpaceSheet)
-    }
-    //starting a transaction to make sure both sheets get saved
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    deathInSpaceSheet.save().then((saved) => {
-        //creating the user-game-sheet mapping
-        const mapping = new UserSheetMapping({
-            game: saved.game,
-            user: saved.owner,
-            sheet: saved._id,
-            sheetModel: "DISSheet"
-        })
-        mapping.save().then(async (savedMap) => {
-            await session.commitTransaction()
-            await session.endSession()
-            return res.status(201).json({saved})
-        }).catch(async (err) => {
-            await session.abortTransaction()
-            await session.endSession()
-            throw err
-        })
-    }).catch(err => {
-        if(err.name === "ValidationError"){
-            return res.status(403).json({error: err.errors})
-        }
-        return res.status(500).json(err.errors)
-    })
-})
-
-//WIP need to figure out how to populate fields of sheet
-//without know what fields are keys, maybe add custom function?
+//gets charactersheet regardless of game, provided that it has been linked
+//to UserSheetMappings and its schema has properly implemented getPopulationFields
 app.get("/api/sheet/:id", async (req, res, next) => {
     UserSheetMapping.findOne({sheet: req.params.id}).exec()
-    .then((mapping) => {
+    .then(async (mapping) => {
         if(!mapping)
             return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
         const tempModel = new mongoose.model(mapping.sheetModel)
-        return tempModel.findById(mapping.sheet).then(charSheet => res.json(charSheet))
-    }).catch(err => {console.log(err); res.status(400).json(err.errors)})
+        //using decalred schema method to find and populate all nessecary fields
+        //after dynamically getting correct model
+        const charSheet = await tempModel.findById(mapping.sheet).populate(new tempModel().getPopulationFields() || [])
+        return res.json(charSheet)
+    }).catch(err => {console.error(err); res.status(400).json(err)})
 })
 
 
@@ -230,9 +87,7 @@ app.delete('/api/sheet/:id', isAuthenticated, async (req, res, next) => {
         res.status(400).json(err.errors)})
 })
 
-//MEANT FOR TESTING PURPOSES
-//BASIC API TO INSERT TEST CLASS INTO DB
-app.post('/users/signup', async (req, res, next) => {
+app.post('/api/signup', async (req, res, next) => {
     const json = req.body
     if(!json.username){
         return res.status(400).json({body: "Missing user: id"})
@@ -288,7 +143,6 @@ app.post('/api/signout', (req, res, next) => {
         res.status(200).json({body: "logout successful"})
     })
 })
-
 
 //BASIC API TO GET TEST CLASSES FROM DB
 app.get('/user', async (req, res, next) => {

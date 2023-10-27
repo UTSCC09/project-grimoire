@@ -17,7 +17,7 @@ export function saltHashPassword(password, saltRounds=10){
 }
 
 export function isAuthenticated(req, res, next) {
-    if (!req.username) return res.status(401).end("access denied");
+    if (!(req.user && req.userId)) return res.status(401).end("access denied");
     next();
 };
 
