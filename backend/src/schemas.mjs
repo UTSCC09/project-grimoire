@@ -69,7 +69,7 @@ const sheetUserMappingSchema = new Schema({
     sheetModel : {
         type: String,
         required: true,
-        enum : ['DISSheet']
+        enum : ['DISSheet', 'MSSheet']
     }
 })
 
