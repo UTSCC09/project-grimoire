@@ -3,7 +3,7 @@ import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
-import { Game, User, UserSheetMapping } from "./schemas.mjs";
+import { Game, User, Group, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
@@ -151,6 +151,132 @@ app.get('/api/sheets/:id/pic', async (req, res, next) => {
     })
 })
 
+// Looking for group endpoints
+
+// endpoint to add a new game group
+// requires a group name, game name, and owner is the user who created the group
+app.post('/api/groups', isAuthenticated, async (req, res, next) => {
+    const json = req.body;
+    const owner = await User.findById(req.userId).exec();
+    if(!json.name){
+        return res.status(400).json({body: "Missing group: name"})
+    }
+    if(!json.game){
+        return res.status(400).json({body: "Missing group: game"})
+    }
+    if(!owner){
+        return res.status(404).json({body: `user with id ${req.userId} not found`})
+    }
+    const group = new Group({
+        name: json.name,
+        owner: owner,
+        game: json.game
+    });
+    group.save().then((saved) => {
+        return res.status(201).json({saved})
+    }).catch((err) => {
+        res.status(500).json({errors: err})
+    })
+})
+
+// endpoint to join a game group as a member
+app.post('/api/groups/:id/join', isAuthenticated, async (req, res, next) => {
+    const id = req.params.id
+    const user = req.userId
+    if(!id){
+        res.status(422).json({body: "missing group: id"})
+        return
+    }
+    const model = await Group.findById(id).exec()
+    if(!model){
+        res.status(404).json({body: `group with id ${id} not found`})
+        return
+    }
+    if(model.members.includes(user)){
+        res.status(409).json({body: `user ${user} already in group ${id}`})
+        return
+    }
+    model.members.push(user)
+    model.save().then((doc) => {
+        res.status(201).json(doc)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
+})
+
+// endpoint to leave a game group as a member
+app.post('/api/groups/:id/leave', isAuthenticated, async (req, res, next) => {
+    const id = req.params.id
+    const user = req.userId
+    if(!id){
+        res.status(422).json({body: "missing group: id"})
+        return
+    }
+    const model = await Group.findById(id).exec()
+    if(!model){
+        res.status(404).json({body: `group with id ${id} not found`})
+        return
+    }
+    if(!model.members.includes(user)){
+        res.status(409).json({body: `user ${user} not in group ${id}`})
+        return
+    }
+    model.members = model.members.filter((member) => member != user)
+    model.save().then((doc) => {
+        res.status(201).json(doc)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
+})
+
+// endpoint to get all game groups
+app.get('/api/groups', async (req, res, next) => {
+    const model = await Group.find({}).exec()
+    res.status(200).json(model)
+})
+
+// endpoint to get all game groups owned by a specific user
+app.get('/api/groups/user/:id', async (req, res, next) => {
+    const id = req.params.id
+    if(!id){
+        res.status(422).json({body: "missing user: id"})
+        return
+    }
+    const model = await Group.find({owner: id}).exec()
+    res.status(200).json(model)
+})
+
+// endpoint to get paginated list of game groups given page number and page size
+app.get('/api/groups/page/', async (req, res, next) => {
+    const page = req.query.page
+    const size = req.query.size
+    if(!page){
+        res.status(422).json({body: "missing page number"})
+        return
+    }
+    if(!size){
+        res.status(422).json({body: "missing page size"})
+        return
+    }
+    const model = await Group.find({}).skip(page * size).limit(size).exec()
+    res.status(200).json(model)
+})
+
+// endpoint to get a specific game group
+app.get('/api/groups/:id', async (req, res, next) => {
+    const id = req.params.id
+    if(!id){
+        res.status(422).json({body: "missing group: id"})
+        return
+    }
+    const model = await Group.findById(id).exec()
+    if(!model){
+        res.status(404).json({body: `group with id ${id} not found`})
+        return
+    }
+    res.status(200).json(model)
+})
+
 app.post('/api/signup', async (req, res, next) => {
     const json = req.body
     if(!json.username){
@@ -199,7 +325,7 @@ app.post("/api/signin", (req, res, next) => {
     }).catch(err => {
         return res.status(400).json({errors: err})
     })
-        
+
 })
 
 app.post('/api/signout', (req, res, next) => {
