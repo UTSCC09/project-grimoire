@@ -1,24 +1,32 @@
 import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from './Home';
+import Template from './Template/Template';
+import { ThemeProvider, createTheme } from '@mui/material';
+import CharSheetView from './charSheets/CharSheetView';
+import Login from './Login';
+
+function getRoutes(){
+  return (
+    <>
+    <Route path="/" element={<Home/>}/>
+    <Route path='/login' element={<Login/>}/>
+    <Route path='/user/sheets' 
+      element={<CharSheetView/>}/>
+    </>
+  )
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Template>
+      <Routes>
+          {getRoutes()}
+      </Routes>
+      </Template>
+    </BrowserRouter>
   );
 }
 
