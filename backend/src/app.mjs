@@ -10,6 +10,7 @@ import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
+import { sendValidationEmail } from "./aws/ses_helper.mjs";
 
 dotenv.config();
 
@@ -58,7 +59,30 @@ app.get("/", (req, res, next) => {
 })
 
 /**
- * endpoint used to signup for the app
+ * endpoint used to validate user on signup, creates a user if code is correct
+ * 
+ * @param {Number} validation the code the user is trying to validate
+ */
+app.post('/validate', (req, res, next) => {
+    const json = req.body
+    if(req.session.validationCode && json.validation == req.session.validationCode){
+        const user = new User(req.session.tempUser) 
+        user.save().then((newUser) => {
+            req.session.tempUser = undefined
+            req.session.validationCode = undefined
+            req.session.user = newUser.email
+            req.session.userId = newUser._id
+            res.status(201).json({email: user.email})
+        }).catch(err => {
+            res.status(400).json({errors: err})
+        })
+    }else{
+        res.status(403).json({body: "invalid validation code"})
+    }
+})
+
+/**
+ * endpoint used to signup for the app, initates signup, and sends verification email
  * 
  * @param {String} email email for new user, must not already exist
  * @param {String} password password for new user, must not already exist
@@ -82,17 +106,18 @@ app.post('/api/signup', async (req, res, next) => {
         }
     
         saltHashPassword(json.password).then(async ([hash, salt])=> {
-            const user = new User({
+            const tempUser = {
                 email: email,
                 password: hash,
                 salt: salt
-            }) 
-            user.save().then((newUser) => {
-                req.session.user = newUser.email
-                req.session.userId = newUser._id
-                res.status(201).json({email: user.email})
+            }
+            const [code, emailPromise] = sendValidationEmail(email)
+            emailPromise.then((resp) => {
+                req.session.validationCode = code
+                req.session.tempUser = tempUser
+                return res.json(resp)
             }).catch(err => {
-                res.status(400).json({errors: err})
+                res.status(500).json(err)
             })
         }).catch((err) => {
             res.status(500).json({errors: err})
