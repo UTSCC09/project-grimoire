@@ -2,10 +2,15 @@ import mongoose, { mongo } from 'mongoose';
 import { randomNumberBetween, rollNSidedDie } from "../helper.mjs";
 import { DISArmor, DISInventoryItem, DISWeapon, DISMutation} from "./schema.mjs";
 
+/**
+ * adds a random starting bonus to a character sheet if stats don't meet requirements
+ * 
+ * @param {Object} sheet object representing a death in space character sheet 
+ * @returns {Object} sheet with the added starting bonus
+ */
 export async function addStartingBonus(sheet){
     //getting index in Bonus table
     const bonus = rollNSidedDie(6)
-    console.log("adding bonus", bonus)
     switch(bonus){
         case 1:
             const mutation = await rollCosmicMutation(sheet.mutations)

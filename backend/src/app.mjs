@@ -1,31 +1,29 @@
-import { createServer } from "http";
+import { createServer } from "https";
 import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
 import { Game, User, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
-import {saltHashPassword, isAuthenticated } from "./helper.mjs";
+import {saltHashPassword, isAuthenticated, isValidEmail } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
-import multer, {MulterError} from 'multer'
-import { resolve } from "path";
+import { readFileSync } from "fs";
+import sheetRouter from "./genericSheets/routes.mjs";
 
 dotenv.config();
 
-const PORT = 8000;
-await mongoose.connect(process.env.MONGO_URL)
+const privateKey = readFileSync( 'server.key' );
+const certificate = readFileSync( 'server.crt' );
+const config = {
+        key: privateKey,
+        cert: certificate
+};
 
-const MAXPORTRAITSIZE = 52428800 //50MB
-const sheetPortraitUpload = multer({dest: resolve("uploads/characterPortraits"), limits: {fileSize : MAXPORTRAITSIZE},
-fileFilter: function(req, file, cb){
-    if((file.mimetype == "image/jpeg" || file.mimetype == "image/jpg" || file.mimetype == "image/gif" || file.mimetype == 'image/png')){
-          //correct format
-          return cb(null, true);
-     } else{ 
-          //wrong format
-          return cb(null, false);
-     }}})
+const PORT = 8000;
+export const DEFAULTPAGE = 0
+export const DEFAULTLIMIT = 10
+await mongoose.connect(process.env.MONGO_URL)
 
 const app = express();
 
@@ -43,158 +41,90 @@ app.use(
 app.use(function (req, res, next) {
     req.user = req.session.user ? req.session.user : null
     req.userId = req.session.userId ? req.session.userId : null
-    console.log("HTTP request", req.user, req.method, req.url, req.body);
+    console.log("HTTPS request", req.user, req.method, req.url, req.body);
     next();
 });
 
+//adding all the Death In Space routes
 app.use('/api/sheets/dis', disRouter)
 
+app.use('/api/sheets', sheetRouter)
+
+/**
+ * sanity check endpoint to test connection
+ */
 app.get("/", (req, res, next) => {
     return res.json({body: "This is the grimoire backend :D"})
 })
 
-//gets charactersheet regardless of game, provided that it has been linked
-//to UserSheetMappings and its schema has properly implemented getPopulationFields
-app.get("/api/sheets/:id", async (req, res, next) => {
-    UserSheetMapping.findOne({sheet: req.params.id}).exec()
-    .then(async (mapping) => {
-        if(!mapping)
-            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
-        const tempModel = new mongoose.model(mapping.sheetModel)
-        //using decalred schema method to find and populate all nessecary fields
-        //after dynamically getting correct model
-        const charSheet = await tempModel.findById(mapping.sheet).populate(new tempModel().getPopulationFields() || [])
-        return res.json(charSheet)
-    }).catch(err => {console.error(err); res.status(400).json(err)})
-})
-
-
-//endpoint that will delete any character sheet, so long as its mapping
-//is properly set up
-app.delete('/api/sheets/:id', isAuthenticated, async (req, res, next) => {
-    const session = await mongoose.startSession()
-    session.startTransaction()
-    UserSheetMapping.findOne({sheet: req.params.id}).exec()
-    .then((mapping) => {
-        if(!mapping)
-            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
-        if(req.userId != mapping.user.toString()){
-            return res.status(403).json({body: "user doesn't have permission to delete given sheet"})
-        }
-        const tempModel = new mongoose.model(mapping.sheetModel)
-        return tempModel.deleteOne({_id: mapping.sheet})
-        .then(async() => {
-            await UserSheetMapping.deleteOne(mapping._id)
-            session.commitTransaction()
-            session.endSession()
-            return res.json({body: `sheet ${mapping.sheet} deleted`})
-        }).catch(err => {
-            session.abortTransaction()
-            session.endSession()
-            res.status(400).json(err.errors)    
-        })
-    }).catch(err => {
-        session.abortTransaction()
-        session.endSession()
-        res.status(400).json(err.errors)})
-})
-
-//endpoint where, if a sheet has a picture field, will upload a picture
-//again, provided proper mapping
-app.post('/api/sheets/:id/pic', isAuthenticated, async(req, res, next) => {
-    const mapping = await UserSheetMapping.findOne({sheet: req.params.id}).exec()
-    if(!mapping)
-        return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
-
-    if(mapping.user != req.userId)
-        return res.status(403).json({body: `user ${req.userId} does not have permission for this sheet`})
-
-    const up = sheetPortraitUpload.single('image')
-    up(req, res, err => {
-        if(err instanceof MulterError){
-            if(err.message === 'File too large')
-                return res.status(422).json({body: "file too large"})
-            throw err
-        }
-        if(!req.file)
-            return res.status(422).json({body: "missing image"})
-        const tempModel = new mongoose.model(mapping.sheetModel)
-        tempModel.findOneAndUpdate({_id: mapping.sheet}, {characterPortrait: req.file}, 
-            {returnDocument: 'after', runValidators:true}).then((doc) => {
-            return res.status(201).json({body: "image successfully uploaded"})
-        }).catch(err => {
-            console.log('errors', err)
-            return res.status(400).json({errors: err})
-        })
-    })
-})
-
-app.get('/api/sheets/:id/pic', async (req, res, next) => {
-    const sheetId = req.params.id
-
-    if(!sheetId){
-        res.status(422).json({body: "missing sheet: id"})
-        return
-    }
-
-    const mapping = await UserSheetMapping.findOne({sheet: req.params.id}).exec()
-    if(!mapping)
-        return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
-
-    const tempModel = new mongoose.model(mapping.sheetModel)
-    tempModel.findById(sheetId).exec().then((doc) => {
-        const img = doc.characterPortrait
-        res.setHeader("Content-Type", img.mimetype);
-        res.sendFile(resolve(img.path));
-    }).catch(err => {
-        res.status(500).json(err)
-    })
-})
-
+/**
+ * endpoint used to signup for the app
+ * 
+ * @param {String} email email for new user, must not already exist
+ * @param {String} password password for new user, must not already exist
+ */
 app.post('/api/signup', async (req, res, next) => {
-    const json = req.body
-    if(!json.username){
-        return res.status(400).json({body: "Missing user: id"})
+    let json = req.body
+    if(!json.email){
+        return res.status(400).json({body: "Missing user: email"})
     }
+    if(!isValidEmail(json.email)){
+        return res.status(400).json({body: "Email is invalid"})
+    }
+    const email = String(json.email).toLowerCase()
     if(!json.password){
         return res.status(400).json({body: "Missing user: password"})
     }
 
-    User.findOne({username: json.username}).exec().then((sameUser) => {
+    User.findOne({email: email}).exec().then((sameUser) => {
         if(sameUser){
-            return res.status(409).json({body:  "username " + json.username + " already exists"});
+            return res.status(409).json({body:  "email " + email + " already exists"});
         }
     
         saltHashPassword(json.password).then(async ([hash, salt])=> {
             const user = new User({
-                username: json.username,
+                email: email,
                 password: hash,
                 salt: salt
             }) 
-            const newUser = await user.save()
-            req.session.user = newUser.username
-            req.session.userId = newUser._id
-            res.status(201).json({username: user.username})
+            user.save().then((newUser) => {
+                req.session.user = newUser.email
+                req.session.userId = newUser._id
+                res.status(201).json({email: user.email})
+            }).catch(err => {
+                res.status(400).json({errors: err})
+            })
         }).catch((err) => {
             res.status(500).json({errors: err})
         })
     })
 })
 
+/**
+ * signs in user to application if they have the proper credentials
+ * @param {String} email email of user
+ * @param {String} password password of user
+ */
 app.post("/api/signin", (req, res, next) => {
-    const username = req.body.username
-    const password = req.body.password
-    User.findOne({username:username}).exec().then((doc) => {
+    let email
+    let password
+    try{
+        email = String(req.body.email).toLowerCase()
+        password = String(req.body.password)
+    }catch(e){
+        return res.status(400).json({body: "email and password must both be strings"})
+    }
+    User.findOne({email:email}).exec().then((doc) => {
         if(!doc)
-            return res.status(404).json({body: `User with username ${username} not found`})
+            return res.status(404).json({body: `User with email ${email} not found`})
 
         compare(password, doc.password).then(result =>  {
             // result is true is the password matches the salted hash from the database
             if (!result) return res.status(401).json({body: "access denied"});
-            //write username into session
-            req.session.user = username;
+            //write email into session
+            req.session.user = email;
             req.session.userId = doc._id
-            return res.json(username);
+            return res.json(email);
         });
     }).catch(err => {
         return res.status(400).json({errors: err})
@@ -202,6 +132,9 @@ app.post("/api/signin", (req, res, next) => {
         
 })
 
+/**
+ * signs user out of application
+ */
 app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
         res.status(200).json({body: "logout successful"})
@@ -214,7 +147,7 @@ app.get('/user', async (req, res, next) => {
     res.status(200).json(models)
 })
 
-export const server = createServer(app).listen(PORT, function (err) {
+export const server = createServer(config, app).listen(PORT, function (err) {
     if (err) console.log(err);
-    else console.log("HTTP server on http://localhost:%s", PORT);
+    else console.log("HTTPS server on http://localhost:%s", PORT);
 });
