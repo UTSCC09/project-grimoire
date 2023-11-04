@@ -1,6 +1,6 @@
 import mongoose, { mongo } from 'mongoose';
 import { randomNumberBetween, rollNSidedDie } from "../helper.mjs";
-import { DISArmor, DISInventoryItem, DISWeapon, DISMutation} from "./schema.mjs";
+import { DISArmor, DISInventoryItem, DISWeapon, DISMutation, DISStartingEquipment} from "./schema.mjs";
 
 /**
  * adds a random starting bonus to a character sheet if stats don't meet requirements
@@ -54,6 +54,17 @@ export async function addStartingBonus(sheet){
     }
     return sheet
 }
+
+export async function addStartingEquip(sheet){
+    const allStartingEquip = await DISStartingEquipment.find({}).exec()
+    if(allStartingEquip.length <= 0)
+        return sheet
+    const randomEquip = allStartingEquip[randomNumberBetween(allStartingEquip.length - 1, 0)]
+    sheet.inventory = sheet.inventory.concat(randomEquip.items)
+    sheet.weapons = sheet.weapons.concat(randomEquip.weapons)
+    sheet.armor = sheet.armor.concat(randomEquip.armor)
+    return sheet
+}   
 
 export async function rollCosmicMutation(prexistingMutations){
     if(!(prexistingMutations instanceof Array)){

@@ -10,7 +10,7 @@ import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
-import { sendValidationEmail } from "./aws/ses_helper.mjs";
+import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 
 dotenv.config();
 
@@ -63,7 +63,7 @@ app.get("/", (req, res, next) => {
  * 
  * @param {Number} validation the code the user is trying to validate
  */
-app.post('/validate', (req, res, next) => {
+app.post('/api/validate/email', (req, res, next) => {
     const json = req.body
     if(req.session.validationCode && json.validation == req.session.validationCode){
         const user = new User(req.session.tempUser) 
@@ -164,12 +164,6 @@ app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
         res.status(200).json({body: "logout successful"})
     })
-})
-
-//BASIC API TO GET TEST CLASSES FROM DB
-app.get('/user', async (req, res, next) => {
-    const models = await User.find({})
-    res.status(200).json(models)
 })
 
 export const server = createServer(config, app).listen(PORT, function (err) {

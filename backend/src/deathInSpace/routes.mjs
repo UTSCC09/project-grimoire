@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { isAuthenticated, rollNSidedDie, randomNumberBetween } from "../helper.mjs";
-import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISWeapon, DeathInSpaceSheet } from "./schema.mjs";
+import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISStartingEquipment, DISWeapon, DeathInSpaceSheet } from "./schema.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
-import { addStartingBonus } from "./sheets.mjs";
+import { addStartingBonus, addStartingEquip } from "./sheets.mjs";
 import mongoose, {mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 
@@ -107,6 +107,23 @@ disRouter.get('/armor', async (req, res, next) => {
 })
 
 /**
+ * gets death in space starting equipment lining up with given pagination
+ * 
+ * @param {Number} page page that we want to paginate to (default 0)
+ * @param {Number} limit number of elements per page (default 10)
+ * 
+ * @returns {Array[Object]} an array of starting equipment
+ */
+disRouter.get('/startequip', async (req, res, next) => {
+    DISStartingEquipment.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
+    .then((docs) => {
+        return res.json(docs)
+    }).catch(err => {
+        return res.status(500).json(err)
+    })
+})
+
+/**
  * creates a fully randomized Death In space charactersheet, with logged in user as owner
  * 
  * @returns {Object} the randomized character sheet created for the user
@@ -147,6 +164,9 @@ disRouter.post("/random", isAuthenticated, async (req, res, next) => {
         origin: randomOrigin._id,
         originBenefit: randomNumberBetween(randomOrigin.benefits.length - 1)
     })
+
+    //add starting equipment
+    deathInSpaceSheet = await addStartingEquip(deathInSpaceSheet)
 
     const errors = deathInSpaceSheet.validateSync()
     if(errors && errors.errors.length > 0){

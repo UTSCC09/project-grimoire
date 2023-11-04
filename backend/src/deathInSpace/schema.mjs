@@ -86,6 +86,30 @@ const DISArmorSchema = new Schema({
 
 export const DISArmor = new mongoose.model("DISArmor", DISArmorSchema)
 
+const DISStartingEquipmentSchmea = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    items: {
+        type: [DISInventorySchema],
+        default: [],
+        required: true
+    },
+    weapons: {
+        type: [DISWeaponSchema],
+        default: [],
+        required: true
+    },
+    armor: {
+        type: [DISArmorSchema],
+        default: [],
+        required: true
+    }
+})
+
+export const DISStartingEquipment = new mongoose.model("DISStartingEquip", DISStartingEquipmentSchmea)
+
 const DISMutationSchema = new Schema({
     name: {
         type: String,
