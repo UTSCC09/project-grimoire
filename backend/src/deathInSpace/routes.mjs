@@ -3,7 +3,7 @@ import { isAuthenticated, rollNSidedDie, randomNumberBetween } from "../helper.m
 import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISStartingEquipment, DISWeapon, DeathInSpaceSheet } from "./schema.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
 import { addStartingBonus, addStartingEquip } from "./sheets.mjs";
-import mongoose, {mongo} from 'mongoose'
+import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 
 const disRouter = Router()
@@ -98,6 +98,8 @@ disRouter.get('/weapons', async (req, res, next) => {
  * @returns {Array[Object]} an array of armor
  */
 disRouter.get('/armor', async (req, res, next) => {
+    const page = req.query.page || DEFAULTPAGE
+    const limit = req.query.limit || DEFAULTLIMIT
     DISArmor.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
     .then((docs) => {
         return res.json(docs)
@@ -115,6 +117,8 @@ disRouter.get('/armor', async (req, res, next) => {
  * @returns {Array[Object]} an array of starting equipment
  */
 disRouter.get('/startequip', async (req, res, next) => {
+    const page = req.query.page || DEFAULTPAGE
+    const limit = req.query.limit || DEFAULTLIMIT
     DISStartingEquipment.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
     .then((docs) => {
         return res.json(docs)
@@ -128,9 +132,13 @@ disRouter.get('/startequip', async (req, res, next) => {
  * 
  * @returns {Object} the randomized character sheet created for the user
  */
-disRouter.post("/random", isAuthenticated, async (req, res, next) => {
+disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
 
     let json = req.body
+    if(!json.name){
+        return res.status(400).json({body: "missing name"})
+    }
+
     const user = await User.findById(req.userId).exec()
     if(!user){
         return res.status(404).json({body: `user with id ${req.userId} not found`})
@@ -193,7 +201,7 @@ disRouter.post("/random", isAuthenticated, async (req, res, next) => {
         mapping.save().then(async (savedMap) => {
             session.commitTransaction()
             .then(() => session.endSession())
-            .then(() => res.status(201).json({saved}))
+            .then(() => res.status(201).json(saved))
         }).catch(async (err) => {
             session.abortTransaction()
             .then(() => session.endSession())
@@ -218,7 +226,7 @@ disRouter.post("/random", isAuthenticated, async (req, res, next) => {
  * @param {Number} originBenefit the index of the origin's benefits, represents the benefit they chose
  * @param {Boolean} addedBonus weather or not the user has already added their starting bonus (if their stats are too low)
  */
-disRouter.post("/create", isAuthenticated, async(req, res, next) => {
+disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
     let json = req.body
     const user = await User.findById(req.userId).exec()
     if(!user){
@@ -238,9 +246,15 @@ disRouter.post("/create", isAuthenticated, async(req, res, next) => {
         owner: user._id, 
         game: game._id, 
         characterName: json.name,
-
         stats: stats,
         inventory: json.inventory,
+        weapons: json.weapons,
+        armor: json.armor,
+        background: json.background,
+        drive: json.drive,
+        looks: json.looks,
+        pastAllegiance: json.pastAllegiance,
+        holos: json.holos,
         mutations: json.mutations,
         voidPoints: 0,
         defenseRating: 12 + json.stats.dex,
@@ -252,6 +266,7 @@ disRouter.post("/create", isAuthenticated, async(req, res, next) => {
 
     const errors = deathInSpaceSheet.validateSync()
     if(errors && errors.errors.length > 0){
+        console.error('erros',errors)
         return res.status(403).json({errors: errors.errors})
     }
     //check if needed to add anything else to the character sheet because of poor roles 
@@ -276,7 +291,7 @@ disRouter.post("/create", isAuthenticated, async(req, res, next) => {
         mapping.save().then(async (savedMap) => {
             await session.commitTransaction()
             await session.endSession()
-            return res.status(201).json({saved})
+            return res.status(201).json(saved)
         }).catch(async (err) => {
             await session.abortTransaction()
             await session.endSession()
@@ -298,7 +313,9 @@ disRouter.post("/create", isAuthenticated, async(req, res, next) => {
  * 
  * @returns {Object} returns updated charactersheet
  */
-disRouter.patch('/edit/:id', isAuthenticated, async (req, res, next) => {
+disRouter.patch('/sheets/edit/:id', isAuthenticated, async (req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
     const sheet = await DeathInSpaceSheet.findById(req.params.id).exec()
     if(!sheet)
         return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
@@ -313,3 +330,11 @@ disRouter.patch('/edit/:id', isAuthenticated, async (req, res, next) => {
 })
 
 export default disRouter
+
+
+/**
+ * the following are meant for testing purposes
+ */
+export function getDISSheets(){
+    return DeathInSpaceSheet.find({}).exec()
+}

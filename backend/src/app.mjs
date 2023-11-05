@@ -24,7 +24,14 @@ const config = {
 const PORT = 8000;
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
-await mongoose.connect(process.env.MONGO_URL)
+
+//meant for testing
+export async function connectToDb(connectionString){
+    await mongoose.disconnect()
+    return mongoose.connect(connectionString)
+}
+
+await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
@@ -47,7 +54,7 @@ app.use(function (req, res, next) {
 });
 
 //adding all the Death In Space routes
-app.use('/api/sheets/dis', disRouter)
+app.use('/api/dis', disRouter)
 
 app.use('/api/sheets', sheetRouter)
 
@@ -72,9 +79,14 @@ app.post('/api/validate/email', (req, res, next) => {
             req.session.validationCode = undefined
             req.session.user = newUser.email
             req.session.userId = newUser._id
-            res.status(201).json({email: user.email})
+            if(process.env.TESTING){
+                res.status(201).json({email: user.email, _id:newUser._id})
+            }else{
+                res.status(201).json({email: user.email})
+            }
         }).catch(err => {
-            res.status(400).json({errors: err})
+            console.error(err)
+            res.status(400).json({errors: err.errors})
         })
     }else{
         res.status(403).json({body: "invalid validation code"})
@@ -115,6 +127,9 @@ app.post('/api/signup', async (req, res, next) => {
             emailPromise.then((resp) => {
                 req.session.validationCode = code
                 req.session.tempUser = tempUser
+                //if testing add code
+                if(process.env.TESTING)
+                    resp.code = code
                 return res.json(resp)
             }).catch(err => {
                 res.status(500).json(err)
@@ -166,7 +181,19 @@ app.post('/api/signout', (req, res, next) => {
     })
 })
 
+
 export const server = createServer(config, app).listen(PORT, function (err) {
     if (err) console.log(err);
     else console.log("HTTPS server on http://localhost:%s", PORT);
 });
+
+/**
+ * all of the following are meant for testing purposes
+ */
+export function getUsers(){
+    return User.find({}).exec()
+}
+
+export function getMappings(){
+    return UserSheetMapping.find({}).exec()
+}

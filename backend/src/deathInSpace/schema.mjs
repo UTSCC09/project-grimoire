@@ -40,12 +40,13 @@ const DISWeaponSchema = new Schema({
     },
     damage: {
         type: String, //should be in the form of XdY or just flat number
-        required: true
+        required: true,
     },
     //stat used in rolls
     modifier: {
         type: String,
-        required: true
+        required: true,
+        enum: ['bdy', 'svy', 'tech', 'dex']
     },
     uses: {
         type: Number,
@@ -279,7 +280,9 @@ const DISSheetSchema = new Schema({
         getPopulationFields(){
             return ['origin', 'mutations']
         }
-    }
+    },
+    strict: true,
+    strictQuery: true
 })
 
 export const DeathInSpaceSheet = new mongoose.model('DISSheet', DISSheetSchema) 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isAuthenticated } from "../helper.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
-import mongoose, {mongo} from 'mongoose'
+import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import multer, {MulterError} from 'multer'
 import { resolve } from "path";
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
@@ -48,6 +48,8 @@ sheetRouter.get("/", isAuthenticated, async (req, res, next) => {
  * @returns {Object} the character sheet with the given id
  */
 sheetRouter.get("/:id", async (req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
     UserSheetMapping.findOne({sheet: req.params.id}).exec()
     .then(async (mapping) => {
         if(!mapping)
@@ -67,6 +69,8 @@ sheetRouter.get("/:id", async (req, res, next) => {
  * @param {String} id of the character sheet to be deleted
  */
 sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
     const session = await mongoose.startSession()
     session.startTransaction()
     UserSheetMapping.findOne({sheet: req.params.id}).exec()
@@ -79,7 +83,7 @@ sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
         const tempModel = new mongoose.model(mapping.sheetModel)
         return tempModel.deleteOne({_id: mapping.sheet})
         .then(async() => {
-            await UserSheetMapping.deleteOne(mapping._id)
+            await UserSheetMapping.deleteOne({_id: mapping._id})
             session.commitTransaction()
             session.endSession()
             return res.json({body: `sheet ${mapping.sheet} deleted`})
@@ -91,6 +95,7 @@ sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
     }).catch(err => {
         session.abortTransaction()
         session.endSession()
+        console.error(err)
         res.status(400).json(err.errors)})
 })
 
@@ -103,6 +108,8 @@ sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
  * @param {File} image image that will be uploaded the the sheet
  */
 sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
     const mapping = await UserSheetMapping.findOne({sheet: req.params.id}).exec()
     if(!mapping)
         return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
@@ -137,6 +144,8 @@ sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
  * @returns {File} image corresponding to charactersheet, if it exists
  */
 sheetRouter.get('/:id/pic', async (req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
     const sheetId = req.params.id
 
     if(!sheetId){
