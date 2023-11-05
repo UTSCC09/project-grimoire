@@ -132,10 +132,10 @@ app.post('/api/signup', async (req, res, next) => {
                     resp.code = code
                 return res.json(resp)
             }).catch(err => {
-                res.status(500).json(err)
+                next(err)
             })
         }).catch((err) => {
-            res.status(500).json({errors: err})
+            next(err)
         })
     })
 })
@@ -179,6 +179,14 @@ app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
         res.status(200).json({body: "logout successful"})
     })
+})
+
+/**
+ * error handler
+ */
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).json({body: 'Something broke!', err: err.name, errText: err.message})
 })
 
 

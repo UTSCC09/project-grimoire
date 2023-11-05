@@ -24,7 +24,7 @@ disRouter.get('/origins', async (req, res, next) => {
     .then((origins) => {
         return res.json(origins)
     }).catch(err => {
-        return res.status(500).json(err)
+        next(err)
     })
 })
 
@@ -44,7 +44,7 @@ disRouter.get('/mutations', async (req, res, next) => {
     .then((mutations) => {
         return res.json(mutations)
     }).catch(err => {
-        return res.status(500).json(err)
+        next(err)
     })
 })
 
@@ -64,7 +64,7 @@ disRouter.get('/items', async (req, res, next) => {
     .then((docs) => {
         return res.json(docs)
     }).catch(err => {
-        return res.status(500).json(err)
+        next(err)
     })
     
 })
@@ -85,7 +85,7 @@ disRouter.get('/weapons', async (req, res, next) => {
     .then((docs) => {
         return res.json(docs)
     }).catch(err => {
-        return res.status(500).json(err)
+        next(err)
     })
 })
 
@@ -104,7 +104,7 @@ disRouter.get('/armor', async (req, res, next) => {
     .then((docs) => {
         return res.json(docs)
     }).catch(err => {
-        return res.status(500).json(err)
+        return next(err)
     })
 })
 
@@ -123,7 +123,7 @@ disRouter.get('/startequip', async (req, res, next) => {
     .then((docs) => {
         return res.json(docs)
     }).catch(err => {
-        return res.status(500).json(err)
+        return next(err)
     })
 })
 
@@ -211,7 +211,7 @@ disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
         if(err.name === "ValidationError"){
             return res.status(400).json({error: err.errors})
         }
-        return res.status(500).json(err.errors)
+        return next(err)
     })
 })
 
@@ -301,7 +301,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
         if(err.name === "ValidationError"){
             return res.status(403).json({error: err.errors})
         }
-        return res.status(500).json(err.errors)
+        return next(err)
     })
 })
 
