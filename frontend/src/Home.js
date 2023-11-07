@@ -1,12 +1,21 @@
-import { Box, Typography } from "@mui/material";
-import React from "react";
+import { Box, Typography, Menu } from "@mui/material";
+import {React, useState} from "react";
 import NavBar from "./Template/NavBar";
 
 function Home(props){
+
     return(
-        <Box>
+        <NavigationMenu>
             <Typography>This is the Home page</Typography>
-        </Box>
+        </NavigationMenu>
+    )
+}
+
+function NavigationMenu(props)
+{
+    const [dialog, setDialog] = useState(false)
+    return (
+        <Menu open = {false}>UwU</Menu>
     )
 }
 

@@ -5,15 +5,25 @@ import Home from './Home';
 import Template from './Template/Template';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CharSheetView from './charSheets/CharSheetView';
-import Login from './Login';
+import LookingForGame from './GameGroups/LookingForGame.js';
+import Login from './Login/Login.js';
+import SignUp from './Login/SignUp.js';
+import CreateGame from './GameGroups/CreateGame.js';
+import CreateCharacter from './CharacterManager/CreateCharacter.js'
+import CharacterSheetView from './charSheets/CharSheetView.js';
+import CharacterSheetHomePage from './CharacterManager/CharacterSheetHomePage';
 
 function getRoutes(){
   return (
     <>
     <Route path="/" element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
-    <Route path='/user/sheets' 
-      element={<CharSheetView/>}/>
+    <Route path="/signup" element={<SignUp/>}/>
+    <Route path="/LookingForGame" element={<LookingForGame/>}/>
+    <Route path="/CreateGame" element={<CreateGame/>}/>
+    <Route path="/CreateCharacter" element={<CreateCharacter/>}/>
+    <Route path="/CharacterSheetHomePage" element={<CharacterSheetHomePage/>}/>
+    <Route path='/user/sheets' element={<CharacterSheetView/>}/>
     </>
   )
 }

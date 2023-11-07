@@ -174,6 +174,13 @@ app.post('/api/signup', async (req, res, next) => {
             const newUser = await user.save()
             req.session.user = newUser.username
             req.session.userId = newUser._id
+            res.setHeader(
+                "Set-Cookie",
+                serialize("Username", newUser.username, {
+                  path: "/",
+                  maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                }),
+            );
             res.status(201).json({username: user.username})
         }).catch((err) => {
             res.status(500).json({errors: err})

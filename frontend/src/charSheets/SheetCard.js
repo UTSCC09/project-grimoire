@@ -4,12 +4,16 @@ import React from "react";
 export function SheetCard(props){
     <Card>
         <Typography>
-            {props.gameName}
+            {props.name}
         </Typography>
         <Typography>
-            {props.charName}
+            {props.react}
         </Typography>
     </Card>
+}
+
+SheetCard.propTypes = {
+    name: String
 }
 
 export default SheetCard

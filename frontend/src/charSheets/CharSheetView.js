@@ -1,14 +1,29 @@
-import { Box, Typography } from "@mui/material";
-import React from "react";
+import { Box, Typography} from "@mui/material";
+import {React, useState} from "react";
 
-function CharSheetView(props){
+function CharacterSheetView(props){
+    const [sheets, setSheets] = useState([])
+    
+    function getSheets(){
+        setSheets([])
+    }
+
     return(
         <Box>
             <Typography>
                 Your Charactersheets
-            </Typography>
+            </Typography>        
+            {sheets.length > 0 ? 
+            <>
+                {
+                    sheets.map((sheet) => {
+                        //<SheetCard sheet={sheet} name="foo" react={1}/>
+                    })
+                }
+            </>
+        : <></>}
         </Box>
     )
 }
 
-export default CharSheetView
+export default CharacterSheetView
