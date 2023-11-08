@@ -4,7 +4,7 @@ const ObjectId = Schema.ObjectId;
 import mongoose, { mongo } from 'mongoose';
 
 export const UserSchema = new Schema({
-    username: {
+    email: {
         type: String,
         lowercase: true,
         required: true,
@@ -27,7 +27,14 @@ export const UserSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    twofa: {
+        type: Boolean,
+        required: true,
+        default: false
     }
+}, {
+    timestamps: true
 });
 
 export const User = new mongoose.model("User", UserSchema)
@@ -97,8 +104,10 @@ const sheetUserMappingSchema = new Schema({
     sheetModel : {
         type: String,
         required: true,
-        enum : ['DISSheet', 'MSSheet']
+        enum : ['DISSheet', 'MHSheet']
     }
+}, {
+    timestamps: true
 })
 
 export const UserSheetMapping = new mongoose.model("UserSheetMapping", sheetUserMappingSchema)
