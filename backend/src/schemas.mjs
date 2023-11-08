@@ -27,6 +27,11 @@ export const UserSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    twofa: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 }, {
     timestamps: true

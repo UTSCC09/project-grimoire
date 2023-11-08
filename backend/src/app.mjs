@@ -73,21 +73,34 @@ app.get("/", (req, res, next) => {
 app.post('/api/validate/email', (req, res, next) => {
     const json = req.body
     if(req.session.validationCode && json.validation == req.session.validationCode){
-        const user = new User(req.session.tempUser) 
-        user.save().then((newUser) => {
+        if(req.session.validateSignIn){
             req.session.tempUser = undefined
             req.session.validationCode = undefined
-            req.session.user = newUser.email
-            req.session.userId = newUser._id
-            if(process.env.TESTING){
-                res.status(201).json({email: user.email, _id:newUser._id})
-            }else{
-                res.status(201).json({email: user.email})
-            }
-        }).catch(err => {
-            console.error(err)
-            res.status(400).json({errors: err.errors})
-        })
+            req.session.validateSignin = undefined
+            req.session.user = req.session.tempUser.email
+            req.session.userId = req.session.tempUser._id
+            return res.status(201).json({email: req.session.user, _id: req.session.userId})
+        }
+        else if(req.session.validateSignUp){
+            const user = new User(req.session.tempUser) 
+            user.save().then((newUser) => {
+                req.session.tempUser = undefined
+                req.session.validationCode = undefined
+                req.session.validateSignUp = undefined
+                req.session.user = newUser.email
+                req.session.userId = newUser._id
+                if(process.env.TESTING){
+                    res.status(201).json({email: user.email, _id:newUser._id})
+                }else{
+                    res.status(201).json({email: user.email})
+                }
+            }).catch(err => {
+                console.error(err)
+                res.status(400).json({errors: err.errors})
+            })
+        }else{
+            return res.status(400).json({body: "nothing to verify"})
+        }
     }else{
         res.status(403).json({body: "invalid validation code"})
     }
@@ -121,12 +134,14 @@ app.post('/api/signup', async (req, res, next) => {
             const tempUser = {
                 email: email,
                 password: hash,
-                salt: salt
+                salt: salt,
+                twofa: json.twofa
             }
             const [code, emailPromise] = sendValidationEmail(email)
             emailPromise.then((resp) => {
                 req.session.validationCode = code
                 req.session.tempUser = tempUser
+                req.session.validateSignUp = true
                 //if testing add code
                 if(process.env.TESTING)
                     resp.code = code
@@ -162,9 +177,22 @@ app.post("/api/signin", (req, res, next) => {
             // result is true is the password matches the salted hash from the database
             if (!result) return res.status(401).json({body: "access denied"});
             //write email into session
-            req.session.user = email;
-            req.session.userId = doc._id
-            return res.json(email);
+            if(!doc.twofa){
+                req.session.user = email;
+                req.session.userId = doc._id
+                return res.json(email)
+            }
+            //if we are doing 2fa
+            const [code, emailPromise] = sendValidationEmail(email)
+            emailPromise.then((resp) => {
+                req.session.validationCode = code
+                req.session.tempUser = doc
+                req.session.validateSignIn = true
+                //if testing add code
+                if(process.env.TESTING)
+                    resp.code = code
+                return res.json(email)
+            }).catch(e => next(e))
         });
     }).catch(err => {
         return res.status(400).json({errors: err})
