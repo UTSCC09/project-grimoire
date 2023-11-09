@@ -16,8 +16,8 @@ import helmet from 'helmet'
 
 dotenv.config();
 
-const privateKey = readFileSync( `${process.env.CERT_DIR}/server.key` );
-const certificate = readFileSync( `${process.env.CERT_DIR}/server.crt` );
+const privateKey = readFileSync( `${process.env.SERVER_KEY}` );
+const certificate = readFileSync( `${process.env.SERVER_CRT}` );
 const config = {
         key: privateKey,
         cert: certificate
