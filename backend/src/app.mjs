@@ -15,8 +15,8 @@ import { MapsRouter } from "./googleMaps/routes.mjs";
 
 dotenv.config();
 
-const privateKey = readFileSync( `${CERT_DIR}/server.key` );
-const certificate = readFileSync( `${CERT_DIR}/server.crt` );
+const privateKey = readFileSync( `${process.env.CERT_DIR}/server.key` );
+const certificate = readFileSync( `${process.env.CERT_DIR}/server.crt` );
 const config = {
         key: privateKey,
         cert: certificate
