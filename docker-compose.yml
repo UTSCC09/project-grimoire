@@ -1,34 +1,56 @@
 version: '3'
+
 services:
-  backend:
-    build:
-      context: ./backend/
-      dockerfile: Dockerfile
+  # nginx reverse proxy    
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    restart: always
     ports:
-      - "8000:8000"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./backend/src/.:/app/src/.
-      - ./backend/.env:/app/.env
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs 
+      - ./vhost:/etc/nginx/vhost.d 
+      - ./html:/usr/share/nginx/html 
+      
+  # reverse proxy let's encrypt companion
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    restart: always
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme:/etc/acme.sh
     environment:
-      - NODE_ENV=development
-    env_file:
-      - ./backend/.env
+        - DEFAULT_EMAIL=kyle.lewis@mail.utoronto.ca
+
+  # React frontend
   frontend:
     build:
       context: ./frontend/.
       dockerfile: Dockerfile
-    ports:
-      - "443:3000"
-    volumes:
-      - ./frontend/src/.:/app/src/.
-      - ./frontend/public/.:/app/public/.
-      - ./frontend/.env:/app/.env
+    container_name: frontend
+    restart: always
+    # certificate information for let's encrypt
     environment:
-      - NODE_ENV=development
-      - WDS_SOCKET_HOST=127.0.0.1 
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true 
-    env_file:
-      - ./frontend/.env
-      
+      - VIRTUAL_HOST=${FRONTEND_DOMAIN}
+      - LETSENCRYPT_HOST=${FRONTEND_DOMAIN}
   
+  # react backend      
+  backend:
+    image: backend
+    container_name: backend
+    restart: always
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/.env:/app/.env
+    # certificate information for let's encrypt
+    environment:
+      - VIRTUAL_HOST=${BACKEND_DOMAIN}
+      - LETSENCRYPT_HOST=${BACKEND_DOMAIN}
