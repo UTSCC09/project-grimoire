@@ -12,6 +12,7 @@ import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import { MapsRouter } from "./googleMaps/routes.mjs";
+import helmet from 'helmet'
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ const app = express();
 
 app.use(express.json())
 app.use(mongoSanitize())
+app.use(helmet())
 
 app.use(
     session({
