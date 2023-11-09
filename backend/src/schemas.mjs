@@ -39,35 +39,6 @@ export const UserSchema = new Schema({
 
 export const User = new mongoose.model("User", UserSchema)
 
-export const GroupSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-        index: true,
-        unique: true
-    },
-    owner: {
-        type: ObjectId,
-        required: true,
-        ref : "User"
-    },
-    members: {
-        type: [ObjectId],
-        required: false
-    },
-    game: {
-        type: ObjectId,
-        required: true,
-        ref: "Game"
-    },
-    groupModel: {
-        type: String,
-        required: true,
-    }
-})
-
-export const Group = new mongoose.model("Group", GroupSchema)
-
 export const GameSchema = new Schema({
     name: {
         type: String,

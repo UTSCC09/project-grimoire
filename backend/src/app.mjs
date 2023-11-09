@@ -11,6 +11,7 @@ import disRouter from "./deathInSpace/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
+import groupRouter from "./groups/routes.mjs";
 
 dotenv.config();
 
@@ -57,6 +58,8 @@ app.use(function (req, res, next) {
 app.use('/api/dis', disRouter)
 
 app.use('/api/sheets', sheetRouter)
+
+app.use('/api/groups', groupRouter)
 
 /**
  * sanity check endpoint to test connection
