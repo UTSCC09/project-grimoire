@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 
 services:
   # nginx reverse proxy    
@@ -30,9 +30,7 @@ services:
 
   # React frontend
   frontend:
-    build:
-      context: ./frontend/.
-      dockerfile: Dockerfile
+    image: frontend
     container_name: frontend
     restart: always
     # certificate information for let's encrypt
@@ -45,12 +43,13 @@ services:
     image: backend
     container_name: backend
     restart: always
-    build:
-      context: ./backend/
-      dockerfile: Dockerfile
     volumes:
-      - ./backend/.env:/app/.env
+        # volume for the database (persistence)
+        - ./db:/app/db
     # certificate information for let's encrypt
     environment:
       - VIRTUAL_HOST=${BACKEND_DOMAIN}
       - LETSENCRYPT_HOST=${BACKEND_DOMAIN}
+
+        
+        
