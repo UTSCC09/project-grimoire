@@ -41,6 +41,13 @@ app.use(express.json())
 app.use(mongoSanitize())
 app.use(helmet())
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", process.env.FRONTEND);
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    res.header("Access-Control-Allow-Methods", "*");
+    next();
+  });
+
 app.use(
     session({
       secret: process.env.SESSION_KEY,
