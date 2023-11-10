@@ -79,6 +79,13 @@ app.post('/api/validate/email', (req, res, next) => {
             req.session.validateSignin = undefined
             req.session.user = req.session.tempUser.email
             req.session.userId = req.session.tempUser._id
+            res.setHeader(
+                "Set-Cookie",
+                serialize("Username", newUser.username, {
+                  path: "/",
+                  maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                }),
+            );
             return res.status(201).json({email: req.session.user, _id: req.session.userId})
         }
         else if(req.session.validateSignUp){
@@ -89,6 +96,13 @@ app.post('/api/validate/email', (req, res, next) => {
                 req.session.validateSignUp = undefined
                 req.session.user = newUser.email
                 req.session.userId = newUser._id
+                res.setHeader(
+                  "Set-Cookie",
+                  serialize("Username", newUser.username, {
+                    path: "/",
+                    maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                  }),
+                );
                 if(process.env.TESTING){
                     res.status(201).json({email: user.email, _id:newUser._id})
                 }else{
@@ -180,6 +194,13 @@ app.post("/api/signin", (req, res, next) => {
             if(!doc.twofa){
                 req.session.user = email;
                 req.session.userId = doc._id
+                res.setHeader(
+                  "Set-Cookie",
+                  serialize("Username", newUser.username, {
+                    path: "/",
+                    maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                  }),
+                );
                 return res.json(email)
             }
             //if we are doing 2fa
