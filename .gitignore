@@ -4,3 +4,4 @@ uploads
 TODO.txt
 server.crt
 server.key
+*.pem

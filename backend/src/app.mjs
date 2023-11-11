@@ -14,8 +14,8 @@ import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 
 dotenv.config();
 
-const privateKey = readFileSync( 'server.key' );
-const certificate = readFileSync( 'server.crt' );
+const privateKey = readFileSync( process.env.SERVER_KEY );
+const certificate = readFileSync(process.env.SERVER_CERT );
 const config = {
         key: privateKey,
         cert: certificate
