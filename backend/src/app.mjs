@@ -26,7 +26,7 @@ const config = {
 
 const HTTPSPORT = 8000;
 //used for testing
-const HTTPPORT = 80
+const HTTPPORT = 8080
 
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
