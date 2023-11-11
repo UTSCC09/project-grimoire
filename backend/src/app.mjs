@@ -1,4 +1,5 @@
-import { createServer } from "https";
+import https from "https";
+import http from "http"
 import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
@@ -21,7 +22,10 @@ const config = {
         cert: certificate
 };
 
-const PORT = 8000;
+const HTTPSPORT = 8000;
+//used for testing
+const HTTPPORT = 80
+
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
 
@@ -239,10 +243,15 @@ app.use((err, req, res, next) => {
 })
 
 
-export const server = createServer(config, app).listen(PORT, function (err) {
+export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
     if (err) console.log(err);
-    else console.log("HTTPS server on http://localhost:%s", PORT);
+    else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
 });
+
+export const httpServer = http.createServer(app).listen(HTTPPORT, function (err){
+    if(err) console.log(err)
+    else console.log(`HTTP server on http://localhost:${HTTPPORT}`)
+})
 
 /**
  * all of the following are meant for testing purposes
