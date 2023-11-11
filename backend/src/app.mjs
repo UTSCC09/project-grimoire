@@ -1,9 +1,10 @@
-import { createServer } from "https";
+import https from "https";
+import http from "http"
 import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
-import { Game, User, UserSheetMapping } from "./schemas.mjs";
+import { Game, User, Group, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated, isValidEmail } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
@@ -21,7 +22,10 @@ const config = {
         cert: certificate
 };
 
-const PORT = 8000;
+const HTTPSPORT = 8000;
+//used for testing
+const HTTPPORT = 80
+
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
 
@@ -57,6 +61,8 @@ app.use(function (req, res, next) {
 app.use('/api/dis', disRouter)
 
 app.use('/api/sheets', sheetRouter)
+
+app.use('/api/groups', groupRouter)
 
 /**
  * sanity check endpoint to test connection
@@ -218,7 +224,7 @@ app.post("/api/signin", (req, res, next) => {
     }).catch(err => {
         return res.status(400).json({errors: err})
     })
-        
+
 })
 
 /**
@@ -239,10 +245,15 @@ app.use((err, req, res, next) => {
 })
 
 
-export const server = createServer(config, app).listen(PORT, function (err) {
+export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
     if (err) console.log(err);
-    else console.log("HTTPS server on http://localhost:%s", PORT);
+    else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
 });
+
+export const httpServer = http.createServer(app).listen(HTTPPORT, function (err){
+    if(err) console.log(err)
+    else console.log(`HTTP server on http://localhost:${HTTPPORT}`)
+})
 
 /**
  * all of the following are meant for testing purposes
