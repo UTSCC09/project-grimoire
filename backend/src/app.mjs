@@ -4,11 +4,13 @@ import express from "express";
 import session from "express-session";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
-import { Game, User, Group, UserSheetMapping } from "./schemas.mjs";
+import { Game, User, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated, isValidEmail } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
+import { Group } from "./groups/schema.mjs";
+import groupRouter from "./groups/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";

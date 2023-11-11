@@ -5,7 +5,7 @@ import { Game, User } from "../schemas.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 
-const groupRouter = Router()
+export const groupRouter = Router()
 
 // Looking for group endpoints
 
