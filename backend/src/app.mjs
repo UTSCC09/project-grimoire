@@ -11,13 +11,11 @@ import disRouter from "./deathInSpace/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
-import { MapsRouter } from "./googleMaps/routes.mjs";
-import helmet from 'helmet'
 
 dotenv.config();
 
-const privateKey = readFileSync( `${process.env.SERVER_KEY}` );
-const certificate = readFileSync( `${process.env.SERVER_CRT}` );
+const privateKey = readFileSync( 'server.key' );
+const certificate = readFileSync( 'server.crt' );
 const config = {
         key: privateKey,
         cert: certificate
@@ -39,14 +37,6 @@ const app = express();
 
 app.use(express.json())
 app.use(mongoSanitize())
-app.use(helmet())
-
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", process.env.FRONTEND);
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    res.header("Access-Control-Allow-Methods", "*");
-    next();
-  });
 
 app.use(
     session({
@@ -67,8 +57,6 @@ app.use(function (req, res, next) {
 app.use('/api/dis', disRouter)
 
 app.use('/api/sheets', sheetRouter)
-
-app.use('/api/maps', MapsRouter)
 
 /**
  * sanity check endpoint to test connection
@@ -91,6 +79,13 @@ app.post('/api/validate/email', (req, res, next) => {
             req.session.validateSignin = undefined
             req.session.user = req.session.tempUser.email
             req.session.userId = req.session.tempUser._id
+            res.setHeader(
+                "Set-Cookie",
+                serialize("Username", newUser.username, {
+                  path: "/",
+                  maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                }),
+            );
             return res.status(201).json({email: req.session.user, _id: req.session.userId})
         }
         else if(req.session.validateSignUp){
@@ -101,6 +96,13 @@ app.post('/api/validate/email', (req, res, next) => {
                 req.session.validateSignUp = undefined
                 req.session.user = newUser.email
                 req.session.userId = newUser._id
+                res.setHeader(
+                  "Set-Cookie",
+                  serialize("Username", newUser.username, {
+                    path: "/",
+                    maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                  }),
+                );
                 if(process.env.TESTING){
                     res.status(201).json({email: user.email, _id:newUser._id})
                 }else{
@@ -192,6 +194,13 @@ app.post("/api/signin", (req, res, next) => {
             if(!doc.twofa){
                 req.session.user = email;
                 req.session.userId = doc._id
+                res.setHeader(
+                  "Set-Cookie",
+                  serialize("Username", newUser.username, {
+                    path: "/",
+                    maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                  }),
+                );
                 return res.json(email)
             }
             //if we are doing 2fa
