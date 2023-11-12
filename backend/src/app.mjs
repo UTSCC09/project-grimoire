@@ -1,31 +1,32 @@
-import https from "https";
 import http from "http"
 import express from "express";
 import session from "express-session";
+import { parse, serialize } from "cookie";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
-import { Game, User, Group, UserSheetMapping } from "./schemas.mjs";
+import { Game, User, UserSheetMapping } from "./schemas.mjs";
 import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated, isValidEmail } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
+import { Group } from "./groups/schema.mjs";
+import groupRouter from "./groups/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
-import groupRouter from "./groups/routes.mjs";
 
 dotenv.config();
 
-const privateKey = readFileSync( 'server.key' );
-const certificate = readFileSync( 'server.crt' );
-const config = {
-        key: privateKey,
-        cert: certificate
-};
+// const privateKey = readFileSync( process.env.SERVER_KEY );
+// const certificate = readFileSync(process.env.SERVER_CERT );
+// const config = {
+//         key: privateKey,
+//         cert: certificate
+// };
 
-const HTTPSPORT = 8000;
+// const HTTPSPORT = 8000;
 //used for testing
-const HTTPPORT = 80
+const HTTPPORT = 8000
 
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
@@ -88,7 +89,7 @@ app.post('/api/validate/email', (req, res, next) => {
             req.session.userId = req.session.tempUser._id
             res.setHeader(
                 "Set-Cookie",
-                serialize("Username", newUser.username, {
+                serialize("Username", req.session.user, {
                   path: "/",
                   maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                 }),
@@ -105,7 +106,7 @@ app.post('/api/validate/email', (req, res, next) => {
                 req.session.userId = newUser._id
                 res.setHeader(
                   "Set-Cookie",
-                  serialize("Username", newUser.username, {
+                  serialize("Username", newUser.email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -203,7 +204,7 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
-                  serialize("Username", newUser.username, {
+                  serialize("Username", doc.email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -217,8 +218,9 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.tempUser = doc
                 req.session.validateSignIn = true
                 //if testing add code
+                let body = {email: email}
                 if(process.env.TESTING)
-                    resp.code = code
+                    body.code = code
                 return res.json(email)
             }).catch(e => next(e))
         });
@@ -246,12 +248,12 @@ app.use((err, req, res, next) => {
 })
 
 
-export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
-    if (err) console.log(err);
-    else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
-});
+// export const httpsServer = https.createServer(config, app).listen(HTTPSPORT, function (err) {
+//     if (err) console.log(err);
+//     else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
+// });
 
-export const httpServer = http.createServer(app).listen(HTTPPORT, function (err){
+export const server = http.createServer(app).listen(HTTPPORT, function (err){
     if(err) console.log(err)
     else console.log(`HTTP server on http://localhost:${HTTPPORT}`)
 })
