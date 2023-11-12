@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # production server (SSH public key authentication)
-SERVER=34.130.187.48
+SERVER=34.130.0.51
 REMOTE_DIR=~/project-grimoire
 
 # building the frontend image (--squash is experimental and optional)
