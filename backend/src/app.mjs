@@ -11,9 +11,9 @@ import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
 import { Group } from "./groups/schema.mjs";
 import groupRouter from "./groups/routes.mjs";
-import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
+import cors from 'cors'
 
 dotenv.config();
 
@@ -43,21 +43,12 @@ await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
-if(Boolean(process.env.DEV))
-{
-    const testingHTTPAgent = new http.Agent({
-        rejectUnauthorized: false,
-      });
-
-    app.use((req, res, next) => {
-        req.agent = testingHTTPAgent;
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization,');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        next();
-    });
+const corsOptions = {
+    origin: process.env.FRONTEND,
+    optionsSuccessStatus: 200
 }
+
+app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(mongoSanitize())
