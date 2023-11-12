@@ -30,9 +30,7 @@ services:
 
   # React frontend
   frontend:
-    build:
-      context: ./frontend/.
-      dockerfile: Dockerfile
+    image: frontend
     container_name: frontend
     restart: always
     # certificate information for let's encrypt
@@ -42,17 +40,10 @@ services:
   
   # react backend      
   backend:
-    build:
-      context: ./backend/
-      dockerfile: Dockerfile
+    image: backend
     container_name: backend
     restart: always
-    env_file:
-      - ./backend/.env
     # certificate information for let's encrypt
     environment:
       - VIRTUAL_HOST=${BACKEND_DOMAIN}
       - LETSENCRYPT_HOST=${BACKEND_DOMAIN}
-
-        
-        
