@@ -1,7 +1,7 @@
-import https from "https";
 import http from "http"
 import express from "express";
 import session from "express-session";
+import { parse, serialize } from "cookie";
 import dotenv from 'dotenv';
 import mongoose, {mongo} from 'mongoose'
 import { Game, User, UserSheetMapping } from "./schemas.mjs";
@@ -89,7 +89,7 @@ app.post('/api/validate/email', (req, res, next) => {
             req.session.userId = req.session.tempUser._id
             res.setHeader(
                 "Set-Cookie",
-                serialize("Username", newUser.username, {
+                serialize("Username", req.session.user, {
                   path: "/",
                   maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                 }),
@@ -106,7 +106,7 @@ app.post('/api/validate/email', (req, res, next) => {
                 req.session.userId = newUser._id
                 res.setHeader(
                   "Set-Cookie",
-                  serialize("Username", newUser.username, {
+                  serialize("Username", newUser.email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -204,7 +204,7 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
-                  serialize("Username", newUser.username, {
+                  serialize("Username", doc.email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -218,8 +218,9 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.tempUser = doc
                 req.session.validateSignIn = true
                 //if testing add code
+                let body = {email: email}
                 if(process.env.TESTING)
-                    resp.code = code
+                    body.code = code
                 return res.json(email)
             }).catch(e => next(e))
         });
