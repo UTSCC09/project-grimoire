@@ -16,18 +16,18 @@ export function DualFactorAuth(props){
             {
                 if(response.status === 400)
                 {
-                    throw new Error("No input was detected. Please insert validation code.")
+                    seterror("No input was detected. Please insert validation code.")
                 }
                 if (response.status === 403)
-                    throw new Error("Incorrect validation code");
+                    seterror("Incorrect validation code");
             }
             else
                 navigate("/");
         })
-        .catch(error)
-        {
-            seterror(error);
-        }
+        .catch(function (error) {
+            seterror("Connection to the server returned with an error")
+            console.log(error);
+        });
     }
 
     return <Grid>

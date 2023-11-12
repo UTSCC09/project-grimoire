@@ -2,7 +2,7 @@ import {React, useState} from "react"
 import {Button, TextField, Alert} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import { signUp } from "../api.mjs";
+import { signUp, getSessionCode } from "../api.mjs";
 
 function SignUp(props){
 
@@ -32,6 +32,7 @@ function SignUpForm(props)
             setError(null);
             signUp(props.email, props.password).then(function (response) 
             {
+                
                 if (!response.ok)
                 {
                     if (response.status === 409)
@@ -44,6 +45,7 @@ function SignUpForm(props)
             })
             .catch(function (error)
             {
+                setError("Connection could not be made to the server.");
                 console.log("Error: " + error);
             });
         }

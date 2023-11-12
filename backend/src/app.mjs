@@ -12,6 +12,7 @@ import disRouter from "./deathInSpace/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
+import { serialize } from "cookie";
 
 dotenv.config();
 
@@ -22,9 +23,11 @@ const config = {
         cert: certificate
 };
 
+
+
 const HTTPSPORT = 8000;
 //used for testing
-const HTTPPORT = 80
+const HTTPPORT = 8001;
 
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
@@ -39,14 +42,29 @@ await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
+if(Boolean(process.env.DEV))
+{
+    const testingHTTPAgent = new http.Agent({
+        rejectUnauthorized: false,
+      });
+
+    app.use((req, res, next) => {
+        req.agent = testingHTTPAgent;
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization,');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        next();
+    });
+}
+
 app.use(express.json())
 app.use(mongoSanitize())
-
 app.use(
     session({
       secret: process.env.SESSION_KEY,
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
     })
 );
 
@@ -200,7 +218,7 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
-                  serialize("Username", newUser.username, {
+                  serialize("Username", email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -243,10 +261,10 @@ app.use((err, req, res, next) => {
 })
 
 
-export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
-    if (err) console.log(err);
-    else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
-});
+// export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
+//     if (err) console.log(err);
+//     else console.log("HTTPS server on https://localhost:%s", HTTPSPORT);
+// });
 
 export const httpServer = http.createServer(app).listen(HTTPPORT, function (err){
     if(err) console.log(err)
@@ -263,3 +281,7 @@ export function getUsers(){
 export function getMappings(){
     return UserSheetMapping.find({}).exec()
 }
+
+app.get("/test/sessionCode", function (req, res, next) {
+    console.log(req.session);
+})

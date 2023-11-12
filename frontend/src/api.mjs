@@ -5,15 +5,17 @@ const URL = process.env.REACT_APP_URL
 export function signUp(username, password) 
 {
     const postData = {
-        username: username,
+        email: username,
         password: password
     }
     return fetch(`${URL}/api/signup`, {
         method: 'POST',
         headers: {
+          'Origin': window.location.origin,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(postData),
+        credentials: 'include'
       })
     
 }
@@ -31,19 +33,21 @@ export function logIn(username, password)
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(postData),
+        credentials: 'include'
       })
 }
 
 export function dualFactorValidate(code)
 {
   const post = {
-    validation: code
+    validation: parseInt(code)
   }
   return fetch(`${URL}/api/validate/email`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     }, 
+    credentials: 'include',
     body: JSON.stringify(post)})
 }
 
@@ -53,7 +57,10 @@ export function logOut()
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+          
+        },
+        credentials: 'include',
+        body: JSON.stringify({})
       })
 }
 
@@ -63,7 +70,8 @@ export function getSheet(ID)
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include'
     })
 }
 
@@ -73,13 +81,24 @@ export function deleteSheet(ID)
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include'
     })
 }
 
 //gets the Current User from the site cookie. Code provided by Prof. Sans
 export function getCurrentUser() {
-  let username = document.cookie.split("username=")[1];
+  if (!document.cookie)
+    return null; 
+  let username = document.cookie.split("Username=")[1];
   if (username.length == 0) return null;
-  return username;
+  return decodeURIComponent(username);
+}
+
+// Code used for session testing only
+export function getSessionCode() {
+  return fetch(`${URL}/test/sessionCode`, {
+    method: 'GET',
+    credentials: 'include'
+    })
 }
