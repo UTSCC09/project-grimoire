@@ -17,16 +17,16 @@ import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 
 dotenv.config();
 
-const privateKey = readFileSync( process.env.SERVER_KEY );
-const certificate = readFileSync(process.env.SERVER_CERT );
-const config = {
-        key: privateKey,
-        cert: certificate
-};
+// const privateKey = readFileSync( process.env.SERVER_KEY );
+// const certificate = readFileSync(process.env.SERVER_CERT );
+// const config = {
+//         key: privateKey,
+//         cert: certificate
+// };
 
-const HTTPSPORT = 8000;
+// const HTTPSPORT = 8000;
 //used for testing
-const HTTPPORT = 8080
+const HTTPPORT = 8000
 
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
@@ -247,12 +247,12 @@ app.use((err, req, res, next) => {
 })
 
 
-export const server = https.createServer(config, app).listen(HTTPSPORT, function (err) {
-    if (err) console.log(err);
-    else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
-});
+// export const httpsServer = https.createServer(config, app).listen(HTTPSPORT, function (err) {
+//     if (err) console.log(err);
+//     else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
+// });
 
-export const httpServer = http.createServer(app).listen(HTTPPORT, function (err){
+export const server = http.createServer(app).listen(HTTPPORT, function (err){
     if(err) console.log(err)
     else console.log(`HTTP server on http://localhost:${HTTPPORT}`)
 })
