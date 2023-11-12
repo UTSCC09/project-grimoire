@@ -11,9 +11,9 @@ import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
 import { Group } from "./groups/schema.mjs";
 import groupRouter from "./groups/routes.mjs";
-import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
+import cors from 'cors'
 
 dotenv.config();
 
@@ -24,9 +24,11 @@ dotenv.config();
 //         cert: certificate
 // };
 
+
 // const HTTPSPORT = 8000;
 //used for testing
 const HTTPPORT = 8000
+
 
 export const DEFAULTPAGE = 0
 export const DEFAULTLIMIT = 10
@@ -41,14 +43,20 @@ await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
+const corsOptions = {
+    origin: process.env.FRONTEND,
+    optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions))
+
 app.use(express.json())
 app.use(mongoSanitize())
-
 app.use(
     session({
       secret: process.env.SESSION_KEY,
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
     })
 );
 
@@ -204,6 +212,7 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
+
                   serialize("Username", doc.email, {
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
@@ -251,7 +260,7 @@ app.use((err, req, res, next) => {
 // export const httpsServer = https.createServer(config, app).listen(HTTPSPORT, function (err) {
 //     if (err) console.log(err);
 //     else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
-// });
+
 
 export const server = http.createServer(app).listen(HTTPPORT, function (err){
     if(err) console.log(err)
@@ -268,3 +277,7 @@ export function getUsers(){
 export function getMappings(){
     return UserSheetMapping.find({}).exec()
 }
+
+app.get("/test/sessionCode", function (req, res, next) {
+    console.log(req.session);
+})
