@@ -39,7 +39,6 @@ export const UserSchema = new Schema({
 
 export const User = new mongoose.model("User", UserSchema)
 
-
 export const GameSchema = new Schema({
     name: {
         type: String,
