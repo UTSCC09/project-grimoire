@@ -2,7 +2,7 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 import mongoose, { mongo } from 'mongoose';
-import { ImageSchema } from '../schemas.mjs';
+import { ImageSchema, InventoryItemSchema } from '../schemas.mjs';
 
 const MHMoveSchema = new Schema({
     belongsTo: {
@@ -19,6 +19,11 @@ const MHMoveSchema = new Schema({
         required: true
     },
     isHex: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    isBargain: {
         type: Boolean,
         required: false,
         default: false
@@ -62,7 +67,7 @@ const MHSkinSchema = new Schema({
         type: String,
         required: true
     },
-    advancement: {
+    advancements: {
         type: [String],
         required: true
     },
@@ -151,6 +156,23 @@ const MHSheetSchema = new Schema({
         type: [InventoryItemSchema],
         required: true,
         default: []
+    },
+    takenAdvancements: {
+        type: [Number], //indicies corresponding to advancements of skin,
+        required: false,
+        default : []
+    },
+    look : {
+        type: String,
+        required: false
+    },
+    origin: {
+        type: String,
+        required: false
+    },
+    eyes: {
+        type: String,
+        required: false
     }
 }, {
     methods: {
