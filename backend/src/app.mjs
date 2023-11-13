@@ -281,7 +281,3 @@ export function getUsers(){
 export function getMappings(){
     return UserSheetMapping.find({}).exec()
 }
-
-app.get("/test/sessionCode", function (req, res, next) {
-    console.log(req.session);
-})

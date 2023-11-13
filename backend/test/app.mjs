@@ -360,8 +360,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISOrigin.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISOrigin.find({_id: {$in: json.map(o => o._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISOrigin.find({_id: {$in: json.records.map(o => o._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
@@ -375,8 +375,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISMutation.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISMutation.find({_id: {$in: json.map(d => d._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISMutation.find({_id: {$in: json.records.map(d => d._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
@@ -390,8 +390,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISInventoryItem.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISInventoryItem.find({_id: {$in: json.map(d => d._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISInventoryItem.find({_id: {$in: json.records.map(d => d._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
@@ -405,8 +405,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISWeapon.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISWeapon.find({_id: {$in: json.map(d => d._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISWeapon.find({_id: {$in: json.records.map(d => d._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
@@ -420,8 +420,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISArmor.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISArmor.find({_id: {$in: json.map(d => d._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISArmor.find({_id: {$in: json.records.map(d => d._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
@@ -435,8 +435,8 @@ describe("Death in space sheets", () => {
             expect(res).to.have.status(200)
             const numRecords = await DISStartingEquipment.countDocuments({})
             const json = JSON.parse(res.text)
-            expect(json.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
-            DISStartingEquipment.find({_id: {$in: json.map(d => d._id)}}).exec().then((docs) => {
+            expect(json.records.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
+            DISStartingEquipment.find({_id: {$in: json.records.map(d => d._id)}}).exec().then((docs) => {
                 expect(docs.length).to.equal(Math.min(numRecords, DEFAULTLIMIT))
                 done()
             }).catch(e => done(e))
