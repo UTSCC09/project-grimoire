@@ -18,16 +18,18 @@ const MHMoveSchema = new Schema({
         type: String,
         required: true
     },
-    isHex: {
-        type: Boolean,
-        required: false,
-        default: false
+    type: {
+        type: String,
+        required: true,
+        default: "basic",
+        enum : ['hex', 'bargain', "basic"]
     },
-    isBargain: {
+    isCore:{
         type: Boolean,
-        required: false,
+        required: true,
         default: false
     }
+    
 })
 
 export const MHMoves = new mongoose.model("MHMoves", MHMoveSchema)
@@ -60,7 +62,7 @@ const MHSkinSchema = new Schema({
         }}]
     },
     backstory: {
-        type: String,
+        type: [String],
         required: true
     },
     darkestSelf: {
@@ -74,6 +76,12 @@ const MHSkinSchema = new Schema({
     sexMove: {
         type: String,
         required: true
+    },
+    requiredMoves: {
+        type: [ObjectId],
+        ref: "MHMoves",
+        required: true,
+        default: []
     }
 })
 
@@ -115,7 +123,7 @@ const MHSheetSchema = new Schema({
     },
     skin: {
         type: ObjectId,
-        ref: "MHSkin",
+        ref: "MHSkins",
         required: true
     },
     stats: {
