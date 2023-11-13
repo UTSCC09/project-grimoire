@@ -147,12 +147,14 @@ const MHSheetSchema = new Schema({
     maxHitPoints: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 4
     },
     hitPoints: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 4
     },
     conditions: {
         type: [String],
