@@ -77,7 +77,22 @@ const MHSkinSchema = new Schema({
     }
 })
 
-export const MHSkins = new mongoose.model("MHSkins", MHSkinSchema)
+export const MHSkin = new mongoose.model("MHSkins", MHSkinSchema)
+
+const MHStringSchema = new Schema({
+    originator: {
+        type: String,
+        required: true
+    },
+    destination: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: false
+    }
+})
 
 const MHSheetSchema = new Schema({
     owner: {
@@ -161,6 +176,11 @@ const MHSheetSchema = new Schema({
         type: [Number], //indicies corresponding to advancements of skin,
         required: false,
         default : []
+    },
+    strings: {
+        type: [MHStringSchema],
+        required: false,
+        default: []
     },
     look : {
         type: String,
