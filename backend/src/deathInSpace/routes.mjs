@@ -26,7 +26,7 @@ disRouter.get('/origins', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISOrigin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISOrigin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -56,7 +56,7 @@ disRouter.get('/mutations', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISMutation.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISMutation.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -86,7 +86,7 @@ disRouter.get('/items', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISInventoryItem.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISInventoryItem.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -117,7 +117,7 @@ disRouter.get('/weapons', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISWeapon.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISWeapon.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -147,7 +147,7 @@ disRouter.get('/armor', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISArmor.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISArmor.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -177,7 +177,7 @@ disRouter.get('/startequip', async (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    DISStartingEquipment.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    DISStartingEquipment.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -198,7 +198,7 @@ disRouter.get('/startequip', async (req, res, next) => {
 disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
 
     let json = req.body
-    if(!json.name){
+    if(!json.characterName){
         return res.status(400).json({body: "missing name"})
     }
 
@@ -223,7 +223,7 @@ disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
     let deathInSpaceSheet = new DeathInSpaceSheet({
         owner: user._id, 
         game: game._id, 
-        characterName: json.name,
+        characterName: json.characterName,
 
         stats: stats,
         inventory: [],
@@ -308,7 +308,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
     let deathInSpaceSheet = new DeathInSpaceSheet({
         owner: user._id, 
         game: game._id, 
-        characterName: json.name,
+        characterName: json.characterName,
         stats: stats,
         inventory: json.inventory,
         weapons: json.weapons,
@@ -376,7 +376,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
  * 
  * @returns {Object} returns updated charactersheet
  */
-disRouter.patch('/sheets/edit/:id', isAuthenticated, async (req, res, next) => {
+disRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
     if(!isValidObjectId(req.params.id))
         return res.status(400).json({body: "invalid object id"})
     const sheet = await DeathInSpaceSheet.findById(req.params.id).exec()

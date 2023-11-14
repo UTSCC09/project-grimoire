@@ -21,7 +21,7 @@ MHRouter.get('/skins', (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -49,7 +49,7 @@ MHRouter.get('/moves', (req, res, next) => {
     delete searchParams.page
     delete searchParams.limit
 
-    MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: -1}}).exec()
+    MHMoves.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -63,8 +63,17 @@ MHRouter.get('/moves', (req, res, next) => {
 })
 
 MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
-    const json = req.body
+    let json = req.body
+    if(!json.moves)
+        json.moves = []
 
+    if(!Array.isArray(json.moves)){
+        return res.status(400).json({body: "moves must be an array"})
+    }
+
+    if(!json.skin || !isValidObjectId(json.skin)){
+        return res.status(401).json({body: "skin must be a valid objectId"})
+    }
     //find monster heart skin to get appropriate skill options
     const monsterHearts = await Game.findOne({name: "Monster Hearts"}).exec()
     if(!monsterHearts)
@@ -77,8 +86,6 @@ MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
             return res.status(404).json({body: `skin with id ${json.skinId} not found`})
 
         if(!(typeof(json.statOption) === 'number' && json.statOption < skin.statOptions.length)){
-            console.log('statOptions.length', skin.statOptions.length)
-            console.log('number', json.statOption instanceof Number)
             return res.status(400).json({body: "statOption invalid"})
         }
 
@@ -87,9 +94,10 @@ MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
 
         const statObj = skin.statOptions[json.statOption]
         const MHSheet = new MonsterHeartSheet({
-            characterName: json.name,
+            characterName: json.characterName,
             owner: req.userId,
             game: monsterHearts._id,
+            statOption: json.statOption,
             skin: skin._id,
             stats: statObj,
             strings: json.strings,
@@ -102,8 +110,7 @@ MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
         })
         const errors = MHSheet.validateSync()
         if(errors && errors.errors.length > 0){
-            console.error('erros',errors)
-            return res.status(403).json({errors: errors.errors})
+            return res.status(400).json({errors: errors.errors})
         }
 
         //starting a transaction to make sure both sheets get saved
@@ -128,13 +135,29 @@ MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
             })
         }).catch(err => {
             if(err.name === "ValidationError"){
-                return res.status(403).json({error: err.errors})
+                return res.status(400).json({error: err.errors})
             }
             return next(err)
         })
+    }).catch(e => {
+        next(e)
     })
 })
 
-MHRouter.patch('/sheets/:id', (req, res, next) => {
+MHRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid object id"})
 
+    MonsterHeartSheet.findById(req.params.id).exec().then(sheet => {
+        if(!sheet)
+            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
+        if(sheet.owner != req.userId)
+            return res.status(403).json(`user ${req.userId} does not have permission to edit this sheet`)
+        
+        MonsterHeartSheet.findByIdAndUpdate(req.params.id, req.body, {returnDocument: 'after', runValidators:true}).then(result => {
+            return res.json(result)
+        }).catch(err => {
+            return res.status(400).json(err)
+        })  
+    }).catch(e => next(e))
 })

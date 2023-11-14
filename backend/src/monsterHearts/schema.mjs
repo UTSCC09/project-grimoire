@@ -4,6 +4,19 @@ const ObjectId = Schema.ObjectId;
 import mongoose, { mongo } from 'mongoose';
 import { ImageSchema, InventoryItemSchema } from '../schemas.mjs';
 
+const MHAdvancementSchema = new Schema({
+    desc: {
+        type: String,
+        required: true
+    },
+    function : {
+        type: String,
+        //enum is going to match to a function mapper on frontend used manage ui needed for choosing advancements
+        enum: ["increaseScore", "addLocalMove", "addGlobalMove", "addSpecialMove", "joinGang"],
+        default: "increaseScore"
+    }
+})
+
 const MHMoveSchema = new Schema({
     belongsTo: {
         type: ObjectId,
@@ -70,7 +83,7 @@ const MHSkinSchema = new Schema({
         required: true
     },
     advancements: {
-        type: [String],
+        type: [MHAdvancementSchema],
         required: true
     },
     sexMove: {
@@ -106,12 +119,14 @@ const MHSheetSchema = new Schema({
     owner: {
         type: ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        immutable: true
     },
     game : {
         type: ObjectId,
         ref: "Game",
-        required: true
+        required: true,
+        immutable: true
     },
     characterName: {
         type: String,
@@ -143,6 +158,11 @@ const MHSheetSchema = new Schema({
             type: Number,
             required: true
         }
+    },
+    //chosen statOption from your skin
+    statOption: {
+        type: Number,
+        required: false
     },
     maxHitPoints: {
         type: Number,
@@ -209,7 +229,9 @@ const MHSheetSchema = new Schema({
         getPopulationFields(){
             return ['moves', 'skin']
         }
-    }
+    },
+    strict: true,
+    strictQuery: true
 })
 
 export const MonsterHeartSheet = new mongoose.model("MHSheet", MHSheetSchema)

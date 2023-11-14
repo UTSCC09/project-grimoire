@@ -11,7 +11,7 @@ const sheetRouter = Router()
 //creating multer functionality for uploading character portraits, max size is 50mb
 const MAXPORTRAITSIZE = 52428800 //50MB
 const sheetPortraitUpload = multer({dest: resolve("uploads/characterPortraits"), limits: {fileSize : MAXPORTRAITSIZE},
-fileFilter: function(req, file, cb){s
+fileFilter: function(req, file, cb){
     if((file.mimetype == "image/jpeg" || file.mimetype == "image/jpg" || file.mimetype == "image/gif" || file.mimetype == 'image/png')){
           //correct format
           return cb(null, true);
