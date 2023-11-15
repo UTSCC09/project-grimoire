@@ -24,6 +24,38 @@ export const GroupSchema = new Schema({
         required: true,
         ref: "Game"
     },
+    preferences: {
+        combat: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        puzzles: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        social: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        playerDriven: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        roleplaying: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        homebrew: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+    }
 })
 
 export const Group = new mongoose.model("Group", GroupSchema)
