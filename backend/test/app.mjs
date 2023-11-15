@@ -127,7 +127,8 @@ describe("User creation", () => {
 })
 
 describe("Group creation", () => {
-    let groupId
+    let group1Id
+    let group2Id
 
     it("should create a group", (done) => {
         agent.post('/api/groups/')
@@ -136,7 +137,85 @@ describe("Group creation", () => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
             const json = JSON.parse(res.text)
-            groupId = json._id
+            group1Id = json._id
+            done()
+        })
+    })
+
+    it("should add a user to a group", (done) => {
+        agent.post(`/api/groups/${group1Id}/join`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            expect(json.members).to.contain(userId)
+            done()
+        })
+    })
+
+    it("should not add a user to a group twice", (done) => {
+        agent.post(`/api/groups/${group1Id}/join`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(409)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `user ${userId} already in group ${group1Id}`})
+            done()
+        })
+    })
+
+    it("should remove a user from a group", (done) => {
+        agent.post(`/api/groups/${group1Id}/leave`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            expect(json.members).to.not.contain(userId)
+            done()
+        })
+    })
+
+    it("should not remove a user from a group twice", (done) => {
+        agent.post(`/api/groups/${group1Id}/leave`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(409)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `user ${userId} not in group ${group1Id}`})
+            done()
+        })
+    })
+
+    it("should not add a user to a group that doesn't exist", (done) => {
+        agent.post(`/api/groups/fakeid/join`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `group with id fakeid not found`})
+            done()
+        })
+    })
+
+    it("should not remove a user from a group that doesn't exist", (done) => {
+        agent.post(`/api/groups/fakeid/leave`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `group with id fakeid not found`})
+            done()
+        })
+    })
+
+    it("should add another group", (done) => {
+        agent.post('/api/groups/')
+        .send({name: "test group 2"})
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            group2Id = json._id
             done()
         })
     })
@@ -153,7 +232,7 @@ describe("Group creation", () => {
     })
 
     it("should get a specific group", (done) => {
-        agent.get(`/api/groups/${groupId}`)
+        agent.get(`/api/groups/${group1Id}`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(200)
@@ -164,7 +243,7 @@ describe("Group creation", () => {
     })
 
     it("should update a group", (done) => {
-        agent.patch(`/api/groups/${groupId}`)
+        agent.patch(`/api/groups/${group1Id}`)
         .send({name: "updated group"})
         .end((err, res) => {
             expect(err).to.be.null
@@ -176,12 +255,12 @@ describe("Group creation", () => {
     })
 
     it("should delete a group", (done) => {
-        agent.delete(`/api/groups/${groupId}`)
+        agent.delete(`/api/groups/${group1Id}`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(200)
             const json = JSON.parse(res.text)
-            expect(json).to.deep.equal({body: `group ${groupId} deleted`})
+            expect(json).to.deep.equal({body: `group ${group1Id} deleted`})
             done()
         })
     })
