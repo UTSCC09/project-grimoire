@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, rollNSidedDie, randomNumberBetween, removeSpacesFromQuery } from "../helper.mjs";
+import { isAuthenticated, rollNSidedDie, randomNumberBetween, removeSpacesFromQuery, mongoLikeString } from "../helper.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
@@ -20,7 +20,8 @@ MHRouter.get('/skins', (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
-
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
     MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
@@ -48,8 +49,11 @@ MHRouter.get('/moves', (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
-
-    MHMoves.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+    if(searchParams.type)
+        searchParams.type = mongoLikeString(searchParams.type)
+    MHMoves.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1, isCore: 1}}).exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){

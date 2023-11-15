@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, rollNSidedDie, randomNumberBetween } from "../helper.mjs";
+import { isAuthenticated, rollNSidedDie, randomNumberBetween, mongoLikeString } from "../helper.mjs";
 import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISStartingEquipment, DISWeapon, DeathInSpaceSheet } from "./schema.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
 import { addStartingBonus, addStartingEquip } from "./sheets.mjs";
@@ -25,6 +25,8 @@ disRouter.get('/origins', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
 
     DISOrigin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
@@ -55,6 +57,8 @@ disRouter.get('/mutations', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
 
     DISMutation.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
@@ -85,6 +89,8 @@ disRouter.get('/items', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
 
     DISInventoryItem.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
@@ -116,6 +122,10 @@ disRouter.get('/weapons', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+    if(searchParams.type)
+        searchParams.type = mongoLikeString(searchParams.type)
 
     DISWeapon.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
@@ -146,6 +156,10 @@ disRouter.get('/armor', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+    if(searchParams.type)
+        searchParams.type = mongoLikeString(searchParams.type)
 
     DISArmor.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
@@ -176,6 +190,8 @@ disRouter.get('/startequip', async (req, res, next) => {
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
 
     DISStartingEquipment.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {

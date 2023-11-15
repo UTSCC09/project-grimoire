@@ -57,3 +57,8 @@ export function isValidEmail(email){
         return false
     } 
 }
+
+export function mongoLikeString(value){
+    //anything containing value as a substring, case insensitive
+    return {$regex: `.*${value}.*`, $options: 'i'}
+}
