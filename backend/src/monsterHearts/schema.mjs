@@ -2,7 +2,20 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 import mongoose, { mongo } from 'mongoose';
-import { ImageSchema } from '../schemas.mjs';
+import { ImageSchema, InventoryItemSchema } from '../schemas.mjs';
+
+const MHAdvancementSchema = new Schema({
+    desc: {
+        type: String,
+        required: true
+    },
+    function : {
+        type: String,
+        //enum is going to match to a function mapper on frontend used manage ui needed for choosing advancements
+        enum: ["increaseScore", "addLocalMove", "addGlobalMove", "addSpecialMove", "joinGang"],
+        default: "increaseScore"
+    }
+})
 
 const MHMoveSchema = new Schema({
     belongsTo: {
@@ -18,11 +31,25 @@ const MHMoveSchema = new Schema({
         type: String,
         required: true
     },
-    isHex: {
+    type: {
+        type: String,
+        required: true,
+        default: "basic",
+        enum : ['hex', 'bargain', "basic"]
+    },
+    isCore:{
         type: Boolean,
-        required: false,
+        required: true,
         default: false
-    }
+    },
+    createdBy : {
+        type: ObjectId,
+        required: false,
+        ref: "Users"
+    }  
+}, {
+    strict: true,
+    strictQuery: true
 })
 
 export const MHMoves = new mongoose.model("MHMoves", MHMoveSchema)
@@ -55,35 +82,58 @@ const MHSkinSchema = new Schema({
         }}]
     },
     backstory: {
-        type: String,
+        type: [String],
         required: true
     },
     darkestSelf: {
         type: String,
         required: true
     },
-    advancement: {
-        type: [String],
+    advancements: {
+        type: [MHAdvancementSchema],
         required: true
     },
     sexMove: {
         type: String,
         required: true
+    },
+    requiredMoves: {
+        type: [ObjectId],
+        ref: "MHMoves",
+        required: true,
+        default: []
     }
 })
 
-export const MHSkins = new mongoose.model("MHSkins", MHSkinSchema)
+export const MHSkin = new mongoose.model("MHSkins", MHSkinSchema)
+
+const MHStringSchema = new Schema({
+    originator: {
+        type: String,
+        required: true
+    },
+    destination: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: false
+    }
+})
 
 const MHSheetSchema = new Schema({
     owner: {
         type: ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        immutable: true
     },
     game : {
         type: ObjectId,
         ref: "Game",
-        required: true
+        required: true,
+        immutable: true
     },
     characterName: {
         type: String,
@@ -95,7 +145,7 @@ const MHSheetSchema = new Schema({
     },
     skin: {
         type: ObjectId,
-        ref: "MHSkin",
+        ref: "MHSkins",
         required: true
     },
     stats: {
@@ -116,15 +166,22 @@ const MHSheetSchema = new Schema({
             required: true
         }
     },
+    //chosen statOption from your skin
+    statOption: {
+        type: Number,
+        required: false
+    },
     maxHitPoints: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 4
     },
     hitPoints: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 4
     },
     conditions: {
         type: [String],
@@ -151,13 +208,37 @@ const MHSheetSchema = new Schema({
         type: [InventoryItemSchema],
         required: true,
         default: []
+    },
+    takenAdvancements: {
+        type: [Number], //indicies corresponding to advancements of skin,
+        required: false,
+        default : []
+    },
+    strings: {
+        type: [MHStringSchema],
+        required: false,
+        default: []
+    },
+    look : {
+        type: String,
+        required: false
+    },
+    origin: {
+        type: String,
+        required: false
+    },
+    eyes: {
+        type: String,
+        required: false
     }
 }, {
     methods: {
         getPopulationFields(){
             return ['moves', 'skin']
         }
-    }
+    },
+    strict: true,
+    strictQuery: true
 })
 
 export const MonsterHeartSheet = new mongoose.model("MHSheet", MHSheetSchema)

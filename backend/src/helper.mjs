@@ -16,6 +16,19 @@ export function saltHashPassword(password, saltRounds=10){
     })
 }
 
+export function removeSpacesFromQuery(queryObj){
+    // Extract query parameters and replace %20 with spaces
+    const test = Object.keys(queryObj).reduce((params, key) => {
+        if(params[key] instanceof String){
+            params[key] = queryObj[key].replace(/%20/g, ' ');
+        }else{
+            params[key] = queryObj[key]
+        }
+        return params;
+    }, {});
+    return test
+}
+
 export function isAuthenticated(req, res, next) {
     if (!(req.user && req.userId)) return res.status(401).end("access denied");
     next();
@@ -43,4 +56,9 @@ export function isValidEmail(email){
     }catch(e){
         return false
     } 
+}
+
+export function mongoLikeString(value){
+    //anything containing value as a substring, case insensitive
+    return {$regex: `.*${value}.*`, $options: 'i'}
 }

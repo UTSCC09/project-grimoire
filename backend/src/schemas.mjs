@@ -101,3 +101,18 @@ export const ImageSchema = new Schema({
         required: false
     } 
 })
+
+export const InventoryItemSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: false
+    },
+    weight: {
+        type: Number,
+        required: false
+    }
+})

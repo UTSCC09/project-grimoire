@@ -5,13 +5,16 @@ import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import multer, {MulterError} from 'multer'
 import { resolve } from "path";
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
+import QRCode from 'qrcode'
+import { PassThrough } from 'stream';
+
 
 const sheetRouter = Router()
 
 //creating multer functionality for uploading character portraits, max size is 50mb
 const MAXPORTRAITSIZE = 52428800 //50MB
 const sheetPortraitUpload = multer({dest: resolve("uploads/characterPortraits"), limits: {fileSize : MAXPORTRAITSIZE},
-fileFilter: function(req, file, cb){s
+fileFilter: function(req, file, cb){
     if((file.mimetype == "image/jpeg" || file.mimetype == "image/jpg" || file.mimetype == "image/gif" || file.mimetype == 'image/png')){
           //correct format
           return cb(null, true);
@@ -97,6 +100,30 @@ sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
         session.endSession()
         console.error(err)
         res.status(400).json(err.errors)})
+})
+
+/**
+ * generates a qr code for a character sheet
+ * @param {ObjectId} id the id for the sheet
+ * @returns a qr code with the link for that sheet
+ */
+sheetRouter.get('/:id/qr', async(req, res, next) => {
+    if(!isValidObjectId(req.params.id))
+        return res.status(400).json({body: "invalid id"})
+    UserSheetMapping.findOne({sheet: req.params.id}).exec().then(async doc => {  
+        if(!doc)
+            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})   
+        //qr code taken from https://stackoverflow.com/a/60102473    
+        const qrStream = new PassThrough();
+        const result = await QRCode.toFileStream(qrStream, `${process.env.FRONTEND}/sheets/${req.params.id}`,
+                    {
+                        type: 'png',
+                        width: 200,
+                        errorCorrectionLevel: 'H'
+                    }
+                );
+        qrStream.pipe(res);
+    }).catch(e => next(e))
 })
 
 //endpoint where, if a sheet has a picture field, will upload a picture

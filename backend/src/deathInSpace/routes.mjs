@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { isAuthenticated, rollNSidedDie, randomNumberBetween } from "../helper.mjs";
+import { isAuthenticated, rollNSidedDie, randomNumberBetween, mongoLikeString } from "../helper.mjs";
 import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISStartingEquipment, DISWeapon, DeathInSpaceSheet } from "./schema.mjs";
 import { Game, User, UserSheetMapping } from "../schemas.mjs";
 import { addStartingBonus, addStartingEquip } from "./sheets.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
+import { removeSpacesFromQuery } from "../helper.mjs";
 
 const disRouter = Router()
 
@@ -13,16 +14,28 @@ const disRouter = Router()
  * 
  * @param {Number} page page that we want to paginate to
  * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of origins
+ * @returns {Object} an array of origins, and info involving pagination
  */
 disRouter.get('/origins', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
 
-    DISOrigin.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
-    .then((origins) => {
-        return res.json(origins)
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+
+    DISOrigin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
+    .then((docs) => {
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
         next(err)
     })
@@ -31,18 +44,30 @@ disRouter.get('/origins', async (req, res, next) => {
 /**
  * gets death in space mutations lining up with given pagination
  * 
- * @param {Number} page page that we want to paginate to (default 0)
- * @param {Number} limit number of elements per page (default 10)
+ * @param {Number} page page that we want to paginate to
+ * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of mutations
+ * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/mutations', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
 
-    DISMutation.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
-    .then((mutations) => {
-        return res.json(mutations)
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+
+    DISMutation.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
+    .then((docs) => {
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
         next(err)
     })
@@ -51,18 +76,30 @@ disRouter.get('/mutations', async (req, res, next) => {
 /**
  * gets death in space items lining up with given pagination
  * 
- * @param {Number} page page that we want to paginate to (default 0)
- * @param {Number} limit number of elements per page (default 10)
+ * @param {Number} page page that we want to paginate to
+ * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of items
+ * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/items', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
 
-    DISInventoryItem.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+
+    DISInventoryItem.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
-        return res.json(docs)
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
         next(err)
     })
@@ -72,18 +109,32 @@ disRouter.get('/items', async (req, res, next) => {
 /**
  * gets death in space weapons lining up with given pagination
  * 
- * @param {Number} page page that we want to paginate to (default 0)
- * @param {Number} limit number of elements per page (default 10)
+ * @param {Number} page page that we want to paginate to
+ * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of weapons
+ * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/weapons', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
 
-    DISWeapon.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+    if(searchParams.type)
+        searchParams.type = mongoLikeString(searchParams.type)
+
+    DISWeapon.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
-        return res.json(docs)
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
         next(err)
     })
@@ -92,38 +143,66 @@ disRouter.get('/weapons', async (req, res, next) => {
 /**
  * gets death in space armor lining up with given pagination
  * 
- * @param {Number} page page that we want to paginate to (default 0)
- * @param {Number} limit number of elements per page (default 10)
+ * @param {Number} page page that we want to paginate to
+ * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of armor
+ * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/armor', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
-    DISArmor.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
+
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+    if(searchParams.type)
+        searchParams.type = mongoLikeString(searchParams.type)
+
+    DISArmor.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
-        return res.json(docs)
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
-        return next(err)
+        next(err)
     })
 })
 
 /**
  * gets death in space starting equipment lining up with given pagination
  * 
- * @param {Number} page page that we want to paginate to (default 0)
- * @param {Number} limit number of elements per page (default 10)
+ * @param {Number} page page that we want to paginate to
+ * @param {Number} limit number of elements per page
+ * @param {Object} query the query object itself is used as our search parameters, excluding the page and limit
  * 
- * @returns {Array[Object]} an array of starting equipment
+ * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/startequip', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
-    DISStartingEquipment.find({}, null, {skip: page * limit, limit:limit, sort: {name: -1}}).exec()
+
+    const searchParams = removeSpacesFromQuery(req.query)
+    delete searchParams.page
+    delete searchParams.limit
+    if(searchParams.name)
+        searchParams.name = mongoLikeString(searchParams.name)
+
+    DISStartingEquipment.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
     .then((docs) => {
-        return res.json(docs)
+        let nextPageExists = false
+        if(docs.length > limit){
+            nextPageExists = docs.length > limit
+            docs.pop()
+        }
+        return res.json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
     }).catch(err => {
-        return next(err)
+        next(err)
     })
 })
 
@@ -135,7 +214,7 @@ disRouter.get('/startequip', async (req, res, next) => {
 disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
 
     let json = req.body
-    if(!json.name){
+    if(!json.characterName){
         return res.status(400).json({body: "missing name"})
     }
 
@@ -160,7 +239,7 @@ disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
     let deathInSpaceSheet = new DeathInSpaceSheet({
         owner: user._id, 
         game: game._id, 
-        characterName: json.name,
+        characterName: json.characterName,
 
         stats: stats,
         inventory: [],
@@ -245,7 +324,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
     let deathInSpaceSheet = new DeathInSpaceSheet({
         owner: user._id, 
         game: game._id, 
-        characterName: json.name,
+        characterName: json.characterName,
         stats: stats,
         inventory: json.inventory,
         weapons: json.weapons,
@@ -313,7 +392,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
  * 
  * @returns {Object} returns updated charactersheet
  */
-disRouter.patch('/sheets/edit/:id', isAuthenticated, async (req, res, next) => {
+disRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
     if(!isValidObjectId(req.params.id))
         return res.status(400).json({body: "invalid object id"})
     const sheet = await DeathInSpaceSheet.findById(req.params.id).exec()
