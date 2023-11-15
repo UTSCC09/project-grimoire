@@ -25,13 +25,35 @@ export const GroupSchema = new Schema({
         ref: "Game"
     },
     preferences: {
-        preference1: {
-            type: String,
-            required: false
+        combat: {
+            type: Number,
+            required: false,
+            default: 0
         },
-        preference2: {
-            type: String,
-            required: false
+        puzzles: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        social: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        playerDriven: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        roleplaying: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        homebrew: {
+            type: Number,
+            required: false,
+            default: 0
         },
     }
 })

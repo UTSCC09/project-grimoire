@@ -132,7 +132,7 @@ describe("Group creation", () => {
 
     it("should create a group", (done) => {
         agent.post('/api/groups/')
-        .send({name: "test group"})
+        .send({name: "test group", game: "test game", preferences: {combat: 1, puzzles: 2, social: 3, playerDriven: 4, roleplaying: 5, homebrew: 6}})
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
@@ -210,7 +210,7 @@ describe("Group creation", () => {
 
     it("should add another group", (done) => {
         agent.post('/api/groups/')
-        .send({name: "test group 2"})
+        .send({name: "test group 2", game: "test game 2"})
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
@@ -220,13 +220,13 @@ describe("Group creation", () => {
         })
     })
 
-    it("should get a list of all groups", (done) => {
-        agent.get('/api/groups/')
+    it("should get a paginated list of all groups", (done) => {
+        agent.get('/api/groups/page/')
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(200)
             const json = JSON.parse(res.text)
-            expect(json).to.containSubset([{name: "test group"}])
+            expect(json).to.containSubset([{name: "test group"}, {name: "test group 2"}])
             done()
         })
     })
@@ -242,14 +242,93 @@ describe("Group creation", () => {
         })
     })
 
+    it("should not get a group that doesn't exist", (done) => {
+        agent.get(`/api/groups/fakeid`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `group with id fakeid not found`})
+            done()
+        })
+    })
+
+    it("should get a paginated list of all groups a user is in", (done) => {
+        agent.get(`/api/groups/user/${userId}/member/page/`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset([{name: "test group"}])
+            done()
+        })
+    })
+
+    it("should not get a paginated list of all groups a user is in if they don't exist", (done) => { 
+        agent.get(`/api/groups/user/fakeid/member/page/`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `user with id fakeid not found`})
+            done()
+        })
+    })
+
+    it("should get a paginated list of all groups a user owns", (done) => {
+        agent.get(`/api/groups/user/${userId}/owner/page/`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset([{name: "test group 2"}])
+            done()
+        })
+    })
+
+    it("should not get a paginated list of all groups a user owns if they don't exist", (done) => {
+        agent.get(`/api/groups/user/fakeid/owner/page/`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `user with id fakeid not found`})
+            done()
+        })
+    })
+
+    it("should get a paginated list of groups that match given preferences", (done) => {
+        agent.get(`/api/groups/preferences/page/`)
+        .send({combat: 1, puzzles: 2, social: 3, playerDriven: 4, roleplaying: 5, homebrew: 6})
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset([{name: "test group"}])
+            done()
+        })
+    })
+
     it("should update a group", (done) => {
         agent.patch(`/api/groups/${group1Id}`)
-        .send({name: "updated group"})
+        .send({name: "updated group", game: "updated game", preferences: {combat: 6, puzzles: 5, social: 4, playerDriven: 3, roleplaying: 2, homebrew: 1}})
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
             const json = JSON.parse(res.text)
             expect(json).to.containSubset({name: "updated group"})
+            done()
+        })
+    })
+
+    it("should not update a group that doesn't exist", (done) => {
+        agent.patch(`/api/groups/fakeid`)
+        .send({name: "updated group", game: "updated game", preferences: {combat: 6, puzzles: 5, social: 4, playerDriven: 3, roleplaying: 2, homebrew: 1}})
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(404)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `group with id fakeid not found`})
             done()
         })
     })

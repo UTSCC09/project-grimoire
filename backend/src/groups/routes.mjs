@@ -26,7 +26,15 @@ groupRouter.post('/api/groups/', isAuthenticated, async (req, res, next) => {
     const group = new Group({
         name: json.name,
         owner: owner,
-        game: json.game
+        game: json.game,
+        preferences: {
+            combat: json.combat ? json.combat : 0,
+            puzzles: json.puzzles ? json.puzzles : 0,
+            social: json.social ? json.social : 0,
+            playerDriven: json.playerDriven ? json.playerDriven : 0,
+            roleplaying: json.roleplaying ? json.roleplaying : 0,
+            homebrew: json.homebrew ? json.homebrew : 0
+        }
     });
     group.save().then((saved) => {
         return res.status(201).json({saved})
@@ -131,7 +139,7 @@ groupRouter.get('/api/groups/game/page', async (req, res, next) => {
 })
 
 // endpoint to get paginated list of game groups owned by a specific user
-groupRouter.get('/api/groups/user/:id/page', async (req, res, next) => {
+groupRouter.get('/api/groups/user/:id/owner/page', async (req, res, next) => {
     const id = req.params.id
     const page = req.query.page
     const size = req.query.size
@@ -204,8 +212,12 @@ groupRouter.get('/api/groups/preferences/page', async (req, res, next) => {
                                         $sqrt: {
                                             $add: [
                                                 // vector distance of user preferences and game group preferences
-                                                {$pow: [{$subtract: ["$preferences.preference1", json.preferences[0]]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.preference2", json.preferences[1]]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
                                             ]
                                         }
                                     }
