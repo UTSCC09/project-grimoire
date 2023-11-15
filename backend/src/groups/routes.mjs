@@ -11,7 +11,7 @@ export const groupRouter = Router()
 
 // endpoint to add a new game group
 // requires a group name, game name, and owner is the user who created the group
-groupRouter.post('/api/groups', isAuthenticated, async (req, res, next) => {
+groupRouter.post('/api/groups/', isAuthenticated, async (req, res, next) => {
     const json = req.body;
     const owner = await User.findById(req.userId).exec();
     if(!json.name){
@@ -26,7 +26,15 @@ groupRouter.post('/api/groups', isAuthenticated, async (req, res, next) => {
     const group = new Group({
         name: json.name,
         owner: owner,
-        game: json.game
+        game: json.game,
+        preferences: {
+            combat: json.combat ? json.combat : 0,
+            puzzles: json.puzzles ? json.puzzles : 0,
+            social: json.social ? json.social : 0,
+            playerDriven: json.playerDriven ? json.playerDriven : 0,
+            roleplaying: json.roleplaying ? json.roleplaying : 0,
+            homebrew: json.homebrew ? json.homebrew : 0
+        }
     });
     group.save().then((saved) => {
         return res.status(201).json({saved})
@@ -131,7 +139,7 @@ groupRouter.get('/api/groups/game/page', async (req, res, next) => {
 })
 
 // endpoint to get paginated list of game groups owned by a specific user
-groupRouter.get('/api/groups/user/:id/page', async (req, res, next) => {
+groupRouter.get('/api/groups/user/:id/owner/page', async (req, res, next) => {
     const id = req.params.id
     const page = req.query.page
     const size = req.query.size
@@ -175,7 +183,51 @@ groupRouter.get('/api/groups/user/:id/member/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups given a input of user preferences
 // the user preferences are given in the request body
 groupRouter.get('/api/groups/preferences/page', async (req, res, next) => {
-    //todo
+    const page = req.query.page
+    const size = req.query.size
+    const json = req.body
+    if(!page){
+        res.status(422).json({body: "missing page number"})
+        return
+    }
+    if(!size){
+        res.status(422).json({body: "missing page size"})
+        return
+    }
+    // compare vector of user preferences to vector of game group preferences and find the closest matches
+    // sort the matches by distance from the user preferences
+    const model = await Group
+                        .aggregate([
+                            {
+                                $match: {
+                                    $or: [
+                                        {name: {$regex: json.name, $options: 'i'}},
+                                        {game: {$regex: json.game, $options: 'i'}}
+                                    ]
+                                }
+                            },
+                            {
+                                $project: {
+                                    distance: {
+                                        $sqrt: {
+                                            $add: [
+                                                // vector distance of user preferences and game group preferences
+                                                {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ])
+                        .skip(page * size)
+                        .limit(size)
+                        .exec()
+    res.status(200).json(model)
 })
 
 // endpoint to get a specific game group
@@ -222,6 +274,9 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
     }
     if(json.game){
         model.game = json.game
+    }
+    if(json.preferences){
+        model.preferences = json.preferences
     }
     model.save().then((doc) => {
         res.status(201).json(doc)
