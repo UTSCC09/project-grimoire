@@ -1,11 +1,15 @@
 import {React, useState, useEffect} from "react"
-import {Button} from "@mui/material"
+import {Button, Grid, TextField, Typography} from "@mui/material"
 
 function CreateGame(props){
 
-    const [success, setSuccess] = useState(false)
+    const [gameName, setgameName] = useState(false)
     const [hasLoaded, setLoaded] = useState(false)
-    return <Button>Create a Game</Button>
+
+    return <Grid>
+        <Typography>Create a Game</Typography>
+        <TextField id="emailInput" label="Game Name" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
+        </Grid>
 }
 
 export default CreateGame
