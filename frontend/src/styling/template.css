@@ -8,11 +8,15 @@
     box-shadow: 12;
 }
 
-.nav-box{
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
+.logoPicture{
+    object-fit: cover;
+    height: 13vh;
+    max-height: 100%;
+    width: 20vh;
+}
+
+.logoPicture:hover{
+    cursor:pointer;
 }
 
 .logo-box{

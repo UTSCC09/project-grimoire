@@ -14,7 +14,6 @@ import groupRouter from "./groups/routes.mjs";
 import { readFileSync } from "fs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
-import { serialize } from "cookie";
 
 dotenv.config();
 
