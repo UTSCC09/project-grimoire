@@ -6,4 +6,4 @@ server.crt
 server.key
 *.pem
 certs
-
+db_backups

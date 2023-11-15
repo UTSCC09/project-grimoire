@@ -14,6 +14,7 @@ import groupRouter from "./groups/routes.mjs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import cors from 'cors'
+import { MHRouter } from "./monsterHearts/routes.mjs";
 
 dotenv.config();
 
@@ -74,6 +75,8 @@ app.use('/api/dis', disRouter)
 app.use('/api/sheets', sheetRouter)
 
 app.use('/api/groups', groupRouter)
+
+app.use('/api/mhearts', MHRouter)
 
 /**
  * sanity check endpoint to test connection
@@ -278,7 +281,3 @@ export function getUsers(){
 export function getMappings(){
     return UserSheetMapping.find({}).exec()
 }
-
-app.get("/test/sessionCode", function (req, res, next) {
-    console.log(req.session);
-})
