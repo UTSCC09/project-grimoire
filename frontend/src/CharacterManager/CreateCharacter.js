@@ -185,7 +185,7 @@ function MoveChoices(props)
         <FormControlLabel control={<Button onClick={function (e) {e.preventDefault();
                 //TODO: Post the MonsterHearts Data here.
                 navigate("/CharacterSheetHomePage");
-                }}></Button>}></FormControlLabel>
+                }}>Submit</Button>}></FormControlLabel>
     </FormGroup>)
 }
 

@@ -1,22 +1,19 @@
-import { Box, Typography, Menu } from "@mui/material";
+import { Box, Typography, Menu, createTheme } from "@mui/material";
 import {React, useState} from "react";
 import NavBar from "./Template/NavBar";
+import GrimoireHomePage from "./media/GrimoireHomePage.png";
+import "./styling/index.css";
+import styled from "@emotion/styled";
+import { red } from "@mui/material/colors";
+
 
 function Home(props){
 
-    return(
-        <NavigationMenu>
-            <Typography>This is the Home page</Typography>
-        </NavigationMenu>
-    )
-}
-
-function NavigationMenu(props)
-{
-    const [dialog, setDialog] = useState(false)
-    return (
-        <Menu open = {false}>UwU</Menu>
-    )
+    return <Box className="textPictureContainer">
+        <img alt="Grimoire Home Page" className="homePagePicture" src= {GrimoireHomePage}/>
+        <div className="titleMainText">Welcome to Grimoire</div>
+        </Box>
+    
 }
 
 export default Home

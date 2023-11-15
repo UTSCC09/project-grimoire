@@ -1,10 +1,65 @@
 import {React, useEffect, useState} from "react";
-import {Box, Grid, Button, Menu, MenuItem} from '@mui/material'
-import "./template.css"
+import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
+import "../styling/template.css"
 import { getCurrentUser, logOut } from "../api.mjs";
 import { useNavigate } from "react-router";
+import styled from "@emotion/styled";
+import { grey, red, black} from "@mui/material/colors";
+import GrimoireLogo from "../media/grimoireLogo.png"
+
+const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#000000",
+        textColor: red[500],
+        height: "13vh",
+        position: "fixed",
+      },
+      },
+    sizing: {
+      display: 'flex'
+      },
+    eventOverrides: {
+      ButtonHover: "grab"
+    }
+});
 
 
+const CustomNavBar = styled(Grid)(({theme}) => ({
+  height: theme.palette.primary.height,
+  backgroundColor: theme.palette.primary.main,
+  position: theme.palette.primary.position,
+  marginBottom: "0",
+  'z-index': 1,
+  
+}));
+
+const CustomButton = styled(Button)(({theme}) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.textColor,
+  height: "100%",
+  cursor: 'pointer',
+  '&:hover': {
+    cursor: 'pointer',
+  },
+  marginLeft: theme.spacing(5)
+}));
+
+const CustomGrid = styled(Grid)(({theme}) => ({
+  display: theme.sizing.display,
+  width: theme.palette.primary.width
+}))
+
+const RightCustomButton = styled(Button)(({theme}) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.textColor,
+  height: "100%",
+  cursor: 'pointer',
+  '&:hover': {
+    cursor: 'pointer',
+  },
+  alignSelf: 'right'
+}));
 
 function NavBar(props){
     //For determining the text that should be displayed in the dropdown menu and 
@@ -62,28 +117,26 @@ function NavBar(props){
     
 
     return(
-    <Box className="basic-box">
-        <Grid item container xs={2} className='logo-box'>
-            <Button onClick={event => window.location.href="./"}>Grimoire</Button>
-        </Grid>
-        <Grid item container xs={10} className="nav-box">
-        <DropDownMenu ButtonText ="Sign Up/Log In" statePassArray={LogUserJSON.statePass} DropDownArray={LogUserJSON.textArray} linksArray={LogUserJSON.linksArray}/>
+      <ThemeProvider theme = {theme}>
+    <CustomNavBar item container xs={12} direction ={"row"}>
+        <CustomGrid item container xs={8}>
+        <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
         <DropDownMenu ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
         <DropDownMenu ButtonText ="Games" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
+        </CustomGrid>
+        <CustomGrid alignItems={"right"} alignSelf={"right"} item container xs={4}>
         {
           username ?
-        <DropDownMenu ButtonText={username} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}></DropDownMenu> :
-        <></>
+        <RightDropDownButton ButtonText={username} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
+        <RightDropDownButton ButtonText ="Sign Up/Log In" statePassArray={LogUserJSON.statePass} DropDownArray={LogUserJSON.textArray} linksArray={LogUserJSON.linksArray}/>
         }
-        </Grid>
-        <Grid item container xs={2}>
-
-        </Grid>
-    </Box>
+        </CustomGrid>
+    </CustomNavBar>
+    </ThemeProvider>
     )
 }
 
-//DropDownMenu method provided by MaterialUI
+//DropDownMenu skeleton method provided by MaterialUI
 function DropDownMenu(props) {
   
   const [anchorEl, setAnchorEl] = useState(null);
@@ -112,10 +165,9 @@ function DropDownMenu(props) {
     })
   }
   const totalArray = ArraytoInsert.concat(functionButtonsArray)
-
   return (
     <div>
-      <Button
+      <CustomButton
         id="basic-button"
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup="true"
@@ -123,7 +175,7 @@ function DropDownMenu(props) {
         onClick={handleClick}
       >
         {props.ButtonText}
-      </Button>
+      </CustomButton>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -136,8 +188,61 @@ function DropDownMenu(props) {
         
         {totalArray}
       </Menu>
-    </div>
+</div>
   );
+}
+
+function RightDropDownButton(props)
+{
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const navigate = useNavigate();
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  let ArraytoInsert = [];
+  let functionButtonsArray = [];
+  if(props.DropDownArray)
+  {
+    ArraytoInsert = props.DropDownArray.map(function (s, index) 
+      {
+          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]);}}>{s}</MenuItem>
+      })
+  }
+  if(props.functionsArray)
+  {
+    functionButtonsArray = props.functionsArray.map(function (s, index)
+    {
+      return <MenuItem key= {props.functionNamesArray[index]} onClick={(event) => {event.preventDefault(); s();}}>{props.functionNamesArray[index]}</MenuItem>
+    })
+  }
+  const totalArray = ArraytoInsert.concat(functionButtonsArray)
+
+  return (
+  <div>
+  <RightCustomButton id="basic-button"
+  aria-controls={open ? 'basic-menu' : undefined}
+  aria-haspopup="true"
+  aria-expanded={open ? 'true' : undefined}
+  onClick={handleClick}
+>
+  {props.ButtonText}
+</RightCustomButton>
+<Menu
+  id="basic-menu"
+  anchorEl={anchorEl}
+  open={open}
+  onClose={handleClose}
+  MenuListProps={{
+    'aria-labelledby': 'basic-button',
+  }}
+>
+  {totalArray}
+</Menu>
+</div>)
 }
 
 export default NavBar
