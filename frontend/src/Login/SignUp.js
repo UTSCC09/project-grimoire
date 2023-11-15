@@ -1,8 +1,36 @@
 import {React, useState} from "react"
-import {Button, TextField, Alert} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { signUp, getSessionCode } from "../api.mjs";
+import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
+import "../styling/signUp.css";
+import styled from "@emotion/styled";
+import { red } from "@mui/material/colors";
+
+
+const theme = createTheme({
+    palette: 
+    {
+        primary:
+        {
+            main: '#000000'
+        }
+    },
+    sizing:
+    {
+        width:
+        {
+            primary: 'auto'
+        }
+       
+    }
+})
+
+const CustomTextContainer = styled(Grid)(({theme}) =>({
+    backgroundColor: theme.palette.primary.main,
+    width: theme.sizing.width.primary
+}))
 
 function SignUp(props){
 
@@ -52,17 +80,22 @@ function SignUpForm(props)
     }
     
     return (
-        <Grid2>
-    <TextField id="emailInput" label="Email" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
-    <TextField id="passwordInput" label="Password" variant="standard" onChange={e => {e.preventDefault(); props.setPassword(e.target.value)}}/>
-    <Button onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</Button>
-    {
-        Boolean(error) ? 
-        <Alert severity="error">{error}</Alert>
-        : 
-        <></>
-    }
-        </Grid2>
+    <ThemeProvider theme={theme}>
+    <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
+        <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
+        <CustomTextContainer item container direction="column" xs={3} justifyContent={"center"} alignItems={"center"}>
+            <TextField id="emailInput" label="Email" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
+            <TextField id="passwordInput" label="Password" variant="standard" onChange={e => {e.preventDefault(); props.setPassword(e.target.value)}}/>
+            <Button onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</Button>
+        {
+            Boolean(error) ? 
+            <Alert severity="error">{error}</Alert>
+            : 
+            <></>
+        }
+        </CustomTextContainer>
+        </Grid>
+        </ThemeProvider>
         
     )
 }

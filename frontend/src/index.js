@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './styling/index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import GrimoireHomePage from './media/GrimoireHomePage.png'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
