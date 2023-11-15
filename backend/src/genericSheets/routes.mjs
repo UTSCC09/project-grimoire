@@ -102,12 +102,18 @@ sheetRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
         res.status(400).json(err.errors)})
 })
 
+/**
+ * generates a qr code for a character sheet
+ * @param {ObjectId} id the id for the sheet
+ * @returns a qr code with the link for that sheet
+ */
 sheetRouter.get('/:id/qr', async(req, res, next) => {
     if(!isValidObjectId(req.params.id))
         return res.status(400).json({body: "invalid id"})
     UserSheetMapping.findOne({sheet: req.params.id}).exec().then(async doc => {  
         if(!doc)
-            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})       
+            return res.status(404).json({body: `sheet with id ${req.params.id} not found`})   
+        //qr code taken from https://stackoverflow.com/a/60102473    
         const qrStream = new PassThrough();
         const result = await QRCode.toFileStream(qrStream, `${process.env.FRONTEND}/sheets/${req.params.id}`,
                     {
@@ -116,7 +122,6 @@ sheetRouter.get('/:id/qr', async(req, res, next) => {
                         errorCorrectionLevel: 'H'
                     }
                 );
-
         qrStream.pipe(res);
     }).catch(e => next(e))
 })

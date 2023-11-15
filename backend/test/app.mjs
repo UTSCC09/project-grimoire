@@ -35,6 +35,7 @@ async function resetSheets(){
 async function resetDb(){
     const promises = []
     promises.push(User.deleteMany({}))
+    promises.push(MHMoves.deleteMany({isCore: false}))
     resetSheets()
     await Promise.all(promises)
 }
@@ -345,6 +346,15 @@ describe("Death in space sheets", () => {
         })
     })
 
+    it("should generate a QR code for the sheet", (done) => {
+        agent.get(`/api/sheets/${sheetId}/qr`)
+        .end((err, res)=>{
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            done()
+        })
+    })
+
     it("should fail to find a charactersheet with invalid id", (done) => {
         agent.get('/api/sheets/fakeid')
         .end((err, res) => {
@@ -650,5 +660,34 @@ describe("Testing monster hearts", () => {
             })
         })
     })
+
+    const exampleMove = {
+        "skin": "6551717def129323a9655e7b",
+        "name": "test",
+        "description": "this is a test move",
+    }
+
+    const dirtyExample = {...exampleMove, isCore: true} //should ignore isCore
+
+    it("should create a move in monsterHearts", (done) => {
+        agent.post('/api/mhearts/moves')
+        .send(dirtyExample)
+        .end(async (err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset({...exampleMove, belongsTo: exampleMove.skin, skin:undefined})
+            expect(json.isCore).to.equal(false)
+            MHMoves.countDocuments({isCore: false}).then(numNonCore => {
+                expect(numNonCore).to.equal(1)
+                MHMoves.findOne({exampleMove}).exec().then((doc) => {
+                    expect(doc).to.not.be.null
+                    done()
+                }).catch(e => done(e))
+            }).catch(e => done(e))
+            
+        })
+    })
+
 
 })

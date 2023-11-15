@@ -41,8 +41,15 @@ const MHMoveSchema = new Schema({
         type: Boolean,
         required: true,
         default: false
-    }
-    
+    },
+    createdBy : {
+        type: ObjectId,
+        required: false,
+        ref: "Users"
+    }  
+}, {
+    strict: true,
+    strictQuery: true
 })
 
 export const MHMoves = new mongoose.model("MHMoves", MHMoveSchema)

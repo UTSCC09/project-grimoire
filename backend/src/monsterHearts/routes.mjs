@@ -62,6 +62,15 @@ MHRouter.get('/moves', (req, res, next) => {
     })
 })
 
+/**
+ * creates a monster heart sheet according to schema, ignores fields not in schema
+ * @param {String} characterName name of character
+ * @param {ObjectId} skin chosen skin for said character
+ * @param {Number} statOption chosen statoption for the skin
+ * @param {Object} * the rest of the args for a schema (optional)
+ * 
+ * @returns a new character sheet created under logged in user
+ */
 MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
     let json = req.body
     if(!json.moves)
@@ -144,6 +153,13 @@ MHRouter.post("/sheets/create", isAuthenticated, async (req, res ,next) => {
     })
 })
 
+/**
+ * edits a prexisting charactersheet for monsterhearts
+ * @param {ObjectId} id id of the sheet
+ * @param {Object} * the json object containing key-value pairs for fields we want to change
+ * 
+ * @returns {Object} edited object
+ */
 MHRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
     if(!isValidObjectId(req.params.id))
         return res.status(400).json({body: "invalid object id"})
@@ -160,4 +176,37 @@ MHRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
             return res.status(400).json(err)
         })  
     }).catch(e => next(e))
+})
+
+/**
+ * creates a new move for a skin
+ * 
+ * @param {ObjectId} skin the skin the move will belong to
+ * @param {String} name the name of the move
+ * @param {String} description the description of how the move works
+ * @param {['basic', 'bargain', 'hex']} type the type of move
+ */
+MHRouter.post('/moves', isAuthenticated, async (req, res, next) => {
+    const json = req.body
+    if(!json.skin || !isValidObjectId(json.skin))
+        return res.status(400).json({body: "skin must be a valid objectId"})
+
+    MHSkin.findById(json.skin).exec().then(skin => {
+        if(!skin)
+            return res.status(404).json({body: `skin with id ${json.skin} not found`})
+        const newMove = new MHMoves({
+            ...json,
+            belongsTo: skin._id,
+            createdBy: req.userId,
+            isCore: false
+        })
+
+        const errors = newMove.validateSync()
+        if(errors && errors.errors.length > 0){
+            return res.status(400).json({errors: errors.errors})
+        }
+        newMove.save().then(savedMove => {
+            return res.status(201).json(savedMove)
+        }).catch(e => next(e))
+    }).catch(err => next(err))
 })
