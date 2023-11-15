@@ -24,6 +24,16 @@ export const GroupSchema = new Schema({
         required: true,
         ref: "Game"
     },
+    preferences: {
+        preference1: {
+            type: String,
+            required: false
+        },
+        preference2: {
+            type: String,
+            required: false
+        },
+    }
 })
 
 export const Group = new mongoose.model("Group", GroupSchema)

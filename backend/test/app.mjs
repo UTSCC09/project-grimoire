@@ -6,6 +6,7 @@ import { DISArmor, DISInventoryItem, DISMutation, DISOrigin, DISStartingEquipmen
 import { getDISSheets } from "../src/deathInSpace/routes.mjs";
 import mongoose from "mongoose";
 import chaiSubset from 'chai-subset'
+import { Group } from "../src/groups/schema.mjs";
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -27,11 +28,11 @@ async function resetDb(){
     promises.push(User.deleteMany({}))
     promises.push(DeathInSpaceSheet.deleteMany({}))
     promises.push(UserSheetMapping.deleteMany({}))
+    promises.push(Group.deleteMany({}))
     await Promise.all(promises)
 }
 
 describe("sainity tests", () => {
-
     it("should connect to backend", (done) => {
         agent.get("/")
         .end((err, res) => {
@@ -120,6 +121,67 @@ describe("User creation", () => {
             expect(res).to.have.status(200)
             const json = JSON.parse(res.text)
             expect(json).to.equal(testLowercase)
+            done()
+        })
+    })
+})
+
+describe("Group creation", () => {
+    let groupId
+
+    it("should create a group", (done) => {
+        agent.post('/api/groups/')
+        .send({name: "test group"})
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            groupId = json._id
+            done()
+        })
+    })
+
+    it("should get a list of all groups", (done) => {
+        agent.get('/api/groups/')
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset([{name: "test group"}])
+            done()
+        })
+    })
+
+    it("should get a specific group", (done) => {
+        agent.get(`/api/groups/${groupId}`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset({name: "test group"})
+            done()
+        })
+    })
+
+    it("should update a group", (done) => {
+        agent.patch(`/api/groups/${groupId}`)
+        .send({name: "updated group"})
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            expect(json).to.containSubset({name: "updated group"})
+            done()
+        })
+    })
+
+    it("should delete a group", (done) => {
+        agent.delete(`/api/groups/${groupId}`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json).to.deep.equal({body: `group ${groupId} deleted`})
             done()
         })
     })

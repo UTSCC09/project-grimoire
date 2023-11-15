@@ -11,7 +11,7 @@ const groupRouter = Router()
 
 // endpoint to add a new game group
 // requires a group name, game name, and owner is the user who created the group
-groupRouter.post('/api/groups', isAuthenticated, async (req, res, next) => {
+groupRouter.post('/api/groups/', isAuthenticated, async (req, res, next) => {
     const json = req.body;
     const owner = await User.findById(req.userId).exec();
     if(!json.name){
@@ -175,7 +175,47 @@ groupRouter.get('/api/groups/user/:id/member/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups given a input of user preferences
 // the user preferences are given in the request body
 groupRouter.get('/api/groups/preferences/page', async (req, res, next) => {
-    //todo
+    const page = req.query.page
+    const size = req.query.size
+    const json = req.body
+    if(!page){
+        res.status(422).json({body: "missing page number"})
+        return
+    }
+    if(!size){
+        res.status(422).json({body: "missing page size"})
+        return
+    }
+    // compare vector of user preferences to vector of game group preferences and find the closest matches
+    // sort the matches by distance from the user preferences
+    const model = await Group
+                        .aggregate([
+                            {
+                                $match: {
+                                    $or: [
+                                        {name: {$regex: json.name, $options: 'i'}},
+                                        {game: {$regex: json.game, $options: 'i'}}
+                                    ]
+                                }
+                            },
+                            {
+                                $project: {
+                                    distance: {
+                                        $sqrt: {
+                                            $add: [
+                                                // vector distance of user preferences and game group preferences
+                                                {$pow: [{$subtract: ["$preferences.preference1", json.preferences[0]]}, 2]},
+                                                {$pow: [{$subtract: ["$preferences.preference2", json.preferences[1]]}, 2]},
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ])
+                        .skip(page * size)
+                        .limit(size)
+                        .exec()
+    res.status(200).json(model)
 })
 
 // endpoint to get a specific game group
@@ -222,6 +262,9 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
     }
     if(json.game){
         model.game = json.game
+    }
+    if(json.preferences){
+        model.preferences = json.preferences
     }
     model.save().then((doc) => {
         res.status(201).json(doc)
