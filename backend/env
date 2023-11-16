@@ -1,0 +1,13 @@
+FRONTEND="http://localhost:3000"
+TEST_URL="mongodb+srv://admin:fknApeLGzk32M7J4@cluster0.f6wkpps.mongodb.net/testing?retryWrites=true&w=majority"
+MONGO_URL="mongodb+srv://admin:fknApeLGzk32M7J4@cluster0.f6wkpps.mongodb.net/Grimoire?retryWrites=true&w=majority"
+SESSION_KEY="amaFPM7l5NJuoS0qmT1cpqSc8YkuystH"
+SERVER_KEY="./privkey.pem"
+SERVER_CERT="./fullchain.pem"
+
+SES_ACCESS_KEY_ID="AKIA36VT7EH6IOMLCX72"
+SES_SECRET_ACCESS_KEY="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"
+SES_REGION="ca-central-1"
+SES_MAIL = "mail@grimoire-tt.space"
+
+GOOGLE_MAPS_API_KEY="AIzaSyCT-hahuRH-SX1WG2qy4KIEXXrarYlFNp0"
