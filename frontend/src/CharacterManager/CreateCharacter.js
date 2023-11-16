@@ -10,6 +10,7 @@ function CreateCharacter(props){
     const [games, setGames] = useState([])
     const [searchObj, setSearchObj]  = useState({})
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
 
     function fetchGames(searchObj={}, signal=undefined){
         getGames(searchObj, signal).then(async (resp) => {
