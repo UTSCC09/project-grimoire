@@ -24,6 +24,10 @@ export const GroupSchema = new Schema({
         required: true,
         ref: "Game"
     },
+    location: {
+        type: String,
+        required: false
+    },
     preferences: {
         combat: {
             type: Number,
