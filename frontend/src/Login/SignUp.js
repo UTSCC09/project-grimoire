@@ -1,5 +1,6 @@
 import {React, useState} from "react"
 import {Button, TextField, Alert, Grid, ThemeProvider, createTheme} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { signUp, getSessionCode } from "../api.mjs";
@@ -107,7 +108,7 @@ function SignUpForm(props)
     <ThemeProvider theme={theme}>
     <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
         <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
-        <CustomTextContainer item container direction="column" justifyContent={"center"} alignItems={"center"}>
+        <CustomTextContainer item container direction="column" xs={3} justifyContent={"center"} alignItems={"center"}>
             <TextField id="emailInput" label="Email" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
             <TextField id="passwordInput" label="Password" variant="standard" onChange={e => {e.preventDefault(); props.setPassword(e.target.value)}}/>
             <Button onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</Button>

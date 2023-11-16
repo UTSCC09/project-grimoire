@@ -144,12 +144,14 @@ const DISSheetSchema = new Schema({
     owner: {
         type: ObjectId,
         ref: "User",
-        required: true
+        required: true,
+        immutable: true
     },
     game : {
         type: ObjectId,
         ref: "Game",
-        required: true
+        required: true,
+        immutable: true
     },
     characterName: {
         type: String,

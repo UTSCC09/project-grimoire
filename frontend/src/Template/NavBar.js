@@ -1,6 +1,8 @@
 import {React, useEffect, useState} from "react";
 import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
 import "../styling/template.css"
+import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
+import "../styling/template.css"
 import { getCurrentUser, logOut } from "../api.mjs";
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled";
@@ -124,7 +126,7 @@ function NavBar(props){
         <DropDownMenu ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
         <DropDownMenu ButtonText ="Games" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
         </CustomGrid>
-        <CustomGrid alignItems={"right"} alignSelf={"right"} item container xs={4}>
+        <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
         {
           username ?
         <RightDropDownButton ButtonText={username} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
