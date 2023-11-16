@@ -15,13 +15,23 @@ const theme = createTheme({
         primary:
         {
             main: '#000000'
+        },
+        secondary:
+        {
+            main: '#ffffff'
         }
+
     },
     sizing:
     {
+        
         width:
         {
             primary: 'auto'
+        },
+        display:
+        {
+            primary: 1
         }
        
     }
@@ -29,7 +39,7 @@ const theme = createTheme({
 
 const CustomTextContainer = styled(Grid)(({theme}) =>({
     backgroundColor: theme.palette.primary.main,
-    width: theme.sizing.width.primary
+    flex: theme.sizing.display.primary
 }))
 
 function SignUp(props){
@@ -97,7 +107,7 @@ function SignUpForm(props)
     <ThemeProvider theme={theme}>
     <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
         <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
-        <CustomTextContainer item container direction="column" xs={3} justifyContent={"center"} alignItems={"center"}>
+        <CustomTextContainer item container direction="column" justifyContent={"center"} alignItems={"center"}>
             <TextField id="emailInput" label="Email" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
             <TextField id="passwordInput" label="Password" variant="standard" onChange={e => {e.preventDefault(); props.setPassword(e.target.value)}}/>
             <Button onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</Button>
