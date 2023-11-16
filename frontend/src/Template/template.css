@@ -1,0 +1,31 @@
+.basic-box{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 10%;
+    background-color: #666699;
+    width: 100%;
+    box-shadow: 12;
+}
+
+.nav-box{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.logo-box{
+    display:flex;
+    align-items: center;
+    justify-content: flex-stat;
+}
+
+.nav-button{
+    color: white;
+    background: white;
+}
+
+.nav-button:hover{
+    color: orange
+}
