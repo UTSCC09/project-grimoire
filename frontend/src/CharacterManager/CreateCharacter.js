@@ -37,7 +37,6 @@ function CreateCharacter(props){
             newObj[key] = value
         }
         setSearchObj(newObj)
-        console.log('searchObj', newObj)
     }
 
     useEffect(()=>{
