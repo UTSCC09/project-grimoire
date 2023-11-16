@@ -6,7 +6,7 @@ import { signUp, getSessionCode } from "../api.mjs";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
 import "../styling/signUp.css";
 import styled from "@emotion/styled";
-import { red } from "@mui/material/colors";
+import { red } from "@mui/material/colors"; 
 
 
 const theme = createTheme({
@@ -45,6 +45,20 @@ function SignUpForm(props)
 {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
+    const [allowSubmit, setallowSubmit] = useState(false);
+    const handleEmailChange = function (event)
+    {
+        event.preventDefault();
+        if (isValidEmail(event.target.value))
+        {
+            props.setEmail(event.target.value); 
+            setallowSubmit(true);
+        }
+        else
+        {
+            setallowSubmit(false);
+        }
+    }
     const FormSubmit = function () 
     {
         if (props.email === '' || props.password === '')

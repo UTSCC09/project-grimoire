@@ -9,3 +9,15 @@
 .signUpPageCont {
     max-height: 80vh;
 }
+
+.inputFields {
+    margin-bottom: 5%;
+    width: 100%;
+    max-width: 40vh;
+}
+
+.signUpPrompt {
+    color: white;
+    animation: fadeInFromAbove 2s ease-out;
+    font-size: 4vw;   
+}
