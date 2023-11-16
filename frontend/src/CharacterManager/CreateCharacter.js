@@ -1,6 +1,6 @@
 import {React, useState, useEffect} from "react"
 import { useNavigate } from "react-router";
-import {Button, Typography, Grid, ImageList, ImageListItem, Autocomplete, TextField} from "@mui/material"
+import {Button, Typography, Grid, ImageList, ImageListItem, Autocomplete, TextField, Pagination} from "@mui/material"
 import { getGames } from "../api.mjs";
 import GameCard from "./GameCard";
 import ErrorAlert from "../globalComponents/ErrorAlert";
@@ -8,12 +8,12 @@ import ErrorAlert from "../globalComponents/ErrorAlert";
 function CreateCharacter(props){
     const navigate = useNavigate()
     const [games, setGames] = useState([])
-    const [searchObj, setSearchObj]  = useState({})
+    const [numGames, setNumGames] = useState(0)
+    const [searchObj, setSearchObj]  = useState({page: 0, limit:10})
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
 
     function fetchGames(searchObj={}, signal=undefined){
-        console.log('fetching')
         getGames(searchObj, signal).then(async (resp) => {
             if(!resp.ok){
                 setError("Failed to reach our server, please reload and try again")
@@ -21,6 +21,7 @@ function CreateCharacter(props){
             }
             const json = await resp.json()
             setGames(json.records)
+            setNumGames(json.numGames)
         }).catch(e => {
             if(e.name !== 'AbortError'){
                 console.error('error', e)
@@ -87,6 +88,11 @@ function CreateCharacter(props){
                         onClick={(e)=> {e.preventDefault(); navigateToGame(g.name)}}/>
                     </Grid>
                 ))}
+                {games.map}
+            </Grid>
+            <Grid item container xs={12} sx={{justifyContent:'center', alignItems:'center'}}>
+                <Pagination count={Math.ceil(numGames / 10)} page={searchObj.page + 1} //have to offset because mui starts at index 1
+                onChange={(e,value) => {e.preventDefault(); editSearchObj('page', value - 1)}}/>
             </Grid>
             <ErrorAlert error={error} onClose={(e) => {e.preventDefault(); setError("")}}/>
         </Grid>

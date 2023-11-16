@@ -9,24 +9,26 @@ import { isValidObjectId } from "mongoose";
 const imageUpload = multer({dest: resolve("staticAssets/gameBanners")})
 
 export const gamesRouter = new Router()
+let numGames
 
-gamesRouter.get('/', (req, res, next) => {
+gamesRouter.get('/', async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
+
+    //check if we have number of games; shouldn't change unless newly deployed app
+    if(!numGames){
+        //get number of games and set it, not using memcache because unessecary and pain with nginx
+        numGames = await Game.countDocuments({})
+    }
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
     if(searchParams.name)
         searchParams.name = mongoLikeString(searchParams.name)
-    Game.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
+    Game.find(searchParams, null, {skip: page * limit, limit:limit, sort: {name: 1}}).exec()
     .then((docs) => {
-        let nextPageExists = false
-        if(docs.length > limit){
-            nextPageExists = true
-            docs.pop()
-        }
-        return res.status(200).json({records: docs, nextPageExists:nextPageExists, prevPageExists: page > 0})
+        return res.status(200).json({records: docs, numGames:numGames})
     }).catch(e => next(e))
 })
 
@@ -41,7 +43,7 @@ gamesRouter.get("/:id/pic", (req, res, next) => {
             res.setHeader("Content-Type", img.mimetype);
             res.sendFile(resolve(img.path));
         }else{
-            res.status(404).send({body: `charactrPotrait does not exist for sheet ${req.params.id}`})
+            res.status(404).send({body: `Banner does not exist for game ${req.params.id}`})
         }
     }).catch(e => next(e))
 })
