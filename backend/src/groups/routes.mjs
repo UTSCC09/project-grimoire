@@ -27,6 +27,7 @@ groupRouter.post('/api/groups/', isAuthenticated, async (req, res, next) => {
         name: json.name,
         owner: owner,
         game: json.game,
+        location: json.location ? json.location : "",
         preferences: {
             combat: json.combat ? json.combat : 0,
             puzzles: json.puzzles ? json.puzzles : 0,
@@ -230,6 +231,43 @@ groupRouter.get('/api/groups/preferences/page', async (req, res, next) => {
     res.status(200).json(model)
 })
 
+// endpoint to get paginated list of game groups within a certain distance of a location
+// the location is given in the request body
+groupRouter.get('/api/groups/location/page', async (req, res, next) => {
+    const page = req.query.page
+    const size = req.query.size
+    const json = req.body
+    if(!page){
+        res.status(422).json({body: "missing page number"})
+        return
+    }
+    if(!size){
+        res.status(422).json({body: "missing page size"})
+        return
+    }
+    // find game groups within a certain distance of the location
+    const model = await Group
+                        .aggregate([
+                            {
+                                $match: {
+                                    location: {
+                                        $near: {
+                                            $geometry: {
+                                                type: "Point",
+                                                coordinates: [json.longitude, json.latitude]
+                                            },
+                                            $maxDistance: json.distance
+                                        }
+                                    }
+                                }
+                            }
+                        ])
+                        .skip(page * size)
+                        .limit(size)
+                        .exec()
+    res.status(200).json(model)
+})
+
 // endpoint to get a specific game group
 groupRouter.get('/api/groups/:id', async (req, res, next) => {
     const id = req.params.id
@@ -274,6 +312,9 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
     }
     if(json.game){
         model.game = json.game
+    }
+    if(json.location){
+        model.location = json.location
     }
     if(json.preferences){
         model.preferences = json.preferences
