@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 function Template(props){
     return(
         <Box>
-        <NavBar/>
+        {/* <NavBar/> */}
         {props.children}
         </Box>
     )

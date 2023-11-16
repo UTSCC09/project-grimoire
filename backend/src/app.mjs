@@ -9,12 +9,12 @@ import { compare } from "bcrypt";
 import {saltHashPassword, isAuthenticated, isValidEmail } from "./helper.mjs";
 import mongoSanitize from "express-mongo-sanitize"
 import disRouter from "./deathInSpace/routes.mjs";
-import { Group } from "./groups/schema.mjs";
 import groupRouter from "./groups/routes.mjs";
 import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import cors from 'cors'
 import { MHRouter } from "./monsterHearts/routes.mjs";
+import { gamesRouter } from "./games/routes.mjs";
 
 dotenv.config();
 
@@ -77,6 +77,8 @@ app.use('/api/sheets', sheetRouter)
 app.use('/api/groups', groupRouter)
 
 app.use('/api/mhearts', MHRouter)
+
+app.use('/api/games', gamesRouter)
 
 /**
  * sanity check endpoint to test connection

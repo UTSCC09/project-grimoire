@@ -102,3 +102,15 @@ export function getSessionCode() {
     credentials: 'include'
     })
 }
+
+export function getGames(searchCritera={}, signal=undefined){
+  let urlString = `${URL}/api/games?`
+  for(let key of Object.keys(searchCritera)){
+    urlString += `${key}=${searchCritera[key]}&`
+  }
+  return fetch(urlString, {
+    method: 'GET',
+    credentials: 'include',
+    signal: signal
+  })
+}
