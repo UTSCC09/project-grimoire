@@ -95,8 +95,8 @@ function NavBar(props){
       linksArray: ["/CreateCharacter", "/CharacterSheetHomePage"]
     }
     const lfgJSON = {
-      textArray: ["Look for Group", "Create a Grop"],
-      linksArray: ["/LookingForGroup", "/CreateGroup"]
+      textArray: ["Look for a Group", "Create a Group"],
+      linksArray: ["/LookingForGame", "/CreateGame"]
     }
     const accountJSON = {
       textArray: ["Your Info"],
