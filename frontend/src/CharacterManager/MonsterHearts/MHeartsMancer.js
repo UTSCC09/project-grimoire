@@ -53,7 +53,7 @@ function MHeartsMancer(props){
     };
   
     return (
-      <Grid item container xs={12} className="page-container">
+      <Grid item container xs={12} className="page-container-cover">
         <Grid item container xs={12} sx={{height:'10%'}}>
             <Stepper nonLinear activeStep={activeStep} sx={{width:'100%'}}>
             {steps.map((label, index) => (
