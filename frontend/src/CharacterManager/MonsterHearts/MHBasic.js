@@ -31,10 +31,16 @@ function SkinCard(props){
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
-                <Typography paragraph>Skills:</Typography>
-                <Typography paragraph>Moves:</Typography>
-                <Typography paragraph>Advancements:</Typography>
-                <Typography paragraph>Sex Move:</Typography>
+                <Typography subtitle>Skills:</Typography>
+                <Typography subtitle>Moves:</Typography>
+                <Typography subtitle>Advancements:</Typography>
+                    <Typography paragraph>
+                        {props.advancements.map(a => a.desc).join()}
+                    </Typography>
+                <Typography subtitle>Sex Move:</Typography>
+                    <Typography paragraph>
+                        {props.sexMove}
+                    </Typography>
                 </CardContent>
             </Collapse>
         </Card>
@@ -77,7 +83,7 @@ function MHBasic(props){
             <Grid item container xs={12}>
                 <Typography>Choose your skin</Typography>
                 {skins.map((s) => (
-                    <SkinCard name={s.name} description={s.description}/>
+                    <SkinCard {...s}/>
                 ))}
             </Grid>
             
