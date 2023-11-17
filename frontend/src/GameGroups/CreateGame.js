@@ -144,8 +144,8 @@ function TextForm(props)
     return (
     <Grid width={'60%'}>
         <Typography color={"white"}>Make a Group</Typography>
-        <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName(parseInt(e.target.value));}}/>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label='Game' onChange={(e) => {e.preventDefault(); setgameName(parseInt(e.target.value));}}/>
+        <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
+        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label='Game' onChange={(e) => {e.preventDefault(); setgameName((e.target.value));}}/>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label="Combat" onChange={(e) => {e.preventDefault(); setCombat(parseInt(e.target.value));}}></TextField>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Puzzles" onChange={(e) => {e.preventDefault(); setPuzzles(parseInt(e.target.value));}}></TextField>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Social" onChange={(e) => {e.preventDefault(); setSocial(parseInt(e.target.value));}}></TextField>
