@@ -1,49 +1,72 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from 'prop-types'
-import { Card, CardActions, CardContent, CardMedia, Collapse, FormControlLabel, Grid, Switch, TextField, Typography } from "@mui/material";
+import { Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Dialog, DialogContent, DialogTitle, FormControlLabel, Grid, List, Modal, Paper, Radio, RadioGroup, Switch, TextField, Typography } from "@mui/material";
 import "../characterCreation.css"
 import { getSkins } from "../../api.mjs";
 import ExpandMore from "../../globalComponents/ExpandMore";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+const parseStats = (stat) => {
+    delete stat._id
+    let str = ""
+    for(const key in stat){
+        str += `${key}: ${stat[key]} `
+    }
+
+    return str
+}
+
 function SkinCard(props){
     const [expanded, setExpanded] = useState(false)
-
-    useEffect(() => {
-        console.log('expanded', expanded)
-    }, [expanded])
+    const [selectedStat, setSelectedStat] = useState(0)
 
     return (
+        <>
         <Card>
             <CardMedia/>
-            <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                    {props.name}
-                </Typography>
+            <CardActionArea>
+                <CardContent onClick={() => {setExpanded(true)}}>
+                    <Typography gutterBottom variant="h5" component="div">
+                        {props.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {props.description}
+                    </Typography>
+                </CardContent>
+            </CardActionArea>
+        </Card>
+        <Dialog onClose={() => setExpanded(false)} open={expanded} maxWidth="sm" fullWidth>
+            <DialogTitle>{props.name}</DialogTitle>
+            <DialogContent>
                 <Typography variant="body2" color="text.secondary">
                     {props.description}
                 </Typography>
-            </CardContent>
-            <CardActions>
-                <ExpandMore expanded={expanded} onClick={() => setExpanded(!expanded)}>
-                    <ExpandMoreIcon/>
-                </ExpandMore>
-            </CardActions>
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <CardContent>
-                <Typography subtitle>Skills:</Typography>
-                <Typography subtitle>Moves:</Typography>
-                <Typography subtitle>Advancements:</Typography>
-                    <Typography paragraph>
-                        {props.advancements.map(a => a.desc).join()}
-                    </Typography>
-                <Typography subtitle>Sex Move:</Typography>
-                    <Typography paragraph>
-                        {props.sexMove}
-                    </Typography>
-                </CardContent>
-            </Collapse>
-        </Card>
+                <Grid item container xs={12}>
+                    <Typography>Darkest Self</Typography>
+                    {props.darkestSelf}
+                </Grid>
+                <Grid item container xs={12}>
+                    <Typography>Stats</Typography>
+                    <RadioGroup
+                    value={selectedStat}
+                    onChange={(e) => {e.preventDefault(); setSelectedStat(e.target.value)}}
+                    >
+                    {props.statOptions.map((s, index) => (
+                        <FormControlLabel value={index} control={<Radio />} label={parseStats(s)}/>
+                    ))}
+                </RadioGroup>
+                </Grid>
+                <Grid item container xs={12}>
+                    <Typography>Moves</Typography>
+                    {/* {props.moves.map((m) => <Typography>{m}</Typography>)} */}
+                </Grid>
+                <Grid item container xs={12}>
+                    <Typography>Sex Move</Typography>
+                    {props.sexMove}
+                </Grid>
+            </DialogContent>
+        </Dialog>
+        </>
     )
 }
 
@@ -71,7 +94,7 @@ function MHBasic(props){
     }, [])
 
     return(
-        <Grid item container xs={12} className="mancer-page">
+        <Grid item container xs={12} className="mancer-page" spacing={2}>
             <Grid item container xs={12} sx={{justifyContent:'center'}}>
                 <Grid item>
                     <TextField label="Character Name"/>
@@ -80,13 +103,13 @@ function MHBasic(props){
                     <FormControlLabel control={<Switch />} label="Enable Homebrew ⚗️" />
                 </Grid>
             </Grid>
-            <Grid item container xs={12}>
-                <Typography>Choose your skin</Typography>
-                {skins.map((s) => (
-                    <SkinCard {...s}/>
-                ))}
+            <Grid item container xs={12} spacing={1} sx={{padding:"0.5%"}}>
+                    {skins.map((s) => (
+                        <Grid item container xs={12}>
+                            <SkinCard {...s}/>
+                        </Grid>
+                    ))}
             </Grid>
-            
         </Grid>
     )
 }
