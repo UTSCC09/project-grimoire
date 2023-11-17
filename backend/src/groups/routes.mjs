@@ -47,56 +47,6 @@ groupRouter.post('/create', isAuthenticated, async (req, res, next) => {
     })
 })
 
-// endpoint to join a game group as a member
-groupRouter.post('/:id/join', isAuthenticated, async (req, res, next) => {
-    const id = req.params.id
-    const user = req.userId
-    if(!isValidObjectId(id)) {
-        res.status(400).json({body: "invalid object id"})
-        return
-    }
-    const group = await Group.findById(id).exec()
-    if(!group){
-        res.status(404).json({body: `group with id ${id} not found`})
-        return
-    }
-    if(group.members.includes(user)){
-        res.status(409).json({body: `user ${user} already in group ${id}`})
-        return
-    }
-    group.members.push(user)
-    group.save().then((doc) => {
-        res.status(201).json(doc)
-    }).catch(err => {
-        res.status(500).json({errors: err})
-    })
-})
-
-// endpoint to leave a game group as a member
-groupRouter.post('/:id/leave', isAuthenticated, async (req, res, next) => {
-    const id = req.params.id
-    const user = req.userId
-    if(!isValidObjectId(req.params.id)) {
-        res.status(400).json({body: "invalid object id"})
-        return
-    }
-    const group = await Group.findById(id).exec()
-    if(!group){
-        res.status(404).json({body: `group with id ${id} not found`})
-        return
-    }
-    if(!group.members.includes(user)){
-        res.status(409).json({body: `user ${user} not in group ${id}`})
-        return
-    }
-    group.members = group.members.filter((member) => member != user)
-    group.save().then((doc) => {
-        res.status(201).json(doc)
-    }).catch(err => {
-        res.status(500).json({errors: err})
-    })
-})
-
 // endpoint to get paginated list of game groups given page number and page size
 groupRouter.get('/page/', async (req, res, next) => {
     const page = req.query.page
@@ -186,7 +136,9 @@ groupRouter.get('/user/:id/member/page', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    Group.find({members: mongoose.Types.ObjectId(id)}).skip(page * size).limit(size).exec()
+    const groups = await Group.find().exec()
+    console.log(groups)
+    Group.find({members: id}).skip(page * size).limit(size).exec()
     .then((docs) => {
         res.status(200).json(docs)
     }).catch(err => {
@@ -324,6 +276,56 @@ groupRouter.get('/:id', async (req, res, next) => {
         }
         res.status(200).json(doc)
     } ).catch(err => {
+        res.status(500).json({errors: err})
+    })
+})
+
+// endpoint to join a game group as a member
+groupRouter.patch('/:id/join', isAuthenticated, async (req, res, next) => {
+    const id = req.params.id
+    const user = req.userId
+    if(!isValidObjectId(id)) {
+        res.status(400).json({body: "invalid object id"})
+        return
+    }
+    const group = await Group.findById(id).exec()
+    if(!group){
+        res.status(404).json({body: `group with id ${id} not found`})
+        return
+    }
+    if(group.members.includes(user)){
+        res.status(409).json({body: `user ${user} already in group ${id}`})
+        return
+    }
+    group.members.push(user)
+    group.save().then((doc) => {
+        res.status(201).json(doc)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
+})
+
+// endpoint to leave a game group as a member
+groupRouter.patch('/:id/leave', isAuthenticated, async (req, res, next) => {
+    const id = req.params.id
+    const user = req.userId
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
+        return
+    }
+    const group = await Group.findById(id).exec()
+    if(!group){
+        res.status(404).json({body: `group with id ${id} not found`})
+        return
+    }
+    if(!group.members.includes(user)){
+        res.status(409).json({body: `user ${user} not in group ${id}`})
+        return
+    }
+    group.members = group.members.filter((member) => member != user)
+    group.save().then((doc) => {
+        res.status(201).json(doc)
+    }).catch(err => {
         res.status(500).json({errors: err})
     })
 })

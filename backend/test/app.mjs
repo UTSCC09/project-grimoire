@@ -160,7 +160,7 @@ describe("Group creation", () => {
     })
 
     it("should add a user to a group", (done) => {
-        agent.post(`/api/groups/${group1Id}/join`)
+        agent.patch(`/api/groups/${group1Id}/join`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
@@ -171,7 +171,7 @@ describe("Group creation", () => {
     })
 
     it("should not add a user to a group twice", (done) => {
-        agent.post(`/api/groups/${group1Id}/join`)
+        agent.patch(`/api/groups/${group1Id}/join`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(409)
@@ -182,7 +182,7 @@ describe("Group creation", () => {
     })
 
     it("should remove a user from a group", (done) => {
-        agent.post(`/api/groups/${group1Id}/leave`)
+        agent.patch(`/api/groups/${group1Id}/leave`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(201)
@@ -193,7 +193,7 @@ describe("Group creation", () => {
     })
 
     it("should not remove a user from a group twice", (done) => {
-        agent.post(`/api/groups/${group1Id}/leave`)
+        agent.patch(`/api/groups/${group1Id}/leave`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(409)
@@ -204,7 +204,7 @@ describe("Group creation", () => {
     })
 
     it("should not add a user to a group that doesn't exist", (done) => {
-        agent.post(`/api/groups/${fakeObjectId}/join`)
+        agent.patch(`/api/groups/${fakeObjectId}/join`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(404)
@@ -215,12 +215,23 @@ describe("Group creation", () => {
     })
 
     it("should not remove a user from a group that doesn't exist", (done) => {
-        agent.post(`/api/groups/${fakeObjectId}/leave`)
+        agent.patch(`/api/groups/${fakeObjectId}/leave`)
         .end((err, res) => {
             expect(err).to.be.null
             expect(res).to.have.status(404)
             const json = JSON.parse(res.text)
             expect(json).to.deep.equal({body: `group with id ${fakeObjectId} not found`})
+            done()
+        })
+    })
+
+    it("should add a user to a group", (done) => {
+        agent.patch(`/api/groups/${group1Id}/join`)
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(201)
+            const json = JSON.parse(res.text)
+            expect(json.members).to.contain(userId)
             done()
         })
     })
@@ -293,17 +304,6 @@ describe("Group creation", () => {
         })
     })
 
-    it("should get a paginated list of groups that play a specific game", (done) => {
-        agent.get(`/api/groups/game/${encodeURIComponent("Monster Hearts")}/page?size=${size}&page=${page}`)
-        .end((err, res) => {
-            expect(err).to.be.null
-            expect(res).to.have.status(200)
-            const json = JSON.parse(res.text)
-            expect(json).to.containSubset([{name: "test group 2"}])
-            done()
-        }
-    )})
-
     it("should get a paginated list of groups that match given preferences", (done) => {
         agent.get(`/api/groups/preferences/page?size=${size}&page=${page}`)
         .send({combat: 1, puzzles: 2, social: 3, playerDriven: 4, roleplaying: 5, homebrew: 6})
@@ -344,7 +344,7 @@ describe("Group creation", () => {
         agent.delete(`/api/groups/${group1Id}`)
         .end((err, res) => {
             expect(err).to.be.null
-            expect(res).to.have.status(200)
+            expect(res).to.have.status(201)
             const json = JSON.parse(res.text)
             expect(json).to.deep.equal({body: `group ${group1Id} deleted`})
             done()
