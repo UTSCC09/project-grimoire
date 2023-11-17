@@ -86,7 +86,7 @@ function CreateGameForm(props)
 
 
     return (<Grid className="form" container justifyContent={'flex-start'} alignItems={'flex-start'} flexDirection={'column'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
-        <TextForm setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
+        <TextForm latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
         {(APILoaded.isLoaded) ?  <GoogleMap mapContainerStyle={{width: '75%', height: '100%',}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
         </GoogleMap>
          : <Typography>Loading</Typography> }   
@@ -108,7 +108,7 @@ function TextForm(props)
     const navigate = useNavigate();
     
     const handleSubmission = function () {
-        if (props.latitude === 0 || props.longitude === 0)
+        if (props.latitude === 0 && props.longtitude === 0)
         {
             setError("Location needs to be set")
         }
@@ -122,7 +122,7 @@ function TextForm(props)
         }
         else 
         {
-            postGroup(props.latitude, props.longitude, groupName, gameName,
+            postGroup(props.latitude, props.longtitude, groupName, gameName,
                     combat, puzzles, social, playerDriven, roleplaying, homebrew).then(function (resp)
             {
                 if (!resp.ok)
