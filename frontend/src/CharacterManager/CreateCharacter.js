@@ -54,7 +54,7 @@ function CreateCharacter(props){
     }
 
     return (
-        <Box item container xs={12} className="page-container">
+        <Grid item container xs={12} className="page-container">
             <Grid item container xs={12} spacing={2}>
                 <Grid item container xs={6}>
                 <Autocomplete
@@ -80,9 +80,9 @@ function CreateCharacter(props){
                     </Typography>
                 </Grid>
             </Grid>
-            <Grid item container xs={12}>
+            <Grid item container xs={12} spacing={2}>
                 {games.map((g) => (
-                    <Grid item container xs={Math.max(4, 12 / (games.length || 1))} padding="0.5%">
+                    <Grid item container xs={Math.max(4, 12 / (games.length || 1))}>
                         <GameCard name={g.name} description={g.description} sx={{width:'100%'}}
                         gameId={g._id}
                         onClick={(e)=> {e.preventDefault(); navigateToGame(g.name)}}/>
@@ -95,7 +95,7 @@ function CreateCharacter(props){
                 onChange={(e,value) => {e.preventDefault(); editSearchObj('page', value - 1)}}/>
             </Grid>
             <ErrorAlert error={error} onClose={(e) => {e.preventDefault(); setError("")}}/>
-        </Box>
+        </Grid>
     )
 }
 

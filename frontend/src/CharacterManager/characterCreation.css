@@ -17,13 +17,3 @@
     align-items: center;
     padding:1.5%
 }
-
-.choose-game-container{
-    height:100%;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    padding:1.5%;
-    padding-right: 5%;
-    padding-left: 5%;
-}
