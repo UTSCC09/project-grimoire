@@ -44,7 +44,13 @@ export function postGroup(latitude, longitude, groupName, groupGame, combat, puz
     name: groupName,
     game: groupGame,
     longitude: longitude,
-    latitude: latitude
+    latitude: latitude,
+    combat: combat,
+    puzzles: puzzles,
+    social: social,
+    playerDriven: playerDriven,
+    roleplaying: roleplaying,
+    homebrew: homebrew
   }
   return fetch(`${URL}/api/groups`, {
     method: 'POST',
