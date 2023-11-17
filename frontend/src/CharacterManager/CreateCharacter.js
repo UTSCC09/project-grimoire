@@ -1,6 +1,6 @@
 import {React, useState, useEffect} from "react"
 import { useNavigate } from "react-router";
-import {Button, Typography, Grid, ImageList, ImageListItem, Autocomplete, TextField, Pagination} from "@mui/material"
+import {Button, Typography, Grid, ImageList, ImageListItem, Autocomplete, TextField, Pagination, Box} from "@mui/material"
 import { getGames } from "../api.mjs";
 import GameCard from "./GameCard";
 import ErrorAlert from "../globalComponents/ErrorAlert";
@@ -50,11 +50,11 @@ function CreateCharacter(props){
 
     function navigateToGame(gameName){
         gameName = gameName.replace(/\s+/g, ''); //removing spaces
-        navigate(`./${gameName}/characterMancer`)
+        navigate(`./${gameName}`)
     }
 
     return (
-        <Grid item container xs={12} sx={{justifyContent:'center', alignItems:'center', padding:"0.5%"}}>
+        <Box item container xs={12} className="page-container">
             <Grid item container xs={12} spacing={2}>
                 <Grid item container xs={6}>
                 <Autocomplete
@@ -80,7 +80,7 @@ function CreateCharacter(props){
                     </Typography>
                 </Grid>
             </Grid>
-            <Grid item container xs={12} sx={{paddingLeft: "5%", paddingRight:"5%"}}>
+            <Grid item container xs={12}>
                 {games.map((g) => (
                     <Grid item container xs={Math.max(4, 12 / (games.length || 1))} padding="0.5%">
                         <GameCard name={g.name} description={g.description} sx={{width:'100%'}}
@@ -95,7 +95,7 @@ function CreateCharacter(props){
                 onChange={(e,value) => {e.preventDefault(); editSearchObj('page', value - 1)}}/>
             </Grid>
             <ErrorAlert error={error} onClose={(e) => {e.preventDefault(); setError("")}}/>
-        </Grid>
+        </Box>
     )
 }
 
