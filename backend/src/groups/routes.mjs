@@ -116,8 +116,8 @@ groupRouter.get('/page/', async (req, res, next) => {
 
 // endpoint to get paginated list of game groups for a specific game
 // the game is given in the request body
-groupRouter.get('/game/page', async (req, res, next) => {
-    const game = req.body.game
+groupRouter.get('/game/:id/page', async (req, res, next) => {
+    const game = req.params.id
     const page = req.query.page
     const size = req.query.size
     if(!id){
@@ -197,14 +197,6 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
     const group = await Group
                         .aggregate([
                             {
-                                $match: {
-                                    $or: [
-                                        {name: {$regex: json.name, $options: 'i'}},
-                                        {game: {$regex: json.game, $options: 'i'}}
-                                    ]
-                                }
-                            },
-                            {
                                 $project: {
                                     distance: {
                                         $sqrt: {
@@ -219,6 +211,9 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
                                             ]
                                         }
                                     }
+                                },
+                                $sort: {
+                                    distance: 1
                                 }
                             }
                         ])
@@ -285,7 +280,7 @@ groupRouter.patch('/:id', isAuthenticated, async (req, res, next) => {
     const id = req.params.id
     const json = req.body
     const user = req.userId
-    game = await Game.findOne({name: json.game}).exec()
+    const game = await Game.findOne({name: json.game}).exec()
     if(!isValidObjectId(req.params.id)) {
         res.status(400).json({body: "invalid object id"})
         return
