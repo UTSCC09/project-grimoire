@@ -151,14 +151,14 @@ function DropDownMenu(props) {
   {
     ArraytoInsert = props.DropDownArray.map(function (s, index) 
       {
-          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]);}}>{s}</MenuItem>
+          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]); setAnchorEl(null)}}>{s}</MenuItem>
       })
   }
   if(props.functionsArray)
   {
     functionButtonsArray = props.functionsArray.map(function (s, index)
     {
-      return <MenuItem key= {props.functionNamesArray[index]} onClick={(event) => {event.preventDefault(); s();}}>{props.functionNamesArray[index]}</MenuItem>
+      return <MenuItem key= {props.functionNamesArray[index]} onClick={(event) => {event.preventDefault(); s(); setAnchorEl(null);}}>{props.functionNamesArray[index]}</MenuItem>
     })
   }
   const totalArray = ArraytoInsert.concat(functionButtonsArray)
@@ -206,14 +206,14 @@ function RightDropDownButton(props)
   {
     ArraytoInsert = props.DropDownArray.map(function (s, index) 
       {
-          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]);}}>{s}</MenuItem>
+          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]); setAnchorEl(null)}}>{s}</MenuItem>
       })
   }
   if(props.functionsArray)
   {
     functionButtonsArray = props.functionsArray.map(function (s, index)
     {
-      return <MenuItem key= {props.functionNamesArray[index]} onClick={(event) => {event.preventDefault(); s();}}>{props.functionNamesArray[index]}</MenuItem>
+      return <MenuItem key= {props.functionNamesArray[index]} onClick={(event) => {event.preventDefault(); s(); setAnchorEl(null)}}>{props.functionNamesArray[index]}</MenuItem>
     })
   }
   const totalArray = ArraytoInsert.concat(functionButtonsArray)
