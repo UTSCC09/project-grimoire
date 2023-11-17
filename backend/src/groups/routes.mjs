@@ -159,33 +159,29 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
         return
     }
     // compare vector of user preferences to vector of game group preferences and find the closest matches
-    // sort the matches by distance from the user preferences
-    Group
-        .aggregate([
-            {
-                $set: {
-                    distance: {
-                        $sqrt: {
-                            $add: [
-                                // vector distance of user preferences and game group preferences
-                                {$pow: [{$subtract: [preferences.combat, json.combat]}, 2]},
-                                {$pow: [{$subtract: [preferences.puzzles, json.puzzles]}, 2]},
-                                {$pow: [{$subtract: [preferences.social, json.social]}, 2]},
-                                {$pow: [{$subtract: [preferences.playerDriven, json.playerDriven]}, 2]},
-                                {$pow: [{$subtract: [preferences.roleplaying, json.roleplaying]}, 2]},
-                                {$pow: [{$subtract: [preferences.homebrew, json.homebrew]}, 2]}
-                            ]
-                        }
+    // sort the matches by distance from the user preferences    
+    Group.aggregate([
+        {
+            $set: {
+                distance: {
+                    $sqrt: {
+                        $add: [
+                            {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
+                            {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
+                            {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
+                            {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
+                            {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
+                            {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
+                        ]
                     }
-                },
-                $sort: {
-                    distance: 1
                 }
             }
-        ])
-        .skip(page * size)
-        .limit(size)
-        .exec()
+        },
+        {$sort: {distance: 1}},
+        {$skip: page * size},
+        // {$limit: size},
+        {$limit: 10},
+    ])
         .then((docs) => {
             res.status(200).json(docs)
         }).catch(err => {
@@ -222,11 +218,11 @@ groupRouter.get('/location/page', async (req, res, next) => {
                         }
                     }
                 }
-            }
+            },
+            {$skip: page * size},
+            // {$limit: size},
+            {$limit: 10}
         ])
-        .skip(page * size)
-        .limit(size)
-        .exec()
         .then((docs) => {
             res.status(200).json(docs)
         }).catch(err => {

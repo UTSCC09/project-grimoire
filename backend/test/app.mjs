@@ -298,7 +298,6 @@ describe("Group creation", () => {
             expect(err).to.be.null
             expect(res).to.have.status(200)
             const json = JSON.parse(res.text)
-            // expect to own both
             expect(json).to.containSubset([{name: "test group"}, {name: "test group 2"}])
             done()
         })
