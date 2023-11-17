@@ -153,3 +153,13 @@ export function getSkins(searchCritera={}, signal=undefined){
     signal: signal
   })
 }
+
+export function getGroups(page=0){
+  return fetch(`${URL}/api/groups/page?page=${page}`, {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    credentials: 'include',
+  })
+}

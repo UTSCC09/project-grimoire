@@ -1,6 +1,6 @@
 import {React, useEffect, useState} from "react";
 import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider, AppBar, Toolbar} from '@mui/material'
-import "../styling/template.css"
+import "./template.css"
 import { getCurrentUser, logOut } from "../api.mjs";
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled";

@@ -1,5 +1,14 @@
-import {React, useState, useEffect} from "react"
+import React, {useState, useEffect} from "react"
 import {Button} from "@mui/material"
+import { getGroups } from "../api.mjs"
+
+function getPrefString(prefObj){
+    let str = ""
+    for(let key in prefObj){
+        str += `${key}: ${prefObj[key]} `
+    }
+    return str
+}
 
 function LookingForGame(props){
 
@@ -7,18 +16,14 @@ function LookingForGame(props){
     const [hasLoaded, setLoaded] = useState(false)
     const [error, setError] = useState(false)
     const [items, setItems] = useState([])
+    const [page, setPage] = useState(0)
 
     useEffect(() => {
         if(!hasLoaded){
             // fetch paginated list of groups based on search parameters
-            fetch("/api/groups/page", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
+            getGroups(page)
             .then((res) => {
-                if(res.status === 200){
+                if(res.ok){
                     res.json().then((json) => {
                         setItems(json)
                         setLoaded(true)
@@ -26,9 +31,9 @@ function LookingForGame(props){
                 } else {
                     setError(true)
                 }
-            })
+            }).catch(e => console.error(e))
         }
-    })
+    }, [])
 
     if (error) {
         return <div>Error: could not load groups</div>
@@ -46,8 +51,8 @@ function LookingForGame(props){
                                 <p>Owner: {item.owner}</p>
                                 <p>Members: {item.members}</p>
                                 <p>Game: {item.game}</p>
-                                <p>Location: {item.location}</p>
-                                <p>Preferences: {item.preferences}</p>
+                                {/* <p>Location: {item.location}</p> */}
+                                <p>Preferences: {getPrefString(item.preferences)}</p>
                                 <Button onClick={() => setSuccess(true)}>Join Group</Button>
                             </div>
                         </li>
@@ -56,11 +61,6 @@ function LookingForGame(props){
             </div>
         )
     }
-
-    ReactDOM.render(
-        <LookingForGame />,
-        document.getElementById("root")
-    )
 }
 
 export default LookingForGame

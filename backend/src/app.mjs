@@ -44,13 +44,13 @@ await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
-// const corsOptions = {
-//     origin: process.env.FRONTEND,
-//     optionsSuccessStatus: 200,
-//     credentials: true
-// }
+const corsOptions = {
+    origin: process.env.FRONTEND,
+    optionsSuccessStatus: 200,
+    credentials: true
+}
 
-// app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(mongoSanitize())
