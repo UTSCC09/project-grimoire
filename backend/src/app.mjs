@@ -40,6 +40,8 @@ export async function connectToDb(connectionString){
     return mongoose.connect(connectionString)
 }
 
+console.log("Connecting to database at " + process.env.MONGO_URL)
+
 await connectToDb(process.env.MONGO_URL)
 
 const app = express();
