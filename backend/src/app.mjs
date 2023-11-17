@@ -14,6 +14,7 @@ import sheetRouter from "./genericSheets/routes.mjs";
 import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import cors from 'cors'
 import { MHRouter } from "./monsterHearts/routes.mjs";
+import { gamesRouter } from "./games/routes.mjs";
 
 dotenv.config();
 
@@ -45,13 +46,13 @@ await connectToDb(process.env.MONGO_URL)
 
 const app = express();
 
-const corsOptions = {
-    origin: process.env.FRONTEND,
-    optionsSuccessStatus: 200,
-    credentials: true
-}
+// const corsOptions = {
+//     origin: process.env.FRONTEND,
+//     optionsSuccessStatus: 200,
+//     credentials: true
+// }
 
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(mongoSanitize())
@@ -78,6 +79,8 @@ app.use('/api/sheets', sheetRouter)
 app.use('/api/groups', groupRouter)
 
 app.use('/api/mhearts', MHRouter)
+
+app.use('/api/games', gamesRouter)
 
 /**
  * sanity check endpoint to test connection

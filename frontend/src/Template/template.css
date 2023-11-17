@@ -9,10 +9,11 @@
 }
 
 .logoPicture{
-    object-fit: cover;
-    height: 13vh;
+    object-fit: contain;
+    height: 10vh;
     max-height: 100%;
     width: 20vh;
+    max-height: 100%;
 }
 
 .logoPicture:hover{
@@ -23,13 +24,9 @@
     display:flex;
     align-items: center;
     justify-content: flex-stat;
+    max-height: 100%;
 }
 
-.nav-button{
-    color: white;
-    background: white;
-}
-
-.nav-button:hover{
-    color: orange
+.NavButton {
+    max-height: 100%;
 }

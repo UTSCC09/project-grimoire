@@ -39,6 +39,25 @@ export const UserSchema = new Schema({
 
 export const User = new mongoose.model("User", UserSchema)
 
+export const ImageSchema = new Schema({
+    mimetype: {
+        type: String,
+        required: true
+    },
+    path: {
+        type: String,
+        required: true
+    },
+    encoding: {
+        type: String,
+        required: false
+    },
+    originalname: {
+        type: String,
+        required: false
+    } 
+})
+
 export const GameSchema = new Schema({
     name: {
         type: String,
@@ -50,6 +69,14 @@ export const GameSchema = new Schema({
         type: Number, //number of sides for the die,
         required: false,
         default: 20
+    },
+    description: {
+        type: String,
+        required: false
+    },
+    banner: {
+        type: ImageSchema,
+        required: false
     }
 })
 
@@ -82,25 +109,6 @@ const sheetUserMappingSchema = new Schema({
 })
 
 export const UserSheetMapping = new mongoose.model("UserSheetMapping", sheetUserMappingSchema)
-
-export const ImageSchema = new Schema({
-    mimetype: {
-        type: String,
-        required: true
-    },
-    path: {
-        type: String,
-        required: true
-    },
-    encoding: {
-        type: String,
-        required: false
-    },
-    originalname: {
-        type: String,
-        required: false
-    } 
-})
 
 export const InventoryItemSchema = new Schema({
     name: {
