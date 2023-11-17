@@ -27,7 +27,9 @@ groupRouter.post('/api/groups/', isAuthenticated, async (req, res, next) => {
         name: json.name,
         owner: owner,
         game: json.game,
-        location: json.location ? json.location : "",
+        location: {
+            coordinates: [json.longitude, json.latitude]
+        },
         preferences: {
             combat: json.combat ? json.combat : 0,
             puzzles: json.puzzles ? json.puzzles : 0,

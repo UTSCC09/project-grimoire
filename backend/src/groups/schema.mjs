@@ -25,7 +25,8 @@ export const GroupSchema = new Schema({
         ref: "Game"
     },
     location: {
-        type: String,
+        type: "Point",
+        coordinates: [Number, Number],
         required: false
     },
     preferences: {
