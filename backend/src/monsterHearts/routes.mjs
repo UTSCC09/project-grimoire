@@ -35,17 +35,6 @@ MHRouter.get('/skins', (req, res, next) => {
     })
 })
 
-MHRouter.get('/fixSkins', async (req, res, next) => {
-    const skins = await MHSkin.find({}).exec()
-    const promises = []
-    for(let s of skins){
-        s.skinAdvancements = undefined
-        promises.push(s.save())
-    }
-    const result = await Promise.all(promises)
-    return res.status(200).json({body: "success"})
-})
-
 /**
  * finds all monster hearts moves
  * @param {Number} page page of pagination that we're on
