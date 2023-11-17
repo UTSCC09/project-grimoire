@@ -1,0 +1,29 @@
+.basic-box{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 10%;
+    background-color: #666699;
+    width: 100%;
+    box-shadow: 12;
+}
+
+.logoPicture{
+    object-fit: fill;
+    max-height: 5vw;
+}
+
+.logoPicture:hover{
+    cursor:pointer;
+}
+
+.logo-box{
+    display:flex;
+    align-items: center;
+    justify-content: flex-stat;
+    max-height: 100%;
+}
+
+.NavButton {
+    max-height: 100%;
+}

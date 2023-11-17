@@ -1,0 +1,14 @@
+Goal: Communicate endpoints and complete Frontend API:
+
+Only have 1 Fronted API.
+
+GET /api/sheets/:id Gets the sheet of a user. (TODO: Security?)
+
+DELETE /api/sheets/:id Deletes the sheet of a user of specified id (TODO: Security?)
+
+POST /api/sheets/:id/pic Gets pic with ID
+
+GET /api/sheets/:id/pic Gets pic of ID 
+
+Note: ID is a random string returned with the POST Sheets
+

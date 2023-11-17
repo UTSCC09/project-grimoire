@@ -3,3 +3,24 @@
 
 
 /frontend/node_modules
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+*.dockerfile
+
+# node
+package-lock.json
+node_modules
+
+# other
+README.md
+
+# database
+db
+data
+
+db_backups
