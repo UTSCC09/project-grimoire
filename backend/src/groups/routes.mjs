@@ -109,8 +109,12 @@ groupRouter.get('/page/', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    const group = await Group.find({}).skip(page * size).limit(size).exec()
-    res.status(200).json(group)
+    Group.find({}).skip(page * size).limit(size).exec()
+    .then((docs) => {
+        res.status(200).json(docs)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
 })
 
 
@@ -132,8 +136,12 @@ groupRouter.get('/game/:id/page', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    const group = await Group.find({game: game}).skip(page * size).limit(size).exec()
-    res.status(200).json(group)
+    Group.find({game: game}).skip(page * size).limit(size).exec()
+    .then((docs) => {
+        res.status(200).json(docs)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
 })
 
 // endpoint to get paginated list of game groups owned by a specific user
@@ -153,8 +161,12 @@ groupRouter.get('/user/:id/owner/page', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    const group = await Group.find({owner: id}).skip(page * size).limit(size).exec()
-    res.status(200).json(group)
+    Group.find({owner: id}).skip(page * size).limit(size).exec()
+    .then((docs) => {
+        res.status(200).json(docs)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
 })
 
 // endpoint to get paginated list of game groups a specific user is a member of
@@ -174,8 +186,12 @@ groupRouter.get('/user/:id/member/page', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    const group = await Group.find({members: id}).skip(page * size).limit(size).exec()
-    res.status(200).json(group)
+    Group.find({members: mongoose.Types.ObjectId(id)}).skip(page * size).limit(size).exec()
+    .then((docs) => {
+        res.status(200).json(docs)
+    }).catch(err => {
+        res.status(500).json({errors: err})
+    })
 })
 
 // endpoint to get paginated list of game groups given a input of user preferences
@@ -194,33 +210,37 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
     }
     // compare vector of user preferences to vector of game group preferences and find the closest matches
     // sort the matches by distance from the user preferences
-    const group = await Group
-                        .aggregate([
-                            {
-                                $project: {
-                                    distance: {
-                                        $sqrt: {
-                                            $add: [
-                                                // vector distance of user preferences and game group preferences
-                                                {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
-                                                {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
-                                            ]
-                                        }
-                                    }
-                                },
-                                $sort: {
-                                    distance: 1
-                                }
-                            }
-                        ])
-                        .skip(page * size)
-                        .limit(size)
-                        .exec()
-    res.status(200).json(group)
+    Group
+        .aggregate([
+            {
+                $project: {
+                    distance: {
+                        $sqrt: {
+                            $add: [
+                                // vector distance of user preferences and game group preferences
+                                {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
+                                {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
+                                {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
+                                {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
+                                {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
+                                {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
+                            ]
+                        }
+                    }
+                },
+                $sort: {
+                    distance: 1
+                }
+            }
+        ])
+        .skip(page * size)
+        .limit(size)
+        .exec()
+        .then((docs) => {
+            res.status(200).json(docs)
+        }).catch(err => {
+            res.status(500).json({errors: err})
+        })   
 })
 
 // endpoint to get paginated list of game groups within a certain distance of a location
@@ -238,26 +258,30 @@ groupRouter.get('/location/page', async (req, res, next) => {
         return
     }
     // find game groups within a certain distance of the location
-    const group = await Group
-                        .aggregate([
-                            {
-                                $match: {
-                                    location: {
-                                        $near: {
-                                            $geometry: {
-                                                type: "Point",
-                                                coordinates: [json.longitude, json.latitude]
-                                            },
-                                            $maxDistance: json.distance
-                                        }
-                                    }
-                                }
-                            }
-                        ])
-                        .skip(page * size)
-                        .limit(size)
-                        .exec()
-    res.status(200).json(group)
+    Group
+        .aggregate([
+            {
+                $match: {
+                    location: {
+                        $near: {
+                            $geometry: {
+                                type: "Point",
+                                coordinates: [json.longitude, json.latitude]
+                            },
+                            $maxDistance: json.distance
+                        }
+                    }
+                }
+            }
+        ])
+        .skip(page * size)
+        .limit(size)
+        .exec()
+        .then((docs) => {
+            res.status(200).json(docs)
+        }).catch(err => {
+            res.status(500).json({errors: err})
+        })
 })
 
 // endpoint to get a specific game group
@@ -267,12 +291,16 @@ groupRouter.get('/:id', async (req, res, next) => {
         res.status(400).json({body: "invalid object id"})
         return
     }
-    const group = await Group.findById(id).exec()
-    if(!group){
-        res.status(404).json({body: `group with id ${id} not found`})
-        return
-    }
-    res.status(200).json(group)
+    Group.findById(id).exec()
+    .then((doc) => {
+        if (!doc) {
+            res.status(404).json({body: `group with id ${id} not found`})
+            return
+        }
+        res.status(200).json(doc)
+    } ).catch(err => {
+        res.status(500).json({errors: err})
+    })
 })
 
 // endpoint to update a game group
