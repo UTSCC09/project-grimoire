@@ -141,3 +141,15 @@ export function getGames(searchCritera={}, signal=undefined){
     signal: signal
   })
 }
+
+export function getSkins(searchCritera={}, signal=undefined){
+  let urlString = `${URL}/api/mhearts/skins?`
+  for(let key of Object.keys(searchCritera)){
+    urlString += `${key}=${searchCritera[key]}&`
+  }
+  return fetch(urlString, {
+    method: 'GET',
+    credentials: 'include',
+    signal: signal
+  })
+}
