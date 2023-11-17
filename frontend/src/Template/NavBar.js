@@ -100,7 +100,7 @@ function NavBar(props){
       linksArray: ["/CreateCharacter", "/CharacterSheetHomePage"]
     }
     const lfgJSON = {
-      textArray: ["Look for Game", "Create a Game"],
+      textArray: ["Look for a Group", "Create a Group"],
       linksArray: ["/LookingForGame", "/CreateGame"]
     }
     const accountJSON = {
@@ -120,7 +120,7 @@ function NavBar(props){
         <CustomGrid item container xs={8}>
         <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
         <DropDownMenu className="NavButton"  ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
-        <DropDownMenu className="NavButton" ButtonText ="Games" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
+        <DropDownMenu className="NavButton" ButtonText ="Groups" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
         </CustomGrid>
         <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
         {
