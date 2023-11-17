@@ -1,8 +1,6 @@
 import {React, useEffect, useState} from "react";
 import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
-import "../styling/template.css"
-import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
-import "../styling/template.css"
+import "./template.css"
 import { getCurrentUser, logOut } from "../api.mjs";
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled";
@@ -14,7 +12,7 @@ const theme = createTheme({
       primary: {
         main: "#000000",
         textColor: red[500],
-        height: "13vh",
+        height: "10vh",
         position: "fixed",
       },
       },
@@ -30,10 +28,8 @@ const theme = createTheme({
 const CustomNavBar = styled(Grid)(({theme}) => ({
   height: theme.palette.primary.height,
   backgroundColor: theme.palette.primary.main,
-  position: theme.palette.primary.position,
   marginBottom: "0",
   'z-index': 1,
-  
 }));
 
 const CustomButton = styled(Button)(({theme}) => ({
@@ -120,11 +116,11 @@ function NavBar(props){
 
     return(
       <ThemeProvider theme = {theme}>
-    <CustomNavBar item container xs={12} direction ={"row"}>
+    <CustomNavBar alignContent={"flex-end"} item container xs={12} direction ={"row"}>
         <CustomGrid item container xs={8}>
         <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
-        <DropDownMenu ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
-        <DropDownMenu ButtonText ="Games" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
+        <DropDownMenu className="NavButton"  ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
+        <DropDownMenu className="NavButton" ButtonText ="Games" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
         </CustomGrid>
         <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
         {

@@ -33,7 +33,6 @@ function Template(props){
         <Box>
             <ThemeProvider theme ={mainTheme}>
                 <NavBar/>
-                <div className="navBarSpacer"></div>
                 {props.children}
             </ThemeProvider>
         </Box>

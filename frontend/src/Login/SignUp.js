@@ -1,11 +1,9 @@
 import {React, useState} from "react"
-import {Button, TextField, Alert, Grid, ThemeProvider, createTheme} from "@mui/material"
-import {Button, TextField, Alert, Grid, ThemeProvider, createTheme} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box} from "@mui/material"
 import {useNavigate} from "react-router-dom"
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { signUp, getSessionCode } from "../api.mjs";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
-import "../styling/signUp.css";
+import "./signUp.css";
 import styled from "@emotion/styled";
 import { red } from "@mui/material/colors"; 
 
@@ -34,13 +32,33 @@ const theme = createTheme({
         {
             primary: 1
         }
-       
+    },
+    Button:
+    {
+        primary: red[500],
+        secondary: '#ffffff'
+    },
+    TextField:
+    {
+        primary: '#ffffff',
+        secondary: red[500]
+    },
+    Typography:
+    {
+        primary: '#ffffff',
+        secondary: red[500]
     }
+
 })
 
 const CustomTextContainer = styled(Grid)(({theme}) =>({
+    width: 'auto',
     backgroundColor: theme.palette.primary.main,
     flex: theme.sizing.display.primary
+}))
+
+const CustomSubmitButton = styled(Button)(({theme}) => ({
+    fontSize: '200%'
 }))
 
 function SignUp(props){
@@ -108,10 +126,19 @@ function SignUpForm(props)
     <ThemeProvider theme={theme}>
     <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
         <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
-        <CustomTextContainer item container direction="column" xs={3} justifyContent={"center"} alignItems={"center"}>
-            <TextField id="emailInput" label="Email" variant="standard" onChange={e => {e.preventDefault(); props.setEmail(e.target.value)}}/>
-            <TextField id="passwordInput" label="Password" variant="standard" onChange={e => {e.preventDefault(); props.setPassword(e.target.value)}}/>
-            <Button onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</Button>
+        <CustomTextContainer spacing={10} item container direction="column" justifyContent={"flex-start"} alignItems={"center"}>
+            <Typography marginTop={'40%'} marginBottom={'5%'} color='secondary' fontSize={80} className="signUpPrompt">Join Us</Typography>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+            <TextField inputProps={{style: {color: "white"}}} className='inputFields' color='secondary' label="Email" variant="filled" focused onChange={e => {handleEmailChange(e);}}/>
+            </Box>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+            <TextField inputProps={{style: {color: "white"}}} className='inputFields' id="passwordInput" color='secondary' label="Password" variant="filled" type="password" focused onChange={e => {props.setPassword(e.target.value)}}/>
+            </Box>
+        {(allowSubmit ? 
+                    <CustomSubmitButton className="submitButton" color="secondary" onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</CustomSubmitButton>
+                    :
+                    <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
+                    )}
         {
             Boolean(error) ? 
             <Alert severity="error">{error}</Alert>

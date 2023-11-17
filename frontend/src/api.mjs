@@ -37,6 +37,26 @@ export function logIn(username, password)
       })
 }
 
+export function postGroup(latitude, longitude, groupName, groupGame, combat, puzzles, 
+                          social, playerDriven, roleplaying, homebrew)
+{
+  const data = {
+    name: groupName,
+    game: groupGame,
+    longitude: longitude,
+    latitude: latitude
+  }
+  return fetch(`${URL}/api/groups`, {
+    method: 'POST',
+    headers:
+    {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+    credentials: 'include'
+  })
+}
+
 export function dualFactorValidate(code)
 {
   const post = {
