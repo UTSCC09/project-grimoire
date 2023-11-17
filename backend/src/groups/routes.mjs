@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isAuthenticated } from "../helper.mjs";
 import { Group } from "./schema.mjs";
-import { Game, User } from "../schemas.mjs";
+import { User } from "../schemas.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 
@@ -26,7 +26,16 @@ groupRouter.post('/api/groups', isAuthenticated, async (req, res, next) => {
     const group = new Group({
         name: json.name,
         owner: owner,
-        game: json.game
+        game: json.game,
+        location: json.location ? json.location : "",
+        preferences: {
+            combat: json.combat ? json.combat : 0,
+            puzzles: json.puzzles ? json.puzzles : 0,
+            social: json.social ? json.social : 0,
+            playerDriven: json.playerDriven ? json.playerDriven : 0,
+            roleplaying: json.roleplaying ? json.roleplaying : 0,
+            homebrew: json.homebrew ? json.homebrew : 0
+        }
     });
     group.save().then((saved) => {
         return res.status(201).json({saved})
@@ -39,8 +48,8 @@ groupRouter.post('/api/groups', isAuthenticated, async (req, res, next) => {
 groupRouter.post('/api/groups/:id/join', isAuthenticated, async (req, res, next) => {
     const id = req.params.id
     const user = req.userId
-    if(!id){
-        res.status(422).json({body: "missing group: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     const model = await Group.findById(id).exec()
@@ -64,8 +73,8 @@ groupRouter.post('/api/groups/:id/join', isAuthenticated, async (req, res, next)
 groupRouter.post('/api/groups/:id/leave', isAuthenticated, async (req, res, next) => {
     const id = req.params.id
     const user = req.userId
-    if(!id){
-        res.status(422).json({body: "missing group: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     const model = await Group.findById(id).exec()
@@ -135,8 +144,8 @@ groupRouter.get('/api/groups/user/:id/page', async (req, res, next) => {
     const id = req.params.id
     const page = req.query.page
     const size = req.query.size
-    if(!id){
-        res.status(422).json({body: "missing user: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     if(!page){
@@ -156,8 +165,8 @@ groupRouter.get('/api/groups/user/:id/member/page', async (req, res, next) => {
     const id = req.params.id
     const page = req.query.page
     const size = req.query.size
-    if(!id){
-        res.status(422).json({body: "missing user: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     if(!page){
@@ -178,11 +187,48 @@ groupRouter.get('/api/groups/preferences/page', async (req, res, next) => {
     //todo
 })
 
+// endpoint to get paginated list of game groups within a certain distance of a location
+// the location is given in the request body
+groupRouter.get('/api/groups/location/page', async (req, res, next) => {
+    const page = req.query.page
+    const size = req.query.size
+    const json = req.body
+    if(!page){
+        res.status(422).json({body: "missing page number"})
+        return
+    }
+    if(!size){
+        res.status(422).json({body: "missing page size"})
+        return
+    }
+    // find game groups within a certain distance of the location
+    const model = await Group
+                        .aggregate([
+                            {
+                                $match: {
+                                    location: {
+                                        $near: {
+                                            $geometry: {
+                                                type: "Point",
+                                                coordinates: [json.longitude, json.latitude]
+                                            },
+                                            $maxDistance: json.distance
+                                        }
+                                    }
+                                }
+                            }
+                        ])
+                        .skip(page * size)
+                        .limit(size)
+                        .exec()
+    res.status(200).json(model)
+})
+
 // endpoint to get a specific game group
 groupRouter.get('/api/groups/:id', async (req, res, next) => {
     const id = req.params.id
-    if(!id){
-        res.status(422).json({body: "missing group: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     const model = await Group.findById(id).exec()
@@ -198,8 +244,8 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
     const id = req.params.id
     const json = req.body
     const user = req.userId
-    if(!id){
-        res.status(422).json({body: "missing group: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     const model = await Group.findById(id).exec()
@@ -223,6 +269,12 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
     if(json.game){
         model.game = json.game
     }
+    if(json.location){
+        model.location = json.location
+    }
+    if(json.preferences){
+        model.preferences = json.preferences
+    }
     model.save().then((doc) => {
         res.status(201).json(doc)
     }).catch(err => {
@@ -234,8 +286,8 @@ groupRouter.patch('/api/groups/:id', isAuthenticated, async (req, res, next) => 
 groupRouter.delete('/api/groups/:id', isAuthenticated, async (req, res, next) => {
     const id = req.params.id
     const user = req.userId
-    if(!id){
-        res.status(422).json({body: "missing group: id"})
+    if(!isValidObjectId(req.params.id)) {
+        res.status(400).json({body: "invalid object id"})
         return
     }
     const model = await Group.findById(id).exec()
