@@ -6,7 +6,6 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import "../characterCreation.css"
 import GeneralMancer from "../GeneralMancer";
 import MHBasic from "./MHBasic";
-import MHSkins from "./MHSkins";
 import MHMoves from "./MHMoves";
 import MHStrings from "./MHStrings";
 import MHFinalize from "./MHFinalize";
@@ -25,17 +24,12 @@ function MHeartsMancer(props){
     }, [char])
 
     const steps = [
-        {name: 'Basic Character Info', component: <MHBasic onClick={() => updateField('name', 'test')} char={char}/>}, 
-        {name: 'Choose Your Skin/Attributes', component: <MHSkins onClick={updateField} char={char}/>}, 
-        {name: 'Choose Your Moves', component: <MHMoves onClick={updateField} char={char}/>}, 
-        {name: "Add Strings", component: <MHStrings onClick={updateField} char={char}/>},
-        {name: "Finalize Your Character", component: <MHFinalize onClick={updateField} char={char}/>}];
+        {name: 'Basic Character Info', component: <MHBasic onUpdate={updateField} char={char}/>}, 
+        {name: 'Choose Your Moves', component: <MHMoves onUpdate={updateField} char={char}/>}, 
+        {name: "Add Strings", component: <MHStrings onUpdate={updateField} char={char}/>},
+        {name: "Finalize Your Character", component: <MHFinalize onUpdate={updateField} char={char}/>}];
     return (
-        <>
-        <GeneralMancer steps={steps}>
-
-        </GeneralMancer>
-        </>
+        <GeneralMancer steps={steps}/>
     )
 }
 
