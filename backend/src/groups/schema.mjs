@@ -13,7 +13,7 @@ export const GroupSchema = new Schema({
     owner: {
         type: ObjectId,
         required: true,
-        ref : "User"
+        ref : "User",
     },
     members: {
         type: [ObjectId],
@@ -22,7 +22,18 @@ export const GroupSchema = new Schema({
     game: {
         type: ObjectId,
         required: true,
-        ref: "Game"
+        ref: "Game",
+    },
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: false
+        },
+        coordinates: {
+            type: [Number],
+            required: false
+        }
     },
     preferences: {
         combat: {

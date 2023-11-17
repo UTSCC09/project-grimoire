@@ -21,13 +21,9 @@
     display:flex;
     align-items: center;
     justify-content: flex-stat;
+    max-height: 100%;
 }
 
-.nav-button{
-    color: white;
-    background: white;
-}
-
-.nav-button:hover{
-    color: orange
+.NavButton {
+    max-height: 100%;
 }
