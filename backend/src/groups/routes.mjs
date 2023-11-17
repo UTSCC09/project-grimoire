@@ -210,20 +210,45 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
     }
     // compare vector of user preferences to vector of game group preferences and find the closest matches
     // sort the matches by distance from the user preferences
+    console.log("pre aggregate")
+    const groups = await Group
+    .aggregate([
+        {
+            $set: {
+                distance: {
+                    $sqrt: {
+                        $add: [
+                            // vector distance of user preferences and game group preferences
+                            {$pow: [{$subtract: [preferences.combat, json.combat]}, 2]},
+                            {$pow: [{$subtract: [preferences.puzzles, json.puzzles]}, 2]},
+                            {$pow: [{$subtract: [preferences.social, json.social]}, 2]},
+                            {$pow: [{$subtract: [preferences.playerDriven, json.playerDriven]}, 2]},
+                            {$pow: [{$subtract: [preferences.roleplaying, json.roleplaying]}, 2]},
+                            {$pow: [{$subtract: [preferences.homebrew, json.homebrew]}, 2]}
+                        ]
+                    }
+                }
+            },
+            $sort: {
+                distance: 1
+            }
+        }
+    ])
+    console.log("aggregate", groups)
     Group
         .aggregate([
             {
-                $project: {
+                $set: {
                     distance: {
                         $sqrt: {
                             $add: [
                                 // vector distance of user preferences and game group preferences
-                                {$pow: [{$subtract: ["$preferences.combat", json.combat]}, 2]},
-                                {$pow: [{$subtract: ["$preferences.puzzles", json.puzzles]}, 2]},
-                                {$pow: [{$subtract: ["$preferences.social", json.social]}, 2]},
-                                {$pow: [{$subtract: ["$preferences.playerDriven", json.playerDriven]}, 2]},
-                                {$pow: [{$subtract: ["$preferences.roleplaying", json.roleplaying]}, 2]},
-                                {$pow: [{$subtract: ["$preferences.homebrew", json.homebrew]}, 2]}
+                                {$pow: [{$subtract: [preferences.combat, json.combat]}, 2]},
+                                {$pow: [{$subtract: [preferences.puzzles, json.puzzles]}, 2]},
+                                {$pow: [{$subtract: [preferences.social, json.social]}, 2]},
+                                {$pow: [{$subtract: [preferences.playerDriven, json.playerDriven]}, 2]},
+                                {$pow: [{$subtract: [preferences.roleplaying, json.roleplaying]}, 2]},
+                                {$pow: [{$subtract: [preferences.homebrew, json.homebrew]}, 2]}
                             ]
                         }
                     }
@@ -364,8 +389,9 @@ groupRouter.delete('/:id', isAuthenticated, async (req, res, next) => {
         res.status(403).json({body: `user ${user} not authorized to delete group ${id}`})
         return
     }
-    group.delete().then((doc) => {
-        res.status(201).json(doc)
+    Group.deleteOne({_id: id}).exec()
+    .then((doc) => {
+        res.status(201).json({body: `group ${id} deleted`})
     }).catch(err => {
         res.status(500).json({errors: err})
     })
