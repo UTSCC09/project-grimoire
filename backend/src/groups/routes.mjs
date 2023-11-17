@@ -136,8 +136,6 @@ groupRouter.get('/user/:id/member/page', async (req, res, next) => {
         res.status(422).json({body: "missing page size"})
         return
     }
-    const groups = await Group.find().exec()
-    console.log(groups)
     Group.find({members: id}).skip(page * size).limit(size).exec()
     .then((docs) => {
         res.status(200).json(docs)
@@ -162,31 +160,6 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
     }
     // compare vector of user preferences to vector of game group preferences and find the closest matches
     // sort the matches by distance from the user preferences
-    console.log("pre aggregate")
-    const groups = await Group
-    .aggregate([
-        {
-            $set: {
-                distance: {
-                    $sqrt: {
-                        $add: [
-                            // vector distance of user preferences and game group preferences
-                            {$pow: [{$subtract: [preferences.combat, json.combat]}, 2]},
-                            {$pow: [{$subtract: [preferences.puzzles, json.puzzles]}, 2]},
-                            {$pow: [{$subtract: [preferences.social, json.social]}, 2]},
-                            {$pow: [{$subtract: [preferences.playerDriven, json.playerDriven]}, 2]},
-                            {$pow: [{$subtract: [preferences.roleplaying, json.roleplaying]}, 2]},
-                            {$pow: [{$subtract: [preferences.homebrew, json.homebrew]}, 2]}
-                        ]
-                    }
-                }
-            },
-            $sort: {
-                distance: 1
-            }
-        }
-    ])
-    console.log("aggregate", groups)
     Group
         .aggregate([
             {
