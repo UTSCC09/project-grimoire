@@ -15,6 +15,7 @@ import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import cors from 'cors'
 import { MHRouter } from "./monsterHearts/routes.mjs";
 import { gamesRouter } from "./games/routes.mjs";
+import { MapsRouter } from "./googleMaps/routes.mjs";
 
 dotenv.config();
 
@@ -79,6 +80,8 @@ app.use('/api/groups', groupRouter)
 app.use('/api/mhearts', MHRouter)
 
 app.use('/api/games', gamesRouter)
+
+app.use('/api/maps', MapsRouter)
 
 /**
  * sanity check endpoint to test connection
