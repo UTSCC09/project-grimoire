@@ -9,11 +9,8 @@
 }
 
 .logoPicture{
-    object-fit: contain;
-    height: 10vh;
-    max-height: 100%;
-    width: 20vh;
-    max-height: 100%;
+    object-fit: fill;
+    max-height: 5vw;
 }
 
 .logoPicture:hover{
