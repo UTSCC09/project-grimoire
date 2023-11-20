@@ -85,7 +85,7 @@ function CreateGameForm(props)
     })
 
 
-    return (<Grid className="form" container justifyContent={'flex-start'} alignItems={'flex-start'} flexDirection={'column'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
+    return (<Grid className="form" container justifyContent={'flex-start'} alignItems={'flex-start'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
         <TextForm latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
         {(APILoaded.isLoaded) ?  <GoogleMap mapContainerStyle={{width: '75%', height: '100%',}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
         </GoogleMap>
@@ -142,9 +142,9 @@ function TextForm(props)
     } 
 
     return (
-    <Grid width={'60%'}>
-        <Typography color={"white"}>Make a Group</Typography>
-        <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
+    <Grid container justifyContent={'center'} alignItems={'center'} width={'100%'}>
+        <Typography fontSize={'2rem'} color={"white"}>Make a Group</Typography>
+        <TextField className="inputField" color="textprimary" inputProps={{style:  {color: "white", fontSize: '20px'}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label='Game' onChange={(e) => {e.preventDefault(); setgameName((e.target.value));}}/>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label="Combat" onChange={(e) => {e.preventDefault(); setCombat(parseInt(e.target.value));}}></TextField>
         <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Puzzles" onChange={(e) => {e.preventDefault(); setPuzzles(parseInt(e.target.value));}}></TextField>

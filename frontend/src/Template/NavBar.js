@@ -1,7 +1,7 @@
 import {React, useEffect, useState} from "react";
-import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider} from '@mui/material'
+import {Box, Grid, Button, Menu, MenuItem, createTheme, ThemeProvider, AppBar, Toolbar} from '@mui/material'
 import "./template.css"
-import { getCurrentUser, logOut } from "../api.mjs";
+import { delete_cookie, getCurrentUser, logOut } from "../api.mjs";
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled";
 import { grey, red, black} from "@mui/material/colors";
@@ -69,13 +69,6 @@ function NavBar(props){
     //In case of a button performing a function instead of traversing to a different link
     //use the functionNameArray and functionArray names and pass them as onClick handlers
     //for those buttons.
-    const [username, setusername] = useState(getCurrentUser());
-    
-    window.addEventListener('storage', function (event) {
-      if (event.key === 'username') {
-        setusername(event.newValue);
-      }
-    });
     const navigate = useNavigate();
     const signOut = function () {
       logOut().then(function (resp)
@@ -86,7 +79,7 @@ function NavBar(props){
           return;
         }
         console.log("Successful sign out");
-        setusername(null);
+        delete_cookie("Username", "/", process.env.REACT_APP_DOMAIN)
         navigate("/")
       })
     };
@@ -116,20 +109,24 @@ function NavBar(props){
 
     return(
       <ThemeProvider theme = {theme}>
-    <CustomNavBar alignContent={"flex-end"} item container xs={12} direction ={"row"}>
-        <CustomGrid item container xs={8}>
-        <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
-        <DropDownMenu className="NavButton"  ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
-        <DropDownMenu className="NavButton" ButtonText ="Groups" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
-        </CustomGrid>
-        <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
-        {
-          username ?
-        <RightDropDownButton ButtonText={username} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
-        <RightDropDownButton ButtonText ="Sign Up/Log In" statePassArray={LogUserJSON.statePass} DropDownArray={LogUserJSON.textArray} linksArray={LogUserJSON.linksArray}/>
-        }
-        </CustomGrid>
-    </CustomNavBar>
+      <AppBar position="sticky">
+        <Toolbar disableGutters>
+          <Grid item container xs={12} direction ={"row"}>
+              <CustomGrid item container xs={8}>
+              <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
+              <DropDownMenu ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
+              <DropDownMenu ButtonText ="Groups" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
+              </CustomGrid>
+              <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
+              {
+                getCurrentUser() ?
+              <RightDropDownButton ButtonText={getCurrentUser()} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
+              <RightDropDownButton ButtonText ="Sign Up/Log In" statePassArray={LogUserJSON.statePass} DropDownArray={LogUserJSON.textArray} linksArray={LogUserJSON.linksArray}/>
+              }
+              </CustomGrid>
+          </Grid>
+        </Toolbar>
+      </AppBar>
     </ThemeProvider>
     )
 }
@@ -152,9 +149,10 @@ function DropDownMenu(props) {
   {
     ArraytoInsert = props.DropDownArray.map(function (s, index) 
       {
-          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); navigate(props.linksArray[index]);}}>{s}</MenuItem>
+          return <MenuItem key= {s} onClick={(event) => {event.preventDefault(); if(getCurrentUser()) navigate(props.linksArray[index]); else navigate("/login"); setAnchorEl(null)}}>{s}</MenuItem>
       })
   }
+  
   if(props.functionsArray)
   {
     functionButtonsArray = props.functionsArray.map(function (s, index)
