@@ -114,8 +114,8 @@ function NavBar(props){
               </CustomGrid>
               <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
               {
-                username ?
-              <RightDropDownButton ButtonText={username} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
+                getCurrentUser() ?
+              <RightDropDownButton ButtonText={getCurrentUser()} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :
               <RightDropDownButton ButtonText ="Sign Up/Log In" statePassArray={LogUserJSON.statePass} DropDownArray={LogUserJSON.textArray} linksArray={LogUserJSON.linksArray}/>
               }
               </CustomGrid>
