@@ -2,11 +2,12 @@ const URL = process.env.REACT_APP_URL
 
 //The following functions return a Promise. The functions which call these ones must
 //handle that Promise asynchonously
-export function signUp(username, password) 
+export function signUp(username, password, dualfactor) 
 {
     const postData = {
         email: username,
-        password: password
+        password: password,
+        twofa: dualfactor
     }
     return fetch(`${URL}/api/signup`, {
         method: 'POST',
@@ -45,14 +46,16 @@ export function postGroup(latitude, longitude, groupName, groupGame, combat, puz
     game: groupGame,
     longitude: longitude,
     latitude: latitude,
-    combat: combat,
-    puzzles: puzzles,
-    social: social,
-    playerDriven: playerDriven,
-    roleplaying: roleplaying,
-    homebrew: homebrew
+    preferences: {
+          combat: combat,
+          puzzles: puzzles,
+          social: social,
+          playerDriven: playerDriven,
+          roleplaying: roleplaying,
+          homebrew: homebrew
+    }
   }
-  return fetch(`${URL}/api/groups`, {
+  return fetch(`${URL}/api/groups/create`, {
     method: 'POST',
     headers:
     {

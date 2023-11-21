@@ -1,10 +1,12 @@
 import {React, useState, useEffect} from "react"
-import {Alert, Box, Button, Grid, TextField, ThemeProvider, Typography, createTheme} from "@mui/material"
+import {Alert, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Slider, TextField, ThemeProvider, Typography, createTheme} from "@mui/material"
 import {GoogleMap, Marker, useJsApiLoader} from "@react-google-maps/api"
 import "./createGame.css"
 import GrimoireCreateGroup from '../media/CreateGroupPicture.png'
-import { postGroup } from "../api.mjs"
+import { getGames, postGroup } from "../api.mjs"
 import { useNavigate } from "react-router";
+import styled from "@emotion/styled"
+import { Form } from "react-router-dom"
 
 const theme = createTheme({
     palette:
@@ -61,7 +63,7 @@ function CreateGame(props){
 
 function CreateGameForm(props)
 {
-    
+    const [isInPersonGame, setisInPersonGame] = useState(true)
     const [latitude, setLatitude] = useState(0)
     const [longtitude, setLongtitude] = useState(0)
     const [error, setError] = useState(null);
@@ -85,16 +87,19 @@ function CreateGameForm(props)
     })
 
 
-    return (<Grid className="form" container justifyContent={'flex-start'} alignItems={'flex-start'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
-        <TextForm latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
-        {(APILoaded.isLoaded) ?  <GoogleMap mapContainerStyle={{width: '75%', height: '100%',}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
+    return (<Grid className="form" container justifyContent={'flex-start'} flexDirection={'column'} alignItems={'center'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
+        <TextForm isInPersonGame={isInPersonGame} setisInPersonGame={setisInPersonGame} latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
+        <Grid width= '80%' height='50vh' container alignItems={'center'}>
+        {(APILoaded.isLoaded && isInPersonGame) ?  <GoogleMap mapContainerStyle={{width: '100%', height: '100%',}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
         </GoogleMap>
-         : <Typography>Loading</Typography> }   
+         : <Typography>Loading</Typography> }  
+         </Grid> 
     </Grid>)
 }
 
 function TextForm(props)
 {
+    //All fields which are user generated
     const [error, setError] = useState(null)
     const [groupName, setgroupName] = useState(null);
     const [gameName, setgameName] = useState(null);
@@ -108,7 +113,7 @@ function TextForm(props)
     const navigate = useNavigate();
     
     const handleSubmission = function () {
-        if (props.latitude === 0 && props.longtitude === 0)
+        if (props.latitude === 0 && props.longtitude === 0 && props.isInPersonGame)
         {
             setError("Location needs to be set")
         }
@@ -139,20 +144,36 @@ function TextForm(props)
                 setError(String(error))
             })
         }
-    } 
+    }
+
+    const handleSliderChange = function (setState)
+    {
+        return (
+            (event, newValue) =>
+            {
+                setState(newValue)
+            }
+        )
+    }
+    //Yeah, I know this is a crappy way to make the code modular, but shut up
+    const PreferenceArray= ['Combat', 'Puzzles', 'Social', 'Player Driven', 'Roleplaying', 'Homebrew']
+    
+    const PreferenceStateChangeArray = [handleSliderChange(setCombat), handleSliderChange(setPuzzles), handleSliderChange(setSocial),
+        handleSliderChange(setPlayerDriven), handleSliderChange(setRoleplaying), handleSliderChange(setHomebrew)]
 
     return (
     <Grid container justifyContent={'center'} alignItems={'center'} width={'100%'}>
         <Typography fontSize={'2rem'} color={"white"}>Make a Group</Typography>
-        <TextField className="inputField" color="textprimary" inputProps={{style:  {color: "white", fontSize: '20px'}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label='Game' onChange={(e) => {e.preventDefault(); setgameName((e.target.value));}}/>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label="Combat" onChange={(e) => {e.preventDefault(); setCombat(parseInt(e.target.value));}}></TextField>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Puzzles" onChange={(e) => {e.preventDefault(); setPuzzles(parseInt(e.target.value));}}></TextField>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Social" onChange={(e) => {e.preventDefault(); setSocial(parseInt(e.target.value));}}></TextField>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Player Driven" onChange={(e) => {e.preventDefault(); setPlayerDriven(parseInt(e.target.value));}}></TextField>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Roleplaying" onChange={(e) => {e.preventDefault(); setRoleplaying(parseInt(e.target.value));}}></TextField>
-        <TextField className="inputField" color='textprimary' inputProps={{style: {color: "white"}}} variant="filled" focused label = "Homebrew" onChange={(e) => {e.preventDefault(); setHomebrew(parseInt(e.target.value));}}></TextField> 
-        <Button color='textprimary' onClick={(e) => {e.preventDefault(); updateGoogleMapsLocation(props.setLatitude, props.setLongtitude, setError)}}>Get Location</Button>
+        <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
+        <SystemPick setgameName={setgameName} setError={setError}/>
+        <Typography fontSize={'2rem'} color={"white"}>Indicate your preference for the following: (Optional)</Typography>
+        <Preferences PreferenceStateChangeArray={PreferenceStateChangeArray} PreferenceArray={PreferenceArray}/>
+        <LocationServices setRemote={props.setisInPersonGame}/>
+        {props.isInPersonGame ?
+            <Button color='textprimary' onClick={(e) => {e.preventDefault(); updateGoogleMapsLocation(props.setLatitude, props.setLongtitude, setError)}}>Get Location</Button>
+            :
+            <Typography sx={{color: '#ff0000'}}>Get Location</Typography>
+        }
         <Button onClick={(e) => {e.preventDefault(); handleSubmission();}} color='textprimary'>Submit</Button>
         {
             (error) ? 
@@ -160,6 +181,52 @@ function TextForm(props)
             <></>
         }
     </Grid>
+    )
+}
+
+
+function LocationServices(props)
+{
+    const handleCheckBox = function (event)
+    {
+        props.setRemote(event.target.checked)
+    }
+
+    return (
+        <FormControl sx={{width: '100%', color: '#ffffff', alignItems: 'center'}}> Will games be in person?
+            <FormControlLabel labelPlacement="start" sx ={{width: '3%', color: '#ffffff'}}
+            control = {<Checkbox  sx ={{color: '#ffffff', '&.Mui-checked': {color: '#ffffff'}}} defaultChecked onChange={handleCheckBox}/>}
+            />
+        </FormControl>
+    )
+}
+
+function Preferences(props)
+{
+    
+    return (
+        <FormControl sx={{width: '90%', alignSelf: 'center', color: '#ffffff'}}>
+            {   
+                props.PreferenceArray.map(function (preference, index)
+                {
+                    return <FormControlLabel
+                    control={<Slider
+                        valueLabelDisplay="auto"
+                        defaultValue={1}
+                        step={1}
+                        marks
+                        min={1}
+                        max={5}
+                        sx={{color: '#ffffff', width: '80%'}}/>}
+                        color="#ffffff"
+                        label={preference}
+                        onChange={props.PreferenceStateChangeArray[index]}
+                        labelPlacement="top"
+                        key={`Preference${preference}`}
+                    />
+                })
+            }
+        </FormControl>
     )
 }
 
@@ -179,6 +246,52 @@ function updateGoogleMapsLocation(setLatitude, setLongtitude, setError)
     {
         setError("Browser does not support geolocation, please manually input a meeting place");
     }
+}
+
+function SystemPick(props)
+{
+    const [gameNames, setGameNames] = useState([]);
+
+    useEffect(function ()
+    {
+        const controller = new AbortController();
+        getGameNames(setGameNames, props.setError, controller)
+    }, [])
+    
+    //RadioGroup helper provided by MaterialUI
+    return (<FormControl>
+        <FormLabel sx={{color: "#ffffff", '&.Mui-focused': { color: "#ffffff"}}} id="demo-row-radio-buttons-group-label">Pick a Supported Game</FormLabel>
+        <RadioGroup
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+          sx={{color: '#ffffff'}}
+        >
+        {
+            gameNames.map(function(gameSystem) 
+            {
+                return <FormControlLabel key={`RadioButton${gameSystem.name}`} value={`${gameSystem.name}`} 
+                control={<Radio sx={{color: '#ffffff', '&.Mui-checked': {color: '#ffffff'}}} onChange={(event) => {event.preventDefault(); props.setgameName(`${gameSystem.name}`)}} />} label={`${gameSystem.name}`} />
+            })
+        }
+        </RadioGroup>
+      </FormControl>)
+}
+
+//Returns all supported gameNames as an array of strings
+function getGameNames(setGameNames, setError, controller)
+{
+    getGames({page: 0, limit: 10}, controller.signal).then(async function (res) {
+        if (!res.ok)
+        {
+            setError("Error in getting supported systems from the server. Please try again later")
+            return;
+        }
+        else
+        {
+            const json = await res.json()
+            setGameNames(json.records)
+        }
+    })
 }
 
 

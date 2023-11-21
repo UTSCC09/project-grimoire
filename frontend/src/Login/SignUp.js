@@ -1,5 +1,5 @@
 import {React, useState} from "react"
-import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box, Checkbox, FormControlLabel, CheckBoxIcon} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import { signUp, getSessionCode } from "../api.mjs";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
@@ -75,6 +75,15 @@ function SignUpForm(props)
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [allowSubmit, setallowSubmit] = useState(false);
+    const [DualFactor, setDualFactor] = useState(false)
+    
+    const handleDualFactorClick = function(event)
+    {
+        event.preventDefault();
+        setDualFactor(event.target.checked);
+        console.log(event.target.checked)
+    }
+
     const handleEmailChange = function (event)
     {
         event.preventDefault();
@@ -101,7 +110,7 @@ function SignUpForm(props)
         else 
         {
             setError(null);
-            signUp(props.email, props.password).then(function (response) 
+            signUp(props.email, props.password, DualFactor).then(function (response) 
             {
                 
                 if (!response.ok)
@@ -139,6 +148,7 @@ function SignUpForm(props)
                     :
                     <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
                     )}
+        <FormControlLabel sx={{color: '#ffffff'}} control={<Checkbox checked={DualFactor} onChange={handleDualFactorClick} color="error"  sx={{color: '#ffffff'}} />} label="Enable Dual Factor Authentication on log in?"/>
         {
             Boolean(error) ? 
             <Alert severity="error">{error}</Alert>
