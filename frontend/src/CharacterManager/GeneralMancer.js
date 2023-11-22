@@ -47,7 +47,7 @@ function GeneralMancer(props, ref){
       const newCompleted = completed;
       newCompleted[activeStep] = true;
       setCompleted(newCompleted);
-      handleNext();
+      //handleNext();
     };
   
     const handleReset = () => {
