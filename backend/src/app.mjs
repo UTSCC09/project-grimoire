@@ -253,7 +253,7 @@ app.post("/api/signin", (req, res, next) => {
  */
 app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
-        res.clearCookie('Username')
+        res.clearCookie("Username")
         res.status(200).json({body: "logout successful"})
     })
 })

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from 'prop-types'
-import { Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Dialog, DialogContent, DialogTitle, FormControlLabel, Grid, List, Modal, Paper, Radio, RadioGroup, Switch, TextField, Typography } from "@mui/material";
+import { Card, CardActionArea, CardActions, CardContent, CardMedia, Collapse, Dialog, DialogActions, 
+    DialogContent, DialogTitle, FormControlLabel, Grid, List, Modal, Paper, Radio, Button,
+    RadioGroup, Switch, TextField, Typography } from "@mui/material";
 import "../characterCreation.css"
 import { getSkins } from "../../api.mjs";
 import ExpandMore from "../../globalComponents/ExpandMore";
@@ -20,6 +22,21 @@ function SkinCard(props){
     const [expanded, setExpanded] = useState(false)
     const [selectedStat, setSelectedStat] = useState(0)
 
+    const onClose = (event) =>{
+        if(event)
+            event.preventDefault();
+        setExpanded(false)
+    }
+
+    function updateMancer(){
+        props.onUpdate({
+            skin: props._id,
+            selectedStat: selectedStat,
+            moves: [...(props.char.moves || []), ...props.requiredMoves]
+        })
+        onClose()
+    }
+
     return (
         <>
         <Card>
@@ -35,7 +52,7 @@ function SkinCard(props){
                 </CardContent>
             </CardActionArea>
         </Card>
-        <Dialog onClose={() => setExpanded(false)} open={expanded} maxWidth="sm" fullWidth>
+        <Dialog onClose={onClose} open={expanded} maxWidth="sm" fullWidth>
             <DialogTitle>{props.name}</DialogTitle>
             <DialogContent>
                 <Typography variant="body2" color="text.secondary">
@@ -65,6 +82,10 @@ function SkinCard(props){
                     {props.sexMove}
                 </Grid>
             </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Go Back</Button>
+                <Button onClick={updateMancer}>Choose This Skin</Button>
+            </DialogActions>
         </Dialog>
         </>
     )
@@ -83,7 +104,7 @@ function MHBasic(props){
                 return
             }
             const json = await resp.json()
-            console.log('json', json)
+            //console.log('json', json)
             setSkins(json.records)
         }).catch(e => {
             console.error(e)
@@ -106,7 +127,7 @@ function MHBasic(props){
             <Grid item container xs={12} spacing={1} sx={{padding:"0.5%"}}>
                     {skins.map((s) => (
                         <Grid item container xs={12}>
-                            <SkinCard {...s}/>
+                            <SkinCard {...s} onUpdate={props.onUpdate} char={props.char}/>
                         </Grid>
                     ))}
             </Grid>

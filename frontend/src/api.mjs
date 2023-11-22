@@ -130,6 +130,8 @@ export function getSessionCode() {
     })
 }
 
+/**CHARACTER CREATION */
+/*---------------------------------------------*/
 export function getGames(searchCritera={}, signal=undefined){
   let urlString = `${URL}/api/games?`
   for(let key of Object.keys(searchCritera)){
@@ -154,6 +156,20 @@ export function getSkins(searchCritera={}, signal=undefined){
   })
 }
 
+export function getMoves(searchCritera, signal=undefined){
+  let urlString = `${URL}/api/mhearts/moves?`
+  for(let key of Object.keys(searchCritera)){
+    urlString += `${key}=${searchCritera[key]}&`
+  }
+  return fetch(urlString, {
+    method: 'GET',
+    credentials: 'include',
+    signal: signal
+  })
+}
+
+/*GROUPS */
+/*---------------------------------------------*/
 export function getGroups(page=0){
   return fetch(`${URL}/api/groups/page?page=${page}`, {
     method: "GET",

@@ -19,8 +19,8 @@ const disRouter = Router()
  * @returns {Object} an array of origins, and info involving pagination
  */
 disRouter.get('/origins', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
@@ -51,8 +51,8 @@ disRouter.get('/origins', async (req, res, next) => {
  * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/mutations', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
@@ -83,8 +83,8 @@ disRouter.get('/mutations', async (req, res, next) => {
  * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/items', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
@@ -116,8 +116,8 @@ disRouter.get('/items', async (req, res, next) => {
  * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/weapons', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
@@ -150,8 +150,8 @@ disRouter.get('/weapons', async (req, res, next) => {
  * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/armor', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
@@ -184,8 +184,8 @@ disRouter.get('/armor', async (req, res, next) => {
  * @returns {Object} an array of records, and info involving pagination
  */
 disRouter.get('/startequip', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
