@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isAuthenticated } from "../helper.mjs";
 import { Group } from "./schema.mjs";
-import { Game, Game, User } from "../schemas.mjs";
+import { Game, User } from "../schemas.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 
 export const groupRouter = Router()
