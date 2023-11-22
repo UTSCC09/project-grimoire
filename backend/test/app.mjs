@@ -362,7 +362,6 @@ describe("Group creation", () => {
     })
 })
 
-/*
 describe("Death in space sheets", () => {
     after(()=>{
        resetSheets()

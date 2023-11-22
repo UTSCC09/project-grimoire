@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 function GameCard(props){
     return (
         <Card sx={props.sx}>
-            <CardActionArea sx={{height:"90%", display:'flex', justifyContent:'flex-start', flexDirection:'column'}}>
+            <CardActionArea sx={{height:"100%", display:'flex', justifyContent:'flex-start', flexDirection:'column'}}
+                onClick={props.onClick}>
                 <CardMedia
                 component="img"
                 sx={{width:'100%', objectFit:'fill', height:250}}
@@ -21,9 +22,6 @@ function GameCard(props){
                     </Typography>
                 </CardContent>
             </CardActionArea>
-            <CardActions sx={{width: "100%", alignItems:"center", justifyContent:'center'}}>
-                <Button onClick={props.onClick} sx={{align:'center'}}>This Game</Button>
-            </CardActions>
         </Card>
     )
 }

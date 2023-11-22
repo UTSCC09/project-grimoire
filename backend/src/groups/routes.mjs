@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isAuthenticated } from "../helper.mjs";
 import { Group } from "./schema.mjs";
-import { Game, User } from "../schemas.mjs";
+import { Game, Game, User } from "../schemas.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
 
 export const groupRouter = Router()
@@ -49,8 +49,8 @@ groupRouter.post('/create', isAuthenticated, async (req, res, next) => {
 
 // endpoint to get paginated list of game groups given page number and page size
 groupRouter.get('/page/', async (req, res, next) => {
-    const page = req.query.page
-    const size = req.query.size
+    const page = req.query.page || DEFAULTPAGE
+    const size = req.query.size || DEFAULTLIMIT
     if(!page){
         res.status(422).json({body: "missing page number"})
         return
