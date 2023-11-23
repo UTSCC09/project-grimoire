@@ -1,3 +1,8 @@
+.center{
+    justify-content: center;
+    align-items: center;
+}
+
 .normal-box{
     height:100%;
     width:100%

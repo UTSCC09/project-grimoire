@@ -1,5 +1,17 @@
 const URL = process.env.REACT_APP_URL
 
+function buildGeneralSearch(url, searchParams, signal=undefined){
+  let urlString = url + "?"
+  for(let key of Object.keys(searchParams)){
+    urlString += `${key}=${searchParams[key]}&`
+  }
+  return fetch(urlString, {
+    method: 'GET',
+    credentials: 'include',
+    signal: signal
+  })
+}
+
 //The following functions return a Promise. The functions which call these ones must
 //handle that Promise asynchonously
 export function signUp(username, password) 
@@ -178,4 +190,9 @@ export function getGroups(page=0){
     },
     credentials: 'include',
   })
+}
+
+/* DIS ORIGINS */
+export function getDISOrigins(searchObj, signal=undefined){
+  return buildGeneralSearch(`${URL}/api/dis/origins`, searchObj, signal)
 }
