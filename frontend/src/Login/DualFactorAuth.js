@@ -51,7 +51,8 @@ const theme = createTheme({
 })
 
 const CustomTextContainer = styled(Grid)(({theme}) =>({
-    width: 'auto',
+    width: '50%',
+    height: '111vh',
     backgroundColor: theme.palette.primary.main,
     flex: theme.sizing.display.primary
 }))
@@ -104,17 +105,19 @@ export function DualFactorAuth(props){
     }
 
     return (<ThemeProvider theme={theme}>
-    <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
-        <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
+    <Grid backgroundColor='#000000' className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
+    <div className="imgcontainer">
+            <img alt="SignUpPicture" style={{maxHeight: '100%', maxWidth: '100%', display: 'fill'}} src={GrimoireSignUpImage}/>
+        </div>
         <CustomTextContainer spacing={10} item container direction="column" justifyContent={"flex-start"} alignItems={"center"}>
             <Typography marginTop={'40%'} marginBottom={'5%'} color='secondary' fontSize={30} className="signUpPrompt">A validation code has been sent to your Email</Typography>
             <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' color='secondary' label="Validation Code" variant="filled" focused onChange={e => {handleCodeChange(e); setvalidatecode(e.target.value)}}/>
             </Box>
             {(allowSubmit ? 
-            <CustomSubmitButton className="submitButton" color="secondary" onClick={e => {e.preventDefault(); handleSubmit()}}>Sign Up</CustomSubmitButton>
+            <CustomSubmitButton className="submitButton" color="secondary" onClick={e => {e.preventDefault(); handleSubmit()}}>Enter</CustomSubmitButton>
             :
-            <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
+            <Typography fontSize={'5vh'} color='red'>Enter</Typography>
             )}
         {
             Boolean(error) ? 

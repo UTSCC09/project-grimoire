@@ -52,7 +52,8 @@ const theme = createTheme({
 })
 
 const CustomTextContainer = styled(Grid)(({theme}) =>({
-    width: 'auto',
+    maxWidth: '40%',
+    height: '105vh',
     backgroundColor: theme.palette.primary.main,
     flex: theme.sizing.display.primary
 }))
@@ -133,14 +134,16 @@ function SignUpForm(props)
     
     return (
     <ThemeProvider theme={theme}>
-    <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
-        <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}></img>
-        <CustomTextContainer spacing={10} item container direction="column" justifyContent={"flex-start"} alignItems={"center"}>
-            <Typography marginTop={'40%'} marginBottom={'5%'} color='secondary' fontSize={80} className="signUpPrompt">Join Us</Typography>
-            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+    <Grid sx={{backgroundColor: '#000000'}} spacing={0} container item direction={"row"} xs={12}>
+        <div className="imgcontainer">
+            <img alt="SignUpPicture" style={{maxHeight: '100%', maxWidth: '100%'}} src={GrimoireSignUpImage}/>
+        </div>
+        <CustomTextContainer spacing={3} item container direction="column" justifyContent={"flex-start"} alignItems={"center"}>
+            <Typography marginTop={'20%'} marginBottom={'5%'} color='secondary' fontSize={80} className="signUpPrompt">Join Us</Typography>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'5%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' color='secondary' label="Email" variant="filled" focused onChange={e => {handleEmailChange(e);}}/>
             </Box>
-            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'5%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' id="passwordInput" color='secondary' label="Password" variant="filled" type="password" focused onChange={e => {props.setPassword(e.target.value)}}/>
             </Box>
         {(allowSubmit ? 

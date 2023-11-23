@@ -52,7 +52,8 @@ const theme = createTheme({
 })
 
 const CustomTextContainer = styled(Grid)(({theme}) =>({
-    width: 'auto',
+    width: '30%',
+    height: '105vh',
     backgroundColor: theme.palette.primary.main,
     flex: theme.sizing.display.primary
 }))
@@ -98,7 +99,7 @@ function LogInForm(props)
             }
         else 
         {
-            logIn(props.email, props.password).then(function (response) 
+            logIn(props.email, props.password).then(async function (response) 
             {
                 if (!response.ok)
                 {
@@ -111,8 +112,11 @@ function LogInForm(props)
                 }
                 else
                 {
-                    localStorage.setItem("username", getCurrentUser());
-                    navigate("/");
+                    const json = await response.json();
+                    if (json.dfa)
+                        navigate("/DualFactorAuth");
+                    else
+                        navigate("/");
                 }
             })
             .catch(function (error)
@@ -126,14 +130,16 @@ function LogInForm(props)
 
     return (
         <ThemeProvider theme={theme}>
-    <Grid className="signUpPageCont" spacing={0} container item direction={"row"} xs={12}>
-        <img alt="SignUpPicture" className="signUpImage" src={GrimoireSignUpImage}/>
+    <Grid sx={{backgroundColor: '#000000'}} spacing={0} container item flexDirection={"row"} xs={12}>
+    <div className="imgcontainer">
+            <img alt="SignUpPicture" style={{maxHeight: '100%', maxWidth: '100%', display: 'fill'}} src={GrimoireSignUpImage}/>
+        </div>
         <CustomTextContainer spacing={10} item container direction="column" justifyContent={"flex-start"} alignItems={"center"}>
-            <Typography marginTop={'40%'} marginBottom={'5%'} color='secondary' fontSize={'400%'} className="signUpPrompt">Welcome Back</Typography>
-            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+            <Typography marginTop={'30%'} marginBottom={'5%'} color='secondary' fontSize={'400%'} className="signUpPrompt">Welcome Back</Typography>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'5%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' color='secondary' label="Email" variant="filled" focused onChange={e => {handleEmailChange(e);}}/>
             </Box>
-            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'10%'}>
+            <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'5%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' id="passwordInput" color='secondary' label="Password" variant="filled" type="password" focused onChange={e => {props.setPassword(e.target.value)}}/>
             </Box>
         {(allowSubmit ? 

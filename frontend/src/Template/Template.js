@@ -24,8 +24,17 @@ const theme = createTheme({
                 }
             }
         }
-
       },
+      palette: {
+        primary:
+        {
+            main: '#ffffff'
+        },
+        secondary:
+        {
+            main: '#ff000d'
+        },
+      }
 })
 
 

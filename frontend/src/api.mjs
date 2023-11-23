@@ -44,8 +44,11 @@ export function postGroup(latitude, longitude, groupName, groupGame, combat, puz
   const data = {
     name: groupName,
     game: groupGame,
-    longitude: longitude,
-    latitude: latitude,
+    location:
+    {
+      longitude: longitude,
+      latitude: latitude,
+    },
     preferences: {
           combat: combat,
           puzzles: puzzles,
@@ -176,4 +179,16 @@ export function getGroups(page=0){
     },
     credentials: 'include',
   })
+}
+
+export function getLocationNamesFromCardinal(lat, lng)
+{
+  return fetch(`${URL}/api/maps/reverseGeocode?lat=${lat}&lng=${lng}`, 
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: 'include'
+        })
 }

@@ -1,9 +1,9 @@
 import {React, useState, useEffect} from "react"
 import {Alert, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Slider, TextField, ThemeProvider, Typography, createTheme} from "@mui/material"
-import {GoogleMap, Marker, useJsApiLoader} from "@react-google-maps/api"
+import {Autocomplete, GoogleMap, Marker, useJsApiLoader} from "@react-google-maps/api"
 import "./createGame.css"
 import GrimoireCreateGroup from '../media/CreateGroupPicture.png'
-import { getGames, postGroup } from "../api.mjs"
+import { getGames, getLocationNamesFromCardinal, postGroup } from "../api.mjs"
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled"
 import { Form } from "react-router-dom"
@@ -50,9 +50,9 @@ function CreateGame(props){
 
       return (
         <ThemeProvider theme={theme}>
-      <Box container='true' spacing={0} justifyContent={'center'} alignItems={'center'} className='entireScreen'>
+      <Box container='true' justifyContent={'center'} alignItems={'center'} className='entireScreen'>
         <Box className='imageContainer'>
-      <img alt='SignUpImage' className='signUpImage' src={GrimoireCreateGroup}/>
+            <img alt='SignUpImage' className='signUpImage' src={GrimoireCreateGroup}/>
         </Box>
         <CreateGameForm/>
       </Box>
@@ -63,10 +63,10 @@ function CreateGame(props){
 
 function CreateGameForm(props)
 {
+    const [searchResult, setSearchResult] = useState(null)
     const [isInPersonGame, setisInPersonGame] = useState(true)
     const [latitude, setLatitude] = useState(0)
     const [longtitude, setLongtitude] = useState(0)
-    const [error, setError] = useState(null);
     const [zoom, setZoom] = useState(1);
 
     useEffect(() => {
@@ -78,7 +78,6 @@ function CreateGameForm(props)
         {
             setZoom(17);
         }
-        console.log('Map center changed:' + String(latitude) + " " + String(longtitude));
       }, [latitude, longtitude]);
 
     const APILoaded = useJsApiLoader({
@@ -86,19 +85,39 @@ function CreateGameForm(props)
         libraries: ['places']
     })
 
+    const onLoadAutoComplete = function (autocomplete)
+    {
+        setSearchResult(autocomplete)
+    }
 
-    return (<Grid className="form" container justifyContent={'flex-start'} flexDirection={'column'} alignItems={'center'} height={'50%'} margin={'auto'} marginTop={'10vh'} width={'40%'}>
+    const onPlaceChanged = async function()  {
+        if (searchResult != null) {
+          const place = await searchResult.getPlace()
+          setLatitude(parseFloat(place.geometry.viewport.eb.hi))
+          setLongtitude(parseFloat(place.geometry.viewport.La.hi))
+        } else {
+          alert("Please enter text");
+        }
+      }
+
+
+    return (<Grid className="form" container justifyContent={'flex-start'} flexDirection={'column'} alignItems={'center'} height={'50%'} margin={'auto'} marginTop={'0vh'} width={'40%'}>
         <TextForm isInPersonGame={isInPersonGame} setisInPersonGame={setisInPersonGame} latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
-        <Grid width= '80%' height='50vh' container alignItems={'center'}>
-        {(APILoaded.isLoaded && isInPersonGame) ?  <GoogleMap mapContainerStyle={{width: '100%', height: '100%',}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
+        {(APILoaded.isLoaded && isInPersonGame) ? <Grid width= '80%' height='50vh' container alignItems={'center'}> 
+        <Autocomplete sx={{width: '300px'}} onLoad={onLoadAutoComplete} onPlaceChanged={onPlaceChanged}>
+            <TextField inputProps={{style: {color: "white"}}} focused className="inputField" color="textprimary" label={'Manually Input a Location'}></TextField>
+        </Autocomplete>
+        <GoogleMap mapContainerStyle={{width: '100%', height: '100%', padding: '0'}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
         </GoogleMap>
+        
+        </Grid> 
          : <Typography>Loading</Typography> }  
-         </Grid> 
     </Grid>)
 }
 
 function TextForm(props)
 {
+    const [displayLocation, setDisplayLocation] = useState(null)
     //All fields which are user generated
     const [error, setError] = useState(null)
     const [groupName, setgroupName] = useState(null);
@@ -127,12 +146,18 @@ function TextForm(props)
         }
         else 
         {
+            if (props.isInPersonGame)
+            {
+                props.setLatitude(0);
+                props.setLongtitude(0);
+            }
             postGroup(props.latitude, props.longtitude, groupName, gameName,
                     combat, puzzles, social, playerDriven, roleplaying, homebrew).then(function (resp)
             {
                 if (!resp.ok)
                 {
                     setError("Connection to server could not be established, please check your inputs")
+                    console.log(resp.json())
                 }
                 else 
                 {
@@ -145,6 +170,34 @@ function TextForm(props)
             })
         }
     }
+
+    useEffect(function ()
+    {
+        if (props.longtitude === 0 && props.latitude === 0)
+        {
+            return
+        }
+        //We know we need to set a location to display to user
+        getLocationNamesFromCardinal(props.latitude, props.longtitude)
+        .then(async function(res)
+        {
+            if (!res.ok)
+            {
+                setError("Can't get location information from server. " + String(res.status))
+            }
+            else 
+            {
+                const json = await res.json()
+                const address_info = json.address_components
+                if (json.address_components)
+                {
+                    setDisplayLocation(address_info.administrative_area_level_3.long_name + ", " +
+                                        address_info.administrative_area_level_1.long_name + ". " +
+                                        address_info.country.long_name)
+                }
+            }
+        })
+    }, [props.longtitude, props.latitude])
 
     const handleSliderChange = function (setState)
     {
@@ -162,7 +215,7 @@ function TextForm(props)
         handleSliderChange(setPlayerDriven), handleSliderChange(setRoleplaying), handleSliderChange(setHomebrew)]
 
     return (
-    <Grid container justifyContent={'center'} alignItems={'center'} width={'100%'}>
+    <Grid container flexDirection={'column'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
         <Typography fontSize={'2rem'} color={"white"}>Make a Group</Typography>
         <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
         <SystemPick setgameName={setgameName} setError={setError}/>
@@ -179,6 +232,12 @@ function TextForm(props)
             (error) ? 
             <Alert severity="error">{error}</Alert> :
             <></>
+        }
+        <Typography fontSize={'2rem'} color={"white"}>Location set to:</Typography>
+        {
+            (displayLocation) ? 
+                <Typography fontSize={'2rem'} color={"white"}>{displayLocation}</Typography> 
+                : <></>
         }
     </Grid>
     )
