@@ -146,11 +146,6 @@ function SignUpForm(props)
             <Box container='true' alignContent='center' justifyContent={'center'} width={'75%'} marginBottom={'5%'}>
             <TextField inputProps={{style: {color: "white"}}} className='inputFields' id="passwordInput" color='secondary' label="Password" variant="filled" type="password" focused onChange={e => {props.setPassword(e.target.value)}}/>
             </Box>
-        {(allowSubmit ? 
-                    <CustomSubmitButton className="submitButton" color="secondary" onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</CustomSubmitButton>
-                    :
-                    <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
-                    )}
         <FormControlLabel sx={{color: '#ffffff'}} control={<Checkbox checked={DualFactor} onChange={handleDualFactorClick} color="error"  sx={{color: '#ffffff'}} />} label="Enable Dual Factor Authentication on log in?"/>
         {
             Boolean(error) ? 
@@ -158,6 +153,11 @@ function SignUpForm(props)
             : 
             <></>
         }
+        {(allowSubmit ? 
+                    <CustomSubmitButton className="submitButton" color="secondary" onClick={e => {e.preventDefault(); FormSubmit()}}>Sign Up</CustomSubmitButton>
+                    :
+                    <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
+                    )}
         </CustomTextContainer>
         </Grid>
         </ThemeProvider>

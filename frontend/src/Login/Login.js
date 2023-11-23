@@ -130,7 +130,7 @@ function LogInForm(props)
 
     return (
         <ThemeProvider theme={theme}>
-    <Grid sx={{backgroundColor: '#000000'}} spacing={0} container item flexDirection={"row"} xs={12}>
+    <Grid sx={{backgroundColor: '#000000', height: '103vh'}} spacing={0} container item flexDirection={"row"}  xs={12}>
     <div className="imgcontainer">
             <img alt="SignUpPicture" style={{maxHeight: '100%', maxWidth: '100%', display: 'fill'}} src={GrimoireSignUpImage}/>
         </div>
