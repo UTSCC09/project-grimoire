@@ -14,6 +14,21 @@ function GeneralMancer(props, ref){
         setSteps(props.steps)
     }, [props.steps])
 
+    //seeing if need to update parent that ready
+    useEffect(()=>{
+      //if we aren't supposed to do nothing
+      if(!props.updateReady)
+          return
+
+      for(let i = 0; i < steps.length; i++){
+        if(steps[i].required && !completed[i]){
+          props.updateReady(false)
+          return
+        }
+      }
+      props.updateReady(true)
+    })
+
     const completedSteps = () => {
       return Object.keys(completed).length;
     };

@@ -192,11 +192,22 @@ export function getGroups(page=0){
   })
 }
 
-/* DIS ORIGINS */
+/* DIS endpoints */
 export function getDISOrigins(searchObj, signal=undefined){
   return buildGeneralSearch(`${URL}/api/dis/origins`, searchObj, signal)
 }
 
 export function getDISEquipment(searchObj, signal){
   return buildGeneralSearch(`${URL}/api/dis/startequip`, searchObj, signal)
+}
+
+export function createDISSheet(sheetObj){
+  return fetch(`${URL}/api/dis/sheets/create`, {
+    method: "POST",
+    body: JSON.stringify(sheetObj),
+    headers: {
+        "Content-Type": "application/json"
+    },
+    credentials: 'include',
+  })
 }

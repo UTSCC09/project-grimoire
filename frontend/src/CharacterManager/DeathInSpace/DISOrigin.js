@@ -18,6 +18,8 @@ function OriginCard(props){
     function updateMancer(){
         props.onUpdate({
             origin: props._id,
+            chosenOrigin: props.name,
+            chosenBenefit: props.benefits[selectedBonus],
             originBenefit: selectedBonus
         }, true, true)
         onClose()

@@ -5,52 +5,43 @@ import PropTypes from "prop-types"
 
 function StatPicker(props){
     const NUMSTATS=props.stats.length
-    const loadedRolled = props.rolledKey && localStorage.getItem(props.rolledKey) ? JSON.parse(localStorage.getItem(props.rolledKey)) : []
-    const [rolledArray, setRolledArray] = useState(loadedRolled)
+    const [rolledArray, setRolledArray] = useState([])
     const [charObj, setCharObj] = useState(props.char || {})
 
-    // useEffect(() => {
-    //     if(props.char != charObj){}
-    //         setCharObj(props.char)
-    // }, [props.char])
-
-    useEffect(() => {
-        if(props.rolledKey)
-            localStorage.setItem(props.rolledKey, JSON.stringify(rolledArray))
-    }, [rolledArray])
+    function saveAndPushCharObj(obj){
+        setCharObj(obj)
+        props.onUpdate(obj, false, isComplete(obj))
+    }
 
     function updateChar(key, value){
         const newChar = {...charObj}
         newChar[key] = value
-        setCharObj(newChar)
+        saveAndPushCharObj(newChar)
     }
     
-    function isComplete(){
+    function isComplete(obj){
         for(let i = 0; i < NUMSTATS; i++){
             const currStat = props.stats[i].key
-            if(!charObj.stats || !charObj.stats.hasOwnProperty(currStat) || isNaN(Number(charObj.stats[currStat])) || charObj.stats[currStat] === "")
-                return false 
+            if(!obj.stats || !obj.stats.hasOwnProperty(currStat) || isNaN(Number(obj.stats[currStat])) || obj.stats[currStat] === ""){
+                return false
+            } 
         }
-
         for(let i = 0; i < props.customRollers.length; i++){
             //if function exists and says input is invalid
             let cRoller = props.customRollers[i]
-            if(cRoller.validator && !cRoller.validator(charObj[cRoller.key]))
+            if(cRoller.validator && !cRoller.validator(obj[cRoller.key])){
                 return false
+            }
         }
         return true
     }
-
-    useEffect(() => {
-        props.onUpdate(charObj, false, isComplete())
-    }, [charObj])
 
     function updateStat(key, value){
         const newCharObj = {...charObj}
         const newStats = newCharObj.stats ? {...newCharObj.stats} : {}
         newStats[key] = value
         newCharObj.stats = newStats
-        setCharObj(newCharObj)
+        saveAndPushCharObj(newCharObj)
 
         //if a roll was assigned, unassign it
         const newRolled = [...rolledArray]
@@ -96,14 +87,14 @@ function StatPicker(props){
         setRolledArray(newRolled)
         const newCharObj = {...charObj}
         newCharObj.stats = newStatObj
-        setCharObj(newCharObj)
+        saveAndPushCharObj(newCharObj)
     }
 
     function clearStats(){
         const newRolled = rolledArray.map((s) => ({value:s.value, assignedStat: undefined}))
         const newCharObj = {...charObj}
         newCharObj.stats = {}
-        setCharObj(newCharObj)
+        saveAndPushCharObj(newCharObj)
         setRolledArray(newRolled)
     }
 

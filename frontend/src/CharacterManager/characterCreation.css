@@ -15,6 +15,14 @@
     align-items:center
 }
 
+.dis-complete-card{
+    height:'50%'
+}
+
+.divided-grid{
+    border-bottom: 2px black solid;
+}
+
 .normal-box-centered{
     height:100%;
     width:100%;
