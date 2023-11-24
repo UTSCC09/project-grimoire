@@ -196,3 +196,7 @@ export function getGroups(page=0){
 export function getDISOrigins(searchObj, signal=undefined){
   return buildGeneralSearch(`${URL}/api/dis/origins`, searchObj, signal)
 }
+
+export function getDISEquipment(searchObj, signal){
+  return buildGeneralSearch(`${URL}/api/dis/startequip`, searchObj, signal)
+}

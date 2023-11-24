@@ -95,6 +95,7 @@ function DISOrigin(props){
 
     useEffect(() => {
         const abortCont = new AbortController()
+        setLoading(true)
         getDISOrigins(searchObj, abortCont.signal)
         .then(async (resp) => {
             const json = await resp.json()
@@ -105,9 +106,12 @@ function DISOrigin(props){
             }
             setOrigins([...origins, ...json.records])
             setNextExists(json.nextPageExists)
+            setLoading(false)
         }).catch(e => {
             if(e.name !== 'AbortError'){
+                console.error(e)
                 setError("an unexpected Error occured please refresh the page and try again")
+                setLoading(false)
             }
         })
 
@@ -117,7 +121,7 @@ function DISOrigin(props){
     return(
         <Grid item container xs={12}>
             <Grid item container xs={12} sx={{width:"100%"}} spacing={1}>
-                <TextField label="originName" value={searchObj.name || ""} 
+                <TextField label="origin name" value={searchObj.name || ""} 
                 onChange={(e) => {e.preventDefault(); updateSearchObj('name', e.target.value)}}/>
                 {origins.map((o) => (
                     <Grid item container xs={12}>

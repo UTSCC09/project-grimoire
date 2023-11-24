@@ -43,9 +43,9 @@ function GeneralMancer(props, ref){
       setActiveStep(step);
     };
   
-    const handleComplete = () => {
+    const handleComplete = (value=true) => {
       const newCompleted = completed;
-      newCompleted[activeStep] = true;
+      newCompleted[activeStep] = value;
       setCompleted(newCompleted);
       //handleNext();
     };

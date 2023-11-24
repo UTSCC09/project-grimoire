@@ -8,8 +8,6 @@ import DISComplete from "./DISComplete";
 import DISOrigin from "./DISOrigin";
 import DISEquipment from "./DISEquipment";
 
-const steps = ['Select campaign settings', 'Create an ad group', 'Create an ad'];
-
 function DeathInSpaceMancer(props){
     const [char, setChar]  = useState({})
     const DISRef = useRef()
@@ -23,12 +21,11 @@ function DeathInSpaceMancer(props){
     }
 
     function updateChar(updateObj, navigateNext=false, markComplete=false){
-      console.log('markCOmplete', markComplete)
       const newChar = {...char, ...updateObj}
       setChar(newChar)
 
-      if(markComplete)
-        DISRef.current.handleComplete()
+      
+      DISRef.current.handleComplete(markComplete)
 
       if(navigateNext)
         DISRef.current.handleNext()
