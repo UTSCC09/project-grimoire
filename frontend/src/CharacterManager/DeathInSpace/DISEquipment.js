@@ -1,7 +1,9 @@
-import { Button, Card, CardActionArea, CardContent, CircularProgress, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, CircularProgress, Grid, IconButton, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { getDISEquipment } from "../../api.mjs";
 import ErrorAlert from "../../globalComponents/ErrorAlert";
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import "../characterCreation.css"
 
 function EquipmentCard(props){
     function getContainsString(){
@@ -16,23 +18,42 @@ function EquipmentCard(props){
         </>)
     }
 
+    function chooseEquip(){
+        props.onUpdate({
+            startingEquip: {
+                weapons: props.weapons,
+                items: props.items,
+                armor: props.armor
+            }
+        },
+        true,
+        true
+        )
+    }
+
     return (
         <Card sx={{width:'100%'}}>
-            <CardContent>
-                <Grid item container xs={12}>
-                    <Grid item xs={10}>
-                        <Typography gutterBottom variant="h5" component="div">
-                            {props.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {getContainsString()}
-                        </Typography>
+            <Grid item container xs={12}>
+            <Grid container item xs={10} sx={{flexDirection:'row', display:'flex'}}>
+                <CardContent>
+                    <Grid item container xs={12}>
+                        <Grid item xs={12}>
+                            <Typography gutterBottom variant="h5" component="div">
+                                {props.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {getContainsString()}
+                            </Typography>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={2}>
-                        <Button>Next</Button>
-                    </Grid>
-                </Grid>
-            </CardContent>
+                </CardContent>
+            </Grid>
+            <Grid item container xs={2} backgroundColor="#bfb2ae">
+                <CardActionArea onClick={chooseEquip}>
+                        <ArrowForwardIosIcon/>
+                </CardActionArea>
+            </Grid>
+            </Grid>
         </Card>
     )
 }

@@ -8,6 +8,13 @@
     width:100%
 }
 
+.next-button{
+    background-color: red;
+    border-radius: 2%;
+    justify-content:center;
+    align-items:center
+}
+
 .normal-box-centered{
     height:100%;
     width:100%;
