@@ -6,6 +6,7 @@ import DISBasic from "./DISBasic";
 import DISStats from "./DISStats";
 import DISComplete from "./DISComplete";
 import DISOrigin from "./DISOrigin";
+import DISEquipment from "./DISEquipment";
 
 const steps = ['Select campaign settings', 'Create an ad group', 'Create an ad'];
 
@@ -17,7 +18,12 @@ function DeathInSpaceMancer(props){
       console.log('char', char)
     }, [char])
 
+    function completeSheet(){
+      localStorage.removeItem("DISRolled")
+    }
+
     function updateChar(updateObj, navigateNext=false, markComplete=false){
+      console.log('markCOmplete', markComplete)
       const newChar = {...char, ...updateObj}
       setChar(newChar)
 
@@ -30,8 +36,9 @@ function DeathInSpaceMancer(props){
 
     const steps = [
       {name: "General Information", component: <DISBasic char={char} onUpdate={updateChar}/>},
-      {name: "Pick your Origin/Equipment", component: <DISOrigin char={char} onUpdate={updateChar}/>},
+      {name: "Pick your Origin", component: <DISOrigin char={char} onUpdate={updateChar}/>},
       {name: "Choose Your Stats", component: <DISStats char={char} onUpdate={updateChar}/>},
+      {name: "Choose Your Equipment", component: <DISEquipment char={char} onUpdate={updateChar}/>},
       {name: "Finalize Character", component: <DISComplete char={char} onUpdate={updateChar}/>}
     ]
 
