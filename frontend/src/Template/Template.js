@@ -1,37 +1,47 @@
 import React from "react";
 import NavBar from "./NavBar";
-import {Box, ThemeProvider, createTheme} from "@mui/material";
-import { red } from "@mui/material/colors";
+import {Box, ThemeProvider, Typography, createTheme} from "@mui/material";
 
-const mainTheme = createTheme({
-    palette: {
-        primary: {
-            main: '#000000', 
+
+const theme = createTheme({
+    components: {
+        MuiTypography: {
+          styleOverrides: {
+            //Main text, any Typography element will default to this
+            root: {
+              color: '#ffffff' //white
+            },
+            //Default secondary text
+            subtitle: {
+                color: '#ff000d' //red
+            }
+          },
         },
-        secondary: {
-            main: '#7289da'
-        },
-        textColorPrimary:
+        MuiGrid: {
+            styleOverrides: {
+                root:{
+                    backgroundcolor: '#000000'
+                }
+            }
+        }
+      },
+      palette: {
+        primary:
         {
             main: '#ffffff'
         },
-        textColorSecondary:
+        secondary:
         {
-            main: red[500]
-        }
-    },
-    fontColor: {
-        primary:{
-            main: red[500],
-        }
-    }
+            main: '#ff000d'
+        },
+      }
 })
 
 
 function Template(props){
     return(
         <Box>
-            <ThemeProvider theme ={mainTheme}>
+            <ThemeProvider theme ={theme}>
                 <NavBar/>
                 {props.children}
             </ThemeProvider>

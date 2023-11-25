@@ -14,11 +14,12 @@ function buildGeneralSearch(url, searchParams, signal=undefined){
 
 //The following functions return a Promise. The functions which call these ones must
 //handle that Promise asynchonously
-export function signUp(username, password) 
+export function signUp(username, password, dualfactor) 
 {
     const postData = {
         email: username,
-        password: password
+        password: password,
+        twofa: dualfactor
     }
     return fetch(`${URL}/api/signup`, {
         method: 'POST',
@@ -55,17 +56,21 @@ export function postGroup(latitude, longitude, groupName, groupGame, combat, puz
   const data = {
     name: groupName,
     game: groupGame,
-    longitude: longitude,
-    latitude: latitude,
-    combat: combat,
-    puzzles: puzzles,
-    social: social,
-    playerDriven: playerDriven,
-    roleplaying: roleplaying,
-    homebrew: homebrew
+    location:
+    {
+      longitude: longitude,
+      latitude: latitude,
+    },
+    preferences: {
+          combat: combat,
+          puzzles: puzzles,
+          social: social,
+          playerDriven: playerDriven,
+          roleplaying: roleplaying,
+          homebrew: homebrew
+    }
   }
-  console.log("lat " + latitude + " long:" + longitude);
-  return fetch(`${URL}/api/groups`, {
+  return fetch(`${URL}/api/groups/create`, {
     method: 'POST',
     headers:
     {
@@ -134,6 +139,18 @@ export function getCurrentUser() {
   return decodeURIComponent(username);
 }
 
+
+// https://stackoverflow.com/questions/2144386/how-to-delete-a-cookie
+//Function used for delete_cookie
+export function delete_cookie( name, path, domain ) {
+  if(document.cookie) {
+    document.cookie = name + "=" +
+      ((path) ? ";path="+path:"")+
+      ((domain)?";domain="+domain:"") +
+      ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+  }
+}
+
 // Code used for session testing only
 export function getSessionCode() {
   return fetch(`${URL}/test/sessionCode`, {
@@ -192,6 +209,7 @@ export function getGroups(page=0){
   })
 }
 
+
 /* DIS endpoints */
 export function getDISOrigins(searchObj, signal=undefined){
   return buildGeneralSearch(`${URL}/api/dis/origins`, searchObj, signal)
@@ -212,6 +230,17 @@ export function createDISSheet(sheetObj){
   })
 }
 
-export function getStartingBonus(signal=undefined){
-    return buildGeneralSearch(`${URL}/api/dis/randomBonus`, {}, signal)
-}
+// export function getStartingBonus(signal=undefined){
+//     return buildGeneralSearch(`${URL}/api/dis/randomBonus`, {}, signal)
+// export function getLocationNamesFromCardinal(lat, lng)
+// {
+//   return fetch(`${URL}/api/maps/reverseGeocode?lat=${lat}&lng=${lng}`, 
+//         {
+//           method: "GET",
+//           headers: {
+//             "Content-Type": "application/json"
+//           },
+//           credentials: 'include'
+//         })
+// >>>>>>> dev
+// }
