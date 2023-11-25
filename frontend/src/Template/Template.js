@@ -20,7 +20,7 @@ const theme = createTheme({
         MuiGrid: {
             styleOverrides: {
                 root:{
-                    backgroundcolor: '#000000'
+                    backgroundColor: '#000000'
                 }
             }
         }
