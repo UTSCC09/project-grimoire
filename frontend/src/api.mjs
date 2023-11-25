@@ -244,4 +244,5 @@ export function getLocationNamesFromCardinal(lat, lng)
           },
           credentials: 'include'
         })
+
 }
