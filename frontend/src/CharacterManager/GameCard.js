@@ -8,7 +8,7 @@ function GameCard(props){
     return (
         <Card sx={props.sx}>
             <CardActionArea sx={{height:"100%", display:'flex', justifyContent:'flex-start', flexDirection:'column'}}
-                onClick={(e) => {if(!props.deployed) return props.onClick(e)}}
+                onClick={props.onClick}
                 onMouseOver={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                 <CardMedia
                 component="img"
