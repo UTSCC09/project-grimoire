@@ -1,6 +1,26 @@
+.center{
+    justify-content: center;
+    align-items: center;
+}
+
 .normal-box{
     height:100%;
     width:100%
+}
+
+.next-button{
+    background-color: red;
+    border-radius: 2%;
+    justify-content:center;
+    align-items:center
+}
+
+.dis-complete-card{
+    height:'50%'
+}
+
+.divided-grid{
+    border-bottom: 2px black solid;
 }
 
 .normal-box-centered{
