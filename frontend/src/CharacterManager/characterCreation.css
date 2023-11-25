@@ -30,7 +30,7 @@
     width: 100%;
     justify-content: center;
     height: 100vh;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     padding: 1%;
     min-height: 100vh;
 }

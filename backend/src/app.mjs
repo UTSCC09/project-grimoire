@@ -16,6 +16,7 @@ import cors from 'cors'
 import { MHRouter } from "./monsterHearts/routes.mjs";
 import { gamesRouter } from "./games/routes.mjs";
 import { MapsRouter } from "./googleMaps/routes.mjs";
+import { domainToASCII } from "url";
 
 dotenv.config();
 
@@ -101,11 +102,12 @@ app.post('/api/validate/email', (req, res, next) => {
     const json = req.body
     if(req.session.validationCode && json.validation == req.session.validationCode){
         if(req.session.validateSignIn){
+            req.session.user = req.session.tempUser.email
+            req.session.userId = req.session.tempUser._id
             req.session.tempUser = undefined
             req.session.validationCode = undefined
             req.session.validateSignin = undefined
-            req.session.user = req.session.tempUser.email
-            req.session.userId = req.session.tempUser._id
+            
             res.setHeader(
                 "Set-Cookie",
                 serialize("Username", req.session.user, {
@@ -218,6 +220,7 @@ app.post("/api/signin", (req, res, next) => {
             // result is true is the password matches the salted hash from the database
             if (!result) return res.status(401).json({body: "access denied"});
             //write email into session
+            
             if(!doc.twofa){
                 req.session.user = email;
                 req.session.userId = doc._id
@@ -238,10 +241,10 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.tempUser = doc
                 req.session.validateSignIn = true
                 //if testing add code
-                let body = {email: email}
+                let body = {email: email, dfa: doc.twofa}
                 if(process.env.TESTING)
                     body.code = code
-                return res.json(email)
+                return res.json(body)
             }).catch(e => next(e))
         });
     }).catch(err => {
@@ -255,7 +258,7 @@ app.post("/api/signin", (req, res, next) => {
  */
 app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
-        res.clearCookie('Username')
+        res.clearCookie("Username")
         res.status(200).json({body: "logout successful"})
     })
 })

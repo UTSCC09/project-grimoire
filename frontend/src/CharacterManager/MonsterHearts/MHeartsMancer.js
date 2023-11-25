@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from 'prop-types'
 import {Button, Box, Stepper, StepButton, Step, Grid, Typography, IconButton, Icon } from "@mui/material";
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -12,11 +12,18 @@ import MHFinalize from "./MHFinalize";
 
 function MHeartsMancer(props){
     const [char, setChar] = useState({})
+    const mancerRef = useRef()
 
-    function updateField(key, value){
-        const newChar = {...char}
-        newChar[key] = value
+    function updateField(addedDict, nextPage=true){
+        const newChar = {...char, ...addedDict}
+
         setChar(newChar)
+        console.log('mancerRef', Boolean(mancerRef))
+        if(nextPage && mancerRef){
+            mancerRef.current.handleComplete()
+            mancerRef.current.handleNext()
+        }
+            
     }
 
     useEffect(() => {
@@ -29,7 +36,7 @@ function MHeartsMancer(props){
         {name: "Add Strings", component: <MHStrings onUpdate={updateField} char={char}/>},
         {name: "Finalize Your Character", component: <MHFinalize onUpdate={updateField} char={char}/>}];
     return (
-        <GeneralMancer steps={steps}/>
+        <GeneralMancer steps={steps} ref={mancerRef}/>
     )
 }
 

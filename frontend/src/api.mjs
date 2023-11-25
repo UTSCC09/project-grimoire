@@ -2,11 +2,12 @@ const URL = process.env.REACT_APP_URL
 
 //The following functions return a Promise. The functions which call these ones must
 //handle that Promise asynchonously
-export function signUp(username, password) 
+export function signUp(username, password, dualfactor) 
 {
     const postData = {
         email: username,
-        password: password
+        password: password,
+        twofa: dualfactor
     }
     return fetch(`${URL}/api/signup`, {
         method: 'POST',
@@ -43,17 +44,21 @@ export function postGroup(latitude, longitude, groupName, groupGame, combat, puz
   const data = {
     name: groupName,
     game: groupGame,
-    longitude: longitude,
-    latitude: latitude,
-    combat: combat,
-    puzzles: puzzles,
-    social: social,
-    playerDriven: playerDriven,
-    roleplaying: roleplaying,
-    homebrew: homebrew
+    location:
+    {
+      longitude: longitude,
+      latitude: latitude,
+    },
+    preferences: {
+          combat: combat,
+          puzzles: puzzles,
+          social: social,
+          playerDriven: playerDriven,
+          roleplaying: roleplaying,
+          homebrew: homebrew
+    }
   }
-  console.log("lat " + latitude + " long:" + longitude);
-  return fetch(`${URL}/api/groups`, {
+  return fetch(`${URL}/api/groups/create`, {
     method: 'POST',
     headers:
     {
@@ -122,6 +127,18 @@ export function getCurrentUser() {
   return decodeURIComponent(username);
 }
 
+
+// https://stackoverflow.com/questions/2144386/how-to-delete-a-cookie
+//Function used for delete_cookie
+export function delete_cookie( name, path, domain ) {
+  if(document.cookie) {
+    document.cookie = name + "=" +
+      ((path) ? ";path="+path:"")+
+      ((domain)?";domain="+domain:"") +
+      ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+  }
+}
+
 // Code used for session testing only
 export function getSessionCode() {
   return fetch(`${URL}/test/sessionCode`, {
@@ -130,6 +147,8 @@ export function getSessionCode() {
     })
 }
 
+/**CHARACTER CREATION */
+/*---------------------------------------------*/
 export function getGames(searchCritera={}, signal=undefined){
   let urlString = `${URL}/api/games?`
   for(let key of Object.keys(searchCritera)){
@@ -154,6 +173,20 @@ export function getSkins(searchCritera={}, signal=undefined){
   })
 }
 
+export function getMoves(searchCritera, signal=undefined){
+  let urlString = `${URL}/api/mhearts/moves?`
+  for(let key of Object.keys(searchCritera)){
+    urlString += `${key}=${searchCritera[key]}&`
+  }
+  return fetch(urlString, {
+    method: 'GET',
+    credentials: 'include',
+    signal: signal
+  })
+}
+
+/*GROUPS */
+/*---------------------------------------------*/
 export function getGroups(page=0){
   return fetch(`${URL}/api/groups/page?page=${page}`, {
     method: "GET",
@@ -162,4 +195,16 @@ export function getGroups(page=0){
     },
     credentials: 'include',
   })
+}
+
+export function getLocationNamesFromCardinal(lat, lng)
+{
+  return fetch(`${URL}/api/maps/reverseGeocode?lat=${lat}&lng=${lng}`, 
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: 'include'
+        })
 }

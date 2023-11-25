@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useImperativeHandle } from "react";
 import PropTypes from 'prop-types'
 import {Button, Box, Stepper, StepButton, Step, Grid, Typography, IconButton, Icon } from "@mui/material";
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import "./characterCreation.css"
 
-function GeneralMancer(props){
+function GeneralMancer(props, ref){
     const [activeStep, setActiveStep] = useState(0);
     const [completed, setCompleted] = useState({});
     const [steps, setSteps] = useState(props.steps)
@@ -54,6 +54,14 @@ function GeneralMancer(props){
       setActiveStep(0);
       setCompleted({});
     };
+
+
+    // Expose the function to the parent component
+    useImperativeHandle(ref, () => ({
+      handleNext,
+      handleComplete,
+      handleBack
+    }));
   
     return (
       <Grid item container xs={12} className="page-container-cover">
@@ -93,4 +101,4 @@ GeneralMancer.propTypes = {
     
 }
 
-export default GeneralMancer
+export default React.forwardRef(GeneralMancer)

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import multer from "multer"
 import { Game } from "../schemas.mjs"
-import { resolve } from "path";
+import { resolve, join } from "path";
 import { DEFAULTPAGE, DEFAULTLIMIT } from "../app.mjs";
 import { removeSpacesFromQuery, mongoLikeString } from "../helper.mjs";
 import { isValidObjectId } from "mongoose";
@@ -12,8 +12,14 @@ export const gamesRouter = new Router()
 let numGames
 
 gamesRouter.get('/', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
+
+    //check if we have number of games; shouldn't change unless newly deployed app
+    if(!numGames){
+        //get number of games and set it, not using memcache because unessecary and pain with nginx
+        numGames = await Game.countDocuments({})
+    }
 
     //check if we have number of games; shouldn't change unless newly deployed app
     if(!numGames){
@@ -39,9 +45,10 @@ gamesRouter.get("/:id/pic", (req, res, next) => {
 
     Game.findById(id).exec().then((doc) => {
         const img = doc.banner
+        const dirname = resolve()
         if(img){    
             res.setHeader("Content-Type", img.mimetype);
-            res.sendFile(resolve(img.path));
+            res.sendFile(join(dirname, img.path));
         }else{
             res.status(404).send({body: `Banner does not exist for game ${req.params.id}`})
         }
