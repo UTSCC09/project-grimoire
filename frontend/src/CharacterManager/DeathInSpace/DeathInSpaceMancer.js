@@ -19,8 +19,6 @@ function DeathInSpaceMancer(props){
     const navigate = useNavigate()
 
     useEffect(()=>{
-      console.log('char', formatChar())
-      
       if(char.functions && char.functions.markComplete !== 'ignore')
         DISRef.current.handleComplete(char.functions.markComplete)
 

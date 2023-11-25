@@ -67,7 +67,6 @@ function DISStats(props){
         //if already have a bonus
         if(!isObjectEmpty(startingBonus))
             return finish
-        console.log('adding bonus')
         getStartingBonus(abortCont.signal)
         .then(async (resp) => {
             const json = await resp.json()
