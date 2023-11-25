@@ -230,17 +230,19 @@ export function createDISSheet(sheetObj){
   })
 }
 
-// export function getStartingBonus(signal=undefined){
-//     return buildGeneralSearch(`${URL}/api/dis/randomBonus`, {}, signal)
-// export function getLocationNamesFromCardinal(lat, lng)
-// {
-//   return fetch(`${URL}/api/maps/reverseGeocode?lat=${lat}&lng=${lng}`, 
-//         {
-//           method: "GET",
-//           headers: {
-//             "Content-Type": "application/json"
-//           },
-//           credentials: 'include'
-//         })
-// >>>>>>> dev
-// }
+export function getStartingBonus(signal=undefined){
+    return buildGeneralSearch(`${URL}/api/dis/randomBonus`, {}, signal)
+}
+
+export function getLocationNamesFromCardinal(lat, lng)
+{
+  return fetch(`${URL}/api/maps/reverseGeocode?lat=${lat}&lng=${lng}`, 
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: 'include'
+        })
+
+}
