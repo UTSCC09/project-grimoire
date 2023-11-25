@@ -294,6 +294,19 @@ disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
     })
 })
 
+disRouter.get('/randomBonus', (req, res, next) => {
+    const sheet = {
+        mutations: [],
+        armor: [],
+        weapons: [],
+        inventory: [],
+        hitPoints: 0
+    }
+    addStartingBonus(sheet, true)
+    .then((newSheet) =>  res.json(newSheet))
+    .catch(e => next(e))
+})
+
 /**
  * Creates a death in space character sheet corresponding to passed json object
  * @param {Object} stats object corresponding to stats of the user, should have dex, body, etc. as shown in schema

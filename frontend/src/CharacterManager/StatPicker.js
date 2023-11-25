@@ -10,6 +10,7 @@ function StatPicker(props){
 
     function saveAndPushCharObj(obj){
         setCharObj(obj)
+        console.log('isComplete', isComplete(obj))
         props.onUpdate(obj, false, isComplete(obj))
     }
 
@@ -23,6 +24,7 @@ function StatPicker(props){
         for(let i = 0; i < NUMSTATS; i++){
             const currStat = props.stats[i].key
             if(!obj.stats || !obj.stats.hasOwnProperty(currStat) || isNaN(Number(obj.stats[currStat])) || obj.stats[currStat] === ""){
+                console.log('failing on', currStat)
                 return false
             } 
         }
@@ -30,6 +32,7 @@ function StatPicker(props){
             //if function exists and says input is invalid
             let cRoller = props.customRollers[i]
             if(cRoller.validator && !cRoller.validator(obj[cRoller.key])){
+                console.log('failing on', cRoller)
                 return false
             }
         }
@@ -100,6 +103,7 @@ function StatPicker(props){
 
     return(
         <Grid item container xs={12} className={props.className}>
+            {props.children ? <>{props.children}</> : <></>}
             <Grid item container xs={12} spacing={1} sx={{justifyContent:'center'}}>
                 {props.stats.map((s) => (
                     <Grid item xs={props.widthSx / NUMSTATS}>

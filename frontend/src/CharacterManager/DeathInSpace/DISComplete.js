@@ -5,6 +5,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import '../characterCreation.css'
 
 function DISComplete(props){
+
     return(
         <Grid item container xs={12} sx={{width:'100%', minHeight:'100%', display:'flex'}}>
             <Box className="normal-box">
@@ -21,6 +22,7 @@ function DISComplete(props){
                     <Grid item container xs={6} className="dis-complete-card">
                         <Paper elevation={3} className="normal-box">
                             <Typography align='center'>General Information</Typography>
+                            <Divider/>
                             <Typography>Name*: {props.char.characterName || "No name chosen"}</Typography>
                             <Typography>Background: {props.char.background || "N/A"}</Typography>
                             <Typography>Looks: {props.char.looks || "N/A"}</Typography>
@@ -37,6 +39,7 @@ function DISComplete(props){
                             <Typography>Chosen Origin: {props.char.chosenOrigin}</Typography>
                             <Typography>Chosen Benefit: {props.char.chosenBenefit ? 
                             `${props.char.chosenBenefit.name}: ${props.char.chosenBenefit.description}` : "No Benefit chosen"}</Typography>
+                            <Typography>Mutations: {props.char.mutationObjs ? props.char.mutationObjs.map((m) => m.name).join(', ') : "N/A"}</Typography>
                         </Paper>
                     </Grid>
 
@@ -48,6 +51,7 @@ function DISComplete(props){
                                 <Typography>Dexterity: {props.char.stats ? props.char.stats.dex : "N/A"}</Typography>
                                 <Typography>Savy: {props.char.stats ? props.char.stats.svy : "N/A"}</Typography>
                                 <Typography>Technology: {props.char.stats ? props.char.stats.tech : "N/A"}</Typography>
+                                <Typography>Hit Points: {props.char.hitPoints ? props.char.hitPoints: "N/A"}</Typography>
                         </Paper>
                     </Grid>
 
@@ -55,13 +59,14 @@ function DISComplete(props){
                         <Paper elevation={3} className="normal-box">
                             <Typography align='center'>Inventory</Typography>
                             <Divider/>
+                            <Typography>Holos: {props.char.holos || "N/A"}</Typography>
                             <Typography>Chosen starting Equipment* {props.char.startingEquip? props.char.startingEquip.name : "N/A"}</Typography>
-                            <Typography>Items: {props.char.startingEquip && props.char.startingEquip.items.length > 0? 
-                                props.char.startingEquip.items.map((i) => i.name).join(', ') : "N/A"}</Typography>
-                            <Typography>Weapons: {props.char.startingEquip && props.char.startingEquip.weapons.length > 0? 
-                                props.char.startingEquip.weapons.map((i) => i.base.name).join(', ') : "N/A"}</Typography>
-                            <Typography>Armor: {props.char.startingEquip && props.char.startingEquip.armor.length > 0? 
-                                props.char.startingEquip.armor.map((i) => i.base.name).join(', ') : "N/A"}</Typography>
+                            <Typography>Items: {props.char.inventory && props.char.inventory.length > 0? 
+                                props.char.inventory.map((i) => i.name).join(', ') : "N/A"}</Typography>
+                            <Typography>Weapons: {props.char.weapons && props.char.weapons.length > 0? 
+                                props.char.weapons.map((i) => i.base.name).join(', ') : "N/A"}</Typography>
+                            <Typography>Armor: {props.char.armor && props.char.armor.length > 0? 
+                                props.char.armor.map((i) => i.base.name).join(', ') : "N/A"}</Typography>
                         </Paper>
                     </Grid>
                 </Grid>

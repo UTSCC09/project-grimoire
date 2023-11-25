@@ -19,20 +19,42 @@ function DeathInSpaceMancer(props){
     const navigate = useNavigate()
 
     useEffect(()=>{
-      console.log('char', char)
+      console.log('char', formatChar())
+      
+      if(char.functions && char.functions.markComplete !== 'ignore')
+        DISRef.current.handleComplete(char.functions.markComplete)
+
+      if(char.functions && char.functions.navigateNext)
+        DISRef.current.handleNext()
     }, [char])
 
-    useEffect(()=>{
-      console.log('ready to complete', readyToComplete)
-    })
+    function formatChar(){
+      const newChar = {...char}
+      if(newChar.startingEquip){
+        newChar.inventory = [...(newChar.inventory || []), ...newChar.startingEquip.items]
+        newChar.armor = [...(newChar.armor || []), ...newChar.startingEquip.armor]
+        newChar.weapons = [...(newChar.weapons || []), ...newChar.startingEquip.weapons]
+      }
+
+      //add starting bonus
+      if(newChar.startingBonus){
+        const sbKey = newChar.startingBonus.startingBonus.key
+        if(sbKey === 'hitPoints'){
+          newChar.hitPoints += 3
+        }else{
+          newChar[sbKey] = [...(newChar[sbKey] || []), ...newChar.startingBonus[sbKey]]
+        }
+        if(sbKey === 'mutations')
+          newChar.mutationObjs = [newChar.startingBonus.startingBonus]
+      }
+      return newChar
+    }
 
     function completeSheet(){
       setLoading(true)
       //parse the sheet object
-      const newChar = {...char}
-      newChar.inventory = [...(newChar.inventory || []), ...newChar.startingEquip.items]
-      newChar.armor = [...(newChar.armor || []), ...newChar.startingEquip.armor]
-      newChar.weapons = [...(newChar.weapons || []), ...newChar.startingEquip.weapons]
+      const newChar = formatChar()
+
       createDISSheet(newChar)
       .then(async (resp) => {
         setLoading(false)
@@ -51,13 +73,11 @@ function DeathInSpaceMancer(props){
 
     function updateChar(updateObj, navigateNext=false, markComplete=false){
       const newChar = {...char, ...updateObj}
+      newChar.functions = {
+        markComplete,
+        navigateNext
+      }
       setChar(newChar)
-
-      
-      DISRef.current.handleComplete(markComplete)
-
-      if(navigateNext)
-        DISRef.current.handleNext()
     }
 
     const steps = [
@@ -65,7 +85,7 @@ function DeathInSpaceMancer(props){
       {name: "Pick your Origin", required: true, component: <DISOrigin char={char} onUpdate={updateChar}/>},
       {name: "Choose Your Stats", required: true, component: <DISStats char={char} onUpdate={updateChar}/>},
       {name: "Choose Your Equipment", required: true, component: <DISEquipment char={char} onUpdate={updateChar}/>},
-      {name: "Finalize Character", component: <DISComplete char={char} onComplete={completeSheet} readyToComplete={readyToComplete} isLoading={loading}/>}
+      {name: "Finalize Character", component: <DISComplete char={formatChar()} onComplete={completeSheet} readyToComplete={readyToComplete} isLoading={loading}/>}
     ]
 
     return (

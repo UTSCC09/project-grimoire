@@ -5,3 +5,7 @@ export function randomNumberBetween(max, min=0){
 export function rollNSidedDie(n){
     return randomNumberBetween(n, 1)
 }
+
+export function isObjectEmpty(obj){
+    return Object.keys(obj).length === 0
+}

@@ -197,7 +197,7 @@ export function getDISOrigins(searchObj, signal=undefined){
   return buildGeneralSearch(`${URL}/api/dis/origins`, searchObj, signal)
 }
 
-export function getDISEquipment(searchObj, signal){
+export function getDISEquipment(searchObj, signal=undefined){
   return buildGeneralSearch(`${URL}/api/dis/startequip`, searchObj, signal)
 }
 
@@ -210,4 +210,8 @@ export function createDISSheet(sheetObj){
     },
     credentials: 'include',
   })
+}
+
+export function getStartingBonus(signal=undefined){
+    return buildGeneralSearch(`${URL}/api/dis/randomBonus`, {}, signal)
 }
