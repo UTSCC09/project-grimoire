@@ -77,6 +77,10 @@ export const GameSchema = new Schema({
     banner: {
         type: ImageSchema,
         required: false
+    },
+    deployed: {
+        type: Boolean,
+        default: false
     }
 })
 
