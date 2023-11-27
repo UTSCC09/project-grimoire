@@ -119,6 +119,29 @@ export function getSheet(ID)
     })
 }
 
+export function getPictureOfSheet(ID)
+{
+  return fetch(`${URL}/api/sheets/${ID}/pic`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+})
+}
+
+
+export function getCharacterSheets(page=0, limit=10)
+{
+  return fetch(`${URL}/api/sheets/?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+})
+}
+
 export function deleteSheet(ID)
 {
     return fetch(`${URL}/api/sheets/${ID}`, {

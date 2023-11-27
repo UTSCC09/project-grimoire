@@ -53,7 +53,7 @@ sheetRouter.get("/", isAuthenticated, async (req, res, next) => {
 sheetRouter.get("/:id", async (req, res, next) => {
     if(!isValidObjectId(req.params.id))
         return res.status(400).json({body: "invalid object id"})
-    UserSheetMapping.findOne({sheet: req.params.id}).exec()
+    UserSheetMapping.findOne({_id: req.params.id}).exec()
     .then(async (mapping) => {
         if(!mapping)
             return res.status(404).json({body: `sheet with id ${req.params.id} not found`})
