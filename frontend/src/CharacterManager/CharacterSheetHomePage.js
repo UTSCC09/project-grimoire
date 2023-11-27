@@ -35,6 +35,7 @@ function CharacterSheetList(props)
         //Run normal functionality
         response.json().then((json) => 
         {
+            console.log(json)
             const sheets = json.sheets;
             sheets.pop();
             if(sheets.length === 6)
@@ -102,7 +103,8 @@ function CharacterInfo(props)
     const GoToCharacterSheet = function(event) 
     {
         event.preventDefault();
-        navigate("/user/sheets", { state: {charSheetID: props.characterSheet._id} })
+        console.log(props.characterSheet.sheet._id)
+        navigate("/user/sheets", { state: {charSheetID: props.characterSheet.sheet._id} })
     }
     const dateArray = props.characterSheet.updatedAt.split('T');
     const dateString = dateArray[0];
