@@ -88,6 +88,7 @@ function CharacterSheet(props)
     return (
         <Grid container spacing={0} alignItems={'flex'} flexDirection={'row'} sx={{marginTop: '0%', height: '15vh'}} width={'100%'} backgroundColor={"#ffffff"}>
         <div className="imageContainer">
+            {/* TODO: Implant a character image here */}
             <img></img>
         </div>
         <CharacterInfo characterSheet={props.characterSheet}/>

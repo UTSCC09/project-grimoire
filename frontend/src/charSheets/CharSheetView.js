@@ -21,7 +21,7 @@ function CharacterSheetView(props){
                 {
                     setLoading(false)
                     console.log(json)
-                    setSheet(toString(json))
+                    setSheet(json)
                     return
                 })
               }
@@ -34,7 +34,7 @@ function CharacterSheetView(props){
     }, [])
 
     return(
-        <Grid height={'100vh'}>
+        <Grid container justifyContent={'center'} height={'100vh'}>
             {loading ? <CircularProgress/> : <></>}
             {error ? <Alert severity={'error'}>{error}</Alert> : <></>}
             {sheet ? <CharacterSheet character={sheet}/> : <></>}    
@@ -46,7 +46,6 @@ function CharacterSheet(props)
 {
     const DeathInSpaceID = "65380cc7045073574113c6cd";
     //Need to map the game ID to the actual game which we need a character sheet for
-    console.log(props)
     if (props.character.game === DeathInSpaceID)
     {
         
