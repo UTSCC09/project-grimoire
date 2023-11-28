@@ -63,6 +63,9 @@ app.use(
       secret: process.env.SESSION_KEY,
       resave: false,
       saveUninitialized: false,
+      httpOnly: true,
+      secure: true,
+      sameSite: true
     })
 );
 

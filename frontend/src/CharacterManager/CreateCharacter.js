@@ -48,8 +48,12 @@ function CreateCharacter(props){
         }
     }, [searchObj])
 
-    function navigateToGame(gameName){
-        gameName = gameName.replace(/\s+/g, ''); //removing spaces
+    function navigateToGame(game){
+        if(!game.deployed){
+            setError(`${game.name} is still in development, please try a different game`)
+            return
+        }
+        const gameName = game.name.replace(/\s+/g, ''); //removing spaces
         navigate(`./${gameName}`)
     }
 
@@ -83,9 +87,8 @@ function CreateCharacter(props){
             <Grid item container xs={12} spacing={2}>
                 {games.map((g) => (
                     <Grid item container xs={Math.max(4, 12 / (games.length || 1))}>
-                        <GameCard name={g.name} description={g.description} sx={{width:'100%', paddingBottom:"0.5%"}}
-                        gameId={g._id}
-                        onClick={(e)=> {e.preventDefault(); navigateToGame(g.name)}}/>
+                        <GameCard {...g}  sx={{width:'100%', paddingBottom:"0.5%"}}
+                        onClick={(e)=> {e.preventDefault(); navigateToGame(g)}}/>
                     </Grid>
                 ))}
                 {games.map}
