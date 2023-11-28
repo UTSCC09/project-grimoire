@@ -27,4 +27,8 @@
     max-height: 10%;
     max-width: 10%;
     font-size: small;
-  }
+}
+
+.selectOrigin {
+    width: 50%;
+}

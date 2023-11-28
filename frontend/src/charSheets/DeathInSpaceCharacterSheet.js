@@ -1,4 +1,4 @@
-import { FormControl, FormControlLabel, Grid, Radio, RadioGroup, TextField, ThemeProvider, Typography, createTheme } from "@mui/material"
+import { Button, Divider, FormControl, FormControlLabel, Grid, List, ListItem, ListItemText, Menu, MenuItem, Radio, RadioGroup, Tab, Tabs, TextField, ThemeProvider, Typography, createTheme } from "@mui/material"
 import { useEffect, useState } from "react"
 import './DeathInSpaceCharacterSheet.css'
 import DISStatsContainer from './CharacterSheetMedia/DISStatsContainer.png'
@@ -149,7 +149,6 @@ function GeneralInformation(props)
                 console.log("Error when updating origin benefit. Error code: " + r.status);
         })
     }, [option])
-    console.log(props.characterInfo)
     
     return <Grid>
         <ExperienceAndDefenseRating characterInfo={props.characterInfo}/>
@@ -179,7 +178,7 @@ function ExperienceAndDefenseRating(props)
     const changeExperience = function(event)
     {
         event.preventDefault();
-        if (parseInt(event.target.value))
+        if (parseInt(event.target.value) && parseInt(event.target.value) >= 0)
         {
             setExperience(parseInt(event.target.value))
         }
@@ -267,7 +266,7 @@ function CurrentHealth(props)
     const changeHealth = function(event)
     {
         event.preventDefault();
-        if (parseInt(event.target.value) && parseInt(event.target.value) <= maxHealth)
+        if (parseInt(event.target.value) && 0 <= parseInt(event.target.value) <= maxHealth)
         {
             setcurrentHealth(parseInt(event.target.value))
         }
@@ -276,7 +275,7 @@ function CurrentHealth(props)
     const changeMaxHealth = function(event)
     {
         event.preventDefault();
-        if (parseInt(event.target.value))
+        if (parseInt(event.target.value) && parseInt(event.target.value) >= 0)
         {
             setMaxHealth(parseInt(event.target.value))
         }
@@ -384,11 +383,350 @@ function CurrentLifeSupport(props)
 
 function RightSideOfSheet(props)
 {
- return <Grid width={'35%'}>
+    //Tracks which page we are on. Either we are on "Inventory", "Background Information", or "Current Situation" stats
+    const [page, setPage] = useState("Inventory")
 
- </Grid>
+    const handleChange = function(event, newPage)
+    {
+        event.preventDefault();
+        setPage(newPage)
+        
+    }
+
+    return <Grid height={'100%'} width={'50%'}>
+        <Grid height={'10%'}>
+            <Tabs
+            value={page}
+            onChange={handleChange} 
+            variant='fullWidth'>
+                <Tab disabled={page === "Inventory"} value={"Inventory"} label="Inventory"/>
+                <Tab disabled={page === "Background Info"} value={"Background Info"} label="Background Info"/>
+                <Tab disabled={page === "Current Situation"} value={"Current Situation"} label="Current Situation"/>
+            </Tabs>
+        </Grid>
+        <Grid height={'90%'}>
+        {
+            (page === "Inventory") ? <InventoryAndArmor characterInfo={props.characterInfo}/> : <></>
+        }
+        {
+            (page === "Background Info") ? <BackgroundInfo characterInfo={props.characterInfo}/> : <></>
+        }
+        {
+            (page === "Current Situation") ? <CurrentSituation characterInfo={props.characterInfo}/> : <></>
+        }
+        </Grid>
+    </Grid>
 }
 
+function InventoryAndArmor(props)
+{
+    return (<Grid height={'100%'}>
+        <Weapons characterInfo={props.characterInfo}/>
+        <Armor characterInfo={props.characterInfo}/>
+        <Inventory characterInfo={props.characterInfo}/>
+    </Grid>)
+}
+
+function Weapons(props)
+{
+    return <Grid height={'30%'}>
+    <Typography width={'100%'}  textAlign={'center'} variant='h5'>Weapons:</Typography>
+    <List sx=
+    {{width: '100%', 
+    maxHeight: '70%', 
+    overflow: 'auto'}}>
+        {props.characterInfo.weapons.map(function(weapon)
+        {
+            return (<Grid>
+            <ListItem key={`weapon${weapon}` }>
+                <ListItemText primary={`${weapon.name}`}/>
+            </ListItem>
+            <Divider/>
+            </Grid>)
+        })}
+    </List>
+</Grid>
+}
+
+
+function Inventory(props)
+{   
+    return <Grid height={'40%'}>
+        <Typography width={'100%'}  textAlign={'center'} variant='h5'>Inventory:</Typography>
+        <List sx=
+        {{width: '100%', 
+        maxHeight: '78%', 
+        overflow: 'auto'}}>
+            {props.characterInfo.inventory.map(function(item, index)
+            {
+                return (<Grid key={`GridOfinventoryItem${index}`}>
+                <ListItem key={`inventoryItem${index}` }>
+                    <ListItemText key={`inventoryIteText${index}`} primary={`${item.name}`}/>
+                </ListItem>
+                <Divider/>
+                </Grid>)
+            })}
+        </List>
+    </Grid>
+}
+
+function Armor(props)
+{
+    return (
+    <Grid height={'30%'}>
+        <Typography maxHeight={'20%'} width={'100%'}  textAlign={'center'} variant='h5'>Armor:</Typography>
+        <List sx=
+        {{width: '100%', 
+        maxHeight: '70%', 
+        overflow: 'auto'}}>
+            {props.characterInfo.armor.map(function(item)
+            {
+                return (<Grid>
+                <ListItem key={`Armor${item}`}>
+                    <ListItemText primary={`${item.name}`}/>
+                </ListItem>
+                <Divider/>
+                </Grid>)
+            })}
+        </List>
+    </Grid>)
+}
+
+
+function BackgroundInfo(props)
+{
+
+    const [drive, setDrive] = useState(props.characterInfo.drive)
+    const [allegiance, setAllegiance] = useState(props.characterInfo.pastAllegiance)
+    const [background, setBackground] = useState(props.characterInfo.background)
+
+    const changeDrive = function(event)
+    {
+        event.preventDefault();
+        setDrive(event.target.value)
+    }
+
+    const changeAllegiance = function(event)
+    {
+        event.preventDefault();
+        setAllegiance(event.target.value)
+    }
+
+    const changeBackground = function(event)
+    {
+        event.preventDefault();
+        setBackground(event.target.value)
+    }
+
+    useEffect(function() {
+        const copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.background = background;
+        
+        patchSheet(props.characterInfo._id, copyOfCharacterJSON).then(function (resp)
+        {
+            resp.json().then(function (json)
+            {
+                if (!(json.background === copyOfCharacterJSON.background))
+                {
+                    console.log("Error when setting background, returned value is not the modified value.")
+                    console.log("Returned background: " + json.background)
+                    console.log("Updated background: " + copyOfCharacterJSON.background)
+                }
+            })
+        })
+    }, [background])
+
+
+    useEffect(function() {
+        const copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.drive = drive;
+        
+        patchSheet(props.characterInfo._id, copyOfCharacterJSON).then(function (resp)
+        {
+            resp.json().then(function (json)
+            {
+                if (!(json.drive === copyOfCharacterJSON.drive))
+                {
+                    console.log("Error when setting drive, returned value is not the modified value.")
+                    console.log("Returned drive: " + json.drive)
+                    console.log("Updated drive: " + copyOfCharacterJSON.drive)
+                }
+            })
+        })
+    }, [drive])
+
+
+    useEffect(function() {
+        const copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.pastAllegiance = allegiance;
+        
+        patchSheet(props.characterInfo._id, copyOfCharacterJSON).then(function (resp)
+        {
+            resp.json().then(function (json)
+            {
+                if (!(json.pastAllegiance === copyOfCharacterJSON.pastAllegiance))
+                {
+                    console.log("Error when setting past allegiance, returned value is not the modified value.")
+                    console.log("Returned background: " + json.pastAllegiance)
+                    console.log("Updated background: " + copyOfCharacterJSON.pastAllegiance)
+                }
+            })
+        })
+    }, [allegiance])
+
+
+    return (
+    <Grid height={'100%'}>
+        <Grid height={'20%'} width={'100%'} container flexDirection={'row'}>
+            <TextField focused onChange={changeDrive} value={drive} sx={{width: '40%', marginRight: '10%'}} label="Drive" size="small"/>
+            <TextField onChange={changeAllegiance} value={allegiance} sx={{width: '40%', marginLeft: '10%'}} focused label="Past Allegiance" size="small"/>
+        </Grid>
+        <Grid height={'30%'} width={'100%'} container flexDirection={'row'}>
+            <Origin characterInfo={props.characterInfo}/>
+        </Grid>
+        <Grid height={'50%'} width={'100%'}>
+            <Typography>Background</Typography>
+            <TextField value={background} onChange={changeBackground} multiline rows={10} fullWidth sx={{maxHeight: '100%'}}></TextField>
+        </Grid>
+    </Grid>)
+}
+
+function Origin(props)
+{
+    const [OriginDescription, setOriginDescription] = useState(props.characterInfo.origin.description)
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    return (
+        <Grid container flexDirection={'row'}>
+        <div className="selectOrigin">
+            <Button
+                aria-controls={open ? 'fade-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleClick}
+            >
+                Origins
+            </Button>
+            <Menu
+                MenuListProps={{
+                'aria-labelledby': 'fade-button',
+                }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+            >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Menu>
+            <Grid marginTop={'5%'} container flexDirection={'row'}>
+                <Typography marginRight={'5%'}>Current Origin: </Typography>
+                <Typography>{props.characterInfo.origin.name}</Typography>
+            </Grid>
+        </div>
+        <TextField disabled value={OriginDescription} sx={{justifySelf: 'flex-end', width: '50%'}} multiline rows={4}></TextField>
+        </Grid>
+    )
+}
+
+function CurrentSituation(props)
+{
+    console.log(props.characterInfo)
+    return (<Grid height={'90%'}>
+        <MutationsList characterInfo={props.characterInfo}/>
+        <VoidCorruptions characterInfo={props.characterInfo}/>
+        <Money characterInfo={props.characterInfo}/>
+    </Grid>)
+}
+
+function Money(props)
+{
+    const [Holos, setHolos] = useState(props.characterInfo.holos)
+
+    const changeHolos = function(event)
+    {
+        event.preventDefault()
+        parseInt(event.target.value) ? setHolos(event.target.value) : setHolos(0)
+    }
+
+
+    useEffect(function ()
+    {
+        const copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.holos = Holos
+        patchSheet(copyOfCharacterJSON._id, copyOfCharacterJSON).then(function(r)
+        {
+            if (r.ok)
+            {
+                r.json().then(function (j)
+                {
+                    if (!(parseInt(copyOfCharacterJSON.holos) === parseInt(j.holos)))
+                    {
+                        console.log("Error updating origin benefit. Returned value not the same as updated value.")
+                        console.log("Returned value: "  + j.holos);
+                        console.log("Updated value: " + copyOfCharacterJSON.holos)
+                    }
+                })
+            }
+            else    
+                console.log("Error when updating origin benefit. Error code: " + r.status);
+        })
+    }, [Holos])
+
+    return (<Grid container flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
+        <TextField onChange={changeHolos} defaultValue={Holos} variant="filled" label="Holos" sx={{width: '50%'}}></TextField>
+    </Grid>)
+}
+
+function VoidCorruptions(props)
+{
+    return <Grid height={'47%'}>
+         <Typography textAlign={'center'} variant="h5">Void Corruption:</Typography>
+         <List sx=
+        {{width: '100%', 
+        maxHeight: '70%', 
+        overflow: 'auto'}}>
+            {props.characterInfo.corruption.map(function(corruption, index)
+            {
+                return (<Grid>
+                <ListItem key={`Corruption${index}`}>
+                    <ListItemText primary={`${corruption.name}`}/>
+                </ListItem>
+                <Divider/>
+                </Grid>)
+            })}
+        </List>
+    </Grid>
+}
+
+function MutationsList(props)
+{
+    return <Grid height={'47%'}>
+        <Typography textAlign={'center'} variant="h5">Mutations</Typography>
+        <List sx=
+        {{width: '100%', 
+        maxHeight: '70%', 
+        overflow: 'auto'}}>
+            {props.characterInfo.mutations.map(function(mutation, index)
+            {
+                return (<Grid>
+                <ListItem key={`Mutation${index}`}>
+                    <ListItemText primary={`${mutation.name}`}/>
+                </ListItem>
+                <Divider/>
+                </Grid>)
+            })}
+        </List>
+    </Grid>
+}
 
 
 export default DeathInSpaceCharacterSheet
