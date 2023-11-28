@@ -234,7 +234,7 @@ const MHSheetSchema = new Schema({
 }, {
     methods: {
         getPopulationFields(){
-            return ['moves', 'skin']
+            return ['moves', 'skin', 'game']
         }
     },
     strict: true,
