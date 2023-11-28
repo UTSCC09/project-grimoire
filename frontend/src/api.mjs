@@ -142,6 +142,19 @@ export function getCharacterSheets(page=0, limit=10)
 })
 }
 
+//Calls a patch method, which updates a character sheet
+export function patchSheet(sheetID, CharacterSheetJSON)
+{
+  return fetch(`${URL}/api/dis/sheets/${sheetID}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(CharacterSheetJSON)
+})
+}
+
 export function deleteSheet(ID)
 {
     return fetch(`${URL}/api/sheets/${ID}`, {

@@ -20,7 +20,6 @@ function CharacterSheetView(props){
                 response.json().then(function (json)
                 {
                     setLoading(false)
-                    console.log(json)
                     setSheet(json)
                     return
                 })
@@ -48,8 +47,7 @@ function CharacterSheet(props)
     //Need to map the game ID to the actual game which we need a character sheet for
     if (props.character.game === DeathInSpaceID)
     {
-        
-        return <DeathInSpaceCharacterSheet stats = {props.sheet}/>
+        return <DeathInSpaceCharacterSheet stats = {props.character}/>
     }
     
     return <></>
