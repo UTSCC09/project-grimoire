@@ -16,6 +16,7 @@ import DualFactorAuth from './Login/DualFactorAuth.js';
 import DeathInSpaceMancer from './CharacterManager/DeathInSpace/DeathInSpaceMancer.js';
 import MHeartsMancer from './CharacterManager/MonsterHearts/MHeartsMancer.js';
 import WindowFocusHandler from './FocusHandler.js';
+import Page404 from './Page404.js';
 
 function getRoutes(){
   return (
@@ -31,6 +32,7 @@ function getRoutes(){
     <Route path="/CharacterSheetHomePage" element={<CharacterSheetHomePage/>}/>
     <Route path='/user/sheets' element={<CharacterSheetView/>}/>
     <Route path='/DualFactorAuth' element={<DualFactorAuth/>}/>
+    <Route path="*" element={<Page404/>}/>
     </>
   )
 }
