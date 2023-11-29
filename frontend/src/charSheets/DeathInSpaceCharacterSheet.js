@@ -1,8 +1,8 @@
-import { Button, Divider, FormControl, FormControlLabel, Grid, List, ListItem, ListItemText, Menu, MenuItem, Radio, RadioGroup, Tab, Tabs, TextField, ThemeProvider, Typography, createTheme } from "@mui/material"
+import { Button, CircularProgress, Divider, FormControl, FormControlLabel, Grid, List, ListItem, ListItemText, Menu, MenuItem, Radio, RadioGroup, Tab, Tabs, TextField, ThemeProvider, Typography, createTheme } from "@mui/material"
 import { useEffect, useState } from "react"
 import './DeathInSpaceCharacterSheet.css'
 import DISStatsContainer from './CharacterSheetMedia/DISStatsContainer.png'
-import { patchSheet } from "../api.mjs"
+import { getDISOrigins, patchSheet } from "../api.mjs"
 
 const theme = createTheme({
     components:
@@ -578,8 +578,8 @@ function BackgroundInfo(props)
     return (
     <Grid height={'100%'}>
         <Grid height={'20%'} width={'100%'} container flexDirection={'row'}>
-            <TextField focused onChange={changeDrive} value={drive} sx={{width: '40%', marginRight: '10%'}} label="Drive" size="small"/>
-            <TextField onChange={changeAllegiance} value={allegiance} sx={{width: '40%', marginLeft: '10%'}} focused label="Past Allegiance" size="small"/>
+            <TextField variant="filled" onChange={changeDrive} value={drive} sx={{width: '40%', marginRight: '10%'}} label="Drive" size="small"/>
+            <TextField onChange={changeAllegiance} value={allegiance} sx={{width: '40%', marginLeft: '10%'}} variant="filled" label="Past Allegiance" size="small"/>
         </Grid>
         <Grid height={'30%'} width={'100%'} container flexDirection={'row'}>
             <Origin characterInfo={props.characterInfo}/>
@@ -594,18 +594,79 @@ function BackgroundInfo(props)
 function Origin(props)
 {
     const [OriginDescription, setOriginDescription] = useState(props.characterInfo.origin.description)
-
     const [anchorEl, setAnchorEl] = useState(null);
+    const [origins, setOrigins] = useState([]);
+    const [currOrigin, setCurrOrigin] = useState(props.characterInfo.origin.name)
+    const [originsLoaded, setOriginsLoaded] = useState(false)
+
+    useEffect(function()
+    {
+        getDISOrigins({page: 0, limit: 100000}).then(function (resp)
+        {
+            if (resp.ok)
+            {
+                resp.json().then(function (json)
+                {
+                    setOrigins(json.records)
+                    setOriginsLoaded(true);
+                })
+            }
+            else
+                console.log("Getting DiS origins failed.")
+        })
+    }, [])
+
+
+    useEffect(function()
+    {
+        if (origins.length > 0)
+        {
+            const currOriginJSON = origins.find((element) => element.name === currOrigin)
+            setOriginDescription(currOriginJSON.description);
+            const copyOfCharacterJSON = props.characterInfo;
+            copyOfCharacterJSON.origin = currOriginJSON;
+            patchSheet(copyOfCharacterJSON._id, copyOfCharacterJSON).then(function(resp)
+            {
+                if (resp.ok)
+                {
+                    resp.json().then(function (json)
+                    {
+                        if (!(json.origin.name === copyOfCharacterJSON.origin.name))
+                        {
+                            console.log("Error. Updated value is not returned value.");
+                            console.log("Updated value: " + copyOfCharacterJSON.origin.name)
+                            console.log("Returned value: " + json.origin.name)
+                        }
+                    })
+                }
+                else
+                    console.log("Error when updating origin. Error code: " + resp.status)
+            })
+        }
+    }, [currOrigin, origins])
+
+
+    const changeOrigin = function (event)
+    {
+        event.preventDefault();
+        const {myValue} = event.currentTarget.dataset
+        setCurrOrigin(myValue)
+        setAnchorEl(null);
+    }
+
+
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
+
     const handleClose = () => {
         setAnchorEl(null);
-    };
-
+      };
+    //Drop Down menu provided by MaterialUI documentation
     return (
         <Grid container flexDirection={'row'}>
+        { (originsLoaded) ?
         <div className="selectOrigin">
             <Button
                 aria-controls={open ? 'fade-menu' : undefined}
@@ -623,15 +684,18 @@ function Origin(props)
                 open={open}
                 onClose={handleClose}
             >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
-                <MenuItem onClick={handleClose}>Logout</MenuItem>
+                {origins.map(function (origin)
+                {
+                    return <MenuItem key={`${origin.name}`} data-my-value={origin.name} onClick={changeOrigin}>{origin.name}</MenuItem>
+                })}
             </Menu>
             <Grid marginTop={'5%'} container flexDirection={'row'}>
                 <Typography marginRight={'5%'}>Current Origin: </Typography>
-                <Typography>{props.characterInfo.origin.name}</Typography>
-            </Grid>
+                <Typography>{currOrigin}</Typography>
+            </Grid> 
         </div>
+        : <CircularProgress/>
+        }
         <TextField disabled value={OriginDescription} sx={{justifySelf: 'flex-end', width: '50%'}} multiline rows={4}></TextField>
         </Grid>
     )
