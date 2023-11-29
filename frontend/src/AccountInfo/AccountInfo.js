@@ -1,9 +1,11 @@
 import { Box, Grid, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import "../styling/general.css"
 import { isObjectEmpty } from "../helperFunctions/helper.mjs";
 import { useLocation, useNavigate } from "react-router";
 import { getUser } from "../api.mjs";
+
+import "../styling/general.css"
+import "./info.css"
 
 function AccountInfo(props){
     const navigate = useNavigate()
@@ -22,11 +24,10 @@ function AccountInfo(props){
                 if(resp.status === 401){
                     navigate("/login", {state: {path: location.pathname}})
                 }
-                setError(resp.body)
+                setError(json.body)
                 return retFunc
             }
-            setCurrUser(resp)
-            console.log('currUser', isObjectEmpty(resp), resp)
+            setCurrUser(json)
         }).catch(e => {
             if(e.name !== 'AbortError'){
                 console.error('error', e)
@@ -37,11 +38,15 @@ function AccountInfo(props){
     }, [])
 
     return(
-        <Box className="full-center">
+        <Box item container xs={12} className="full" justifyContent='center'>
             {
                 isObjectEmpty(currUser) ? <></>
                 :
-                <Typography>Hi</Typography>
+                <Box item container xs={12} width="100%">
+                    <Grid item xs={12}>
+                        <Typography align='center' variant="h3">Welcome!</Typography>
+                    </Grid>
+                </Box>
             }
         </Box>
     )

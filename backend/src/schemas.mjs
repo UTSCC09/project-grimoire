@@ -3,41 +3,6 @@ const ObjectId = Schema.ObjectId;
 
 import mongoose, { mongo } from 'mongoose';
 
-export const UserSchema = new Schema({
-    email: {
-        type: String,
-        lowercase: true,
-        required: true,
-        index: true,
-        unqiue: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    salt: {
-        type: String,
-        required: true
-    },
-    profilePicture: {
-        type: String,
-        required: false
-    },
-    isMember: {
-        type: Boolean,
-        required: true,
-        default: false
-    },
-    twofa: {
-        type: Boolean,
-        required: true,
-        default: false
-    }
-}, {
-    timestamps: true
-});
-
-export const User = new mongoose.model("User", UserSchema)
 
 export const ImageSchema = new Schema({
     mimetype: {
@@ -57,6 +22,42 @@ export const ImageSchema = new Schema({
         required: false
     } 
 })
+
+export const UserSchema = new Schema({
+    email: {
+        type: String,
+        lowercase: true,
+        required: true,
+        index: true,
+        unqiue: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    salt: {
+        type: String,
+        required: true
+    },
+    profilePicture: {
+        type: ImageSchema,
+        required: false
+    },
+    isMember: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    twofa: {
+        type: Boolean,
+        required: true,
+        default: false
+    }
+}, {
+    timestamps: true
+});
+
+export const User = new mongoose.model("User", UserSchema)
 
 export const GameSchema = new Schema({
     name: {
