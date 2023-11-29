@@ -19,16 +19,6 @@ import { MapsRouter } from "./googleMaps/routes.mjs";
 import { domainToASCII } from "url";
 
 dotenv.config();
-
-// const privateKey = readFileSync( process.env.SERVER_KEY );
-// const certificate = readFileSync(process.env.SERVER_CERT );
-// const config = {
-//         key: privateKey,
-//         cert: certificate
-// };
-
-
-// const HTTPSPORT = 8000;
 //used for testing
 const HTTPPORT = 8000
 
@@ -42,7 +32,6 @@ export async function connectToDb(connectionString){
     return mongoose.connect(connectionString)
 }
 
-console.log("Connecting to database at " + process.env.MONGO_URL)
 
 await connectToDb(process.env.MONGO_URL)
 
@@ -273,11 +262,6 @@ app.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).json({body: 'Something broke!', err: err.name, errText: err.message})
 })
-
-
-// export const httpsServer = https.createServer(config, app).listen(HTTPSPORT, function (err) {
-//     if (err) console.log(err);
-//     else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
 
 
 export const server = http.createServer(app).listen(HTTPPORT, function (err){
