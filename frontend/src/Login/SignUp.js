@@ -1,5 +1,5 @@
 import {React, useState} from "react"
-import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box, Checkbox, FormControlLabel, CheckBoxIcon} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box, Checkbox, FormControlLabel, CheckBoxIcon, Link} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import { signUp, getSessionCode } from "../api.mjs";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
@@ -158,6 +158,9 @@ function SignUpForm(props)
                     :
                     <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
                     )}
+        <Link variant="subtitle" component="button" color='secondary' onClick={() => navigate(`/login`)}>
+            Log in
+        </Link>
         </CustomTextContainer>
         </Grid>
         </ThemeProvider>

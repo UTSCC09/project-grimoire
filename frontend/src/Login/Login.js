@@ -2,7 +2,7 @@ import {React, useState, useEffect} from "react"
 import {Button, Alert, TextField, createTheme, Grid, ThemeProvider, Typography, Box} from "@mui/material"
 import { getCurrentUser, logIn } from "../api.mjs";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
-import {useNavigate, useLocation} from "react-router-dom"
+import {useNavigate, useLocation, Link} from "react-router-dom"
 import {setusername} from "../Template/NavBar.js"
 import { red } from "@mui/material/colors";
 import styled from "@emotion/styled";
@@ -77,7 +77,6 @@ function LogInForm(props)
     const [allowSubmit, setallowSubmit] = useState(false)
     const navigate = useNavigate();
     
-
     const handleEmailChange = function (event)
     {
         event.preventDefault();
@@ -116,7 +115,7 @@ function LogInForm(props)
                     if (json.dfa)
                         navigate("/DualFactorAuth");
                     else
-                        navigate("/");
+                        navigate(props.location.state && props.location.state.path ? props.location.state.path : "/");
                 }
             })
             .catch(function (error)
@@ -147,6 +146,9 @@ function LogInForm(props)
                     :
                     <Typography fontSize={'5vh'} color='red'>Log In</Typography>
                     )}
+            <Link variant="subtitle" component="button" onClick={(e) => {e.preventDefault(); navigate('/signup')}}>
+                Sign Up
+            </Link>
         {
             Boolean(error) ? 
             <Alert severity="error">{error}</Alert>

@@ -20,7 +20,14 @@ const theme = createTheme({
         MuiGrid: {
             styleOverrides: {
                 root:{
-                    backgroundcolor: '#000000'
+                    backgroundColor: '#000000'
+                }
+            }
+        },
+        MuiBox: {
+            styleOverrides: {
+                root:{
+                    backgroundColor: '#000000'
                 }
             }
         }
@@ -34,6 +41,10 @@ const theme = createTheme({
         {
             main: '#ff000d'
         },
+        text:{
+            primary: '#ffffff',
+            secondary: '#f44336'
+          }
       }
 })
 

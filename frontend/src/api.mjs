@@ -246,3 +246,9 @@ export function getLocationNamesFromCardinal(lat, lng)
         })
 
 }
+
+/*Getting a User's page info*/
+
+export function getUser(signal=undefined){
+  return buildGeneralSearch(`${URL}/api/users/currUser`, {}, signal)
+}

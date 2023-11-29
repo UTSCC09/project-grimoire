@@ -17,6 +17,7 @@ import DeathInSpaceMancer from './CharacterManager/DeathInSpace/DeathInSpaceManc
 import MHeartsMancer from './CharacterManager/MonsterHearts/MHeartsMancer.js';
 import WindowFocusHandler from './FocusHandler.js';
 import Page404 from './Page404.js';
+import AccountInfo from './AccountInfo/AccountInfo.js';
 
 function getRoutes(){
   return (
@@ -24,6 +25,7 @@ function getRoutes(){
     <Route path="/" element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
     <Route path="/signup" element={<SignUp/>}/>
+    <Route path="/accountInfo" element={<AccountInfo/>}/>
     <Route path="/LookingForGame" element={<LookingForGame/>}/>
     <Route path="/CreateGame" element={<CreateGame/>}/>
     <Route path="/CreateCharacter" element={<CreateCharacter/>}/>
