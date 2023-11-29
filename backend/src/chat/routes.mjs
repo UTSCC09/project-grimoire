@@ -4,6 +4,7 @@ import { Message } from "./schema.mjs";
 import { Game, User } from "../schemas.mjs";
 import { Group } from "../groups/schema.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
+import { io } from "socket.io-client";
 
 export const messageRouter = Router()
 
@@ -56,34 +57,30 @@ messageRouter.delete('/messages/:messageId', isAuthenticated, async (req, res) =
     return res.status(200).json({ message: "Message deleted" })
 })
 
-const server = app.listen(8080, () => { console.log("Listening on port 8080") })
-const wsServer = new ws.WebSocketServer({ server });
-wsServer.on('request', async function (request) {
-    const connection = request.accept(null, request.origin);
-    let index = clients.push(connection) - 1;
 
-    console.log("connected")
-
-    connection.on('message', async function (message) {
-        const data = JSON.parse(message.utf8Data)
-        if (data.type === "message") {
-            const message = new Message({
-                sender: data.sender,
-                content: data.content,
-                group: data.group
-            })
-            await message.save()
-            wsServer.clients.forEach(function (client) {
-                if (client !== connection && client.readyState === ws.OPEN) {
-                    client.send(JSON.stringify({ type: "message", message: message }))
-                }
-            })
-        }
-    });
-    connection.on('close', function (connection) {
-        clients.splice(index, 1);
-        console.log("closed")
-    });
+//socket io connection
+io.on('connection', (socket) => {
+    let roomid, username;
+    // var room,user;
+    socket.on('disconnect', () => {
+        console.log("connection closed");
+    })
+    socket.on("new-join", ({ user, room }) => {
+        socket.join(room);
+        roomid = room;
+        username = user;
+        console.log("new joined");
+    })
+    socket.on("new-msg", (msg) => {
+        socket.to(roomid).emit('new-msg', msg);
+        Message.create(msg, (err, data) => {
+            if (err) {
+                console.log(err.message);
+            } else {
+                console.log("data sent to database")
+            }
+        })
+    })
 })
 
 export default messageRouter
