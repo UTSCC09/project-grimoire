@@ -4,6 +4,9 @@ import './DeathInSpaceCharacterSheet.css'
 import DISStatsContainer from './CharacterSheetMedia/DISStatsContainer.png'
 import { getDISOrigins, patchSheet } from "../api.mjs"
 
+
+const URL = process.env.REACT_APP_URL
+
 const theme = createTheme({
     components:
         {
@@ -402,9 +405,10 @@ function RightSideOfSheet(props)
                 <Tab disabled={page === "Inventory"} value={"Inventory"} label="Inventory"/>
                 <Tab disabled={page === "Background Info"} value={"Background Info"} label="Background Info"/>
                 <Tab disabled={page === "Current Situation"} value={"Current Situation"} label="Current Situation"/>
+                <Tab disabled={page === "QR Code"} value={"QR Code"} label="QR Code"/>
             </Tabs>
         </Grid>
-        <Grid height={'90%'}>
+        <Grid container justifyContent={'center'} alignItems={'center'} height={'90%'}>
         {
             (page === "Inventory") ? <InventoryAndArmor characterInfo={props.characterInfo}/> : <></>
         }
@@ -414,13 +418,24 @@ function RightSideOfSheet(props)
         {
             (page === "Current Situation") ? <CurrentSituation characterInfo={props.characterInfo}/> : <></>
         }
+        {
+            (page === "QR Code") ? <QRCode characterInfo={props.characterInfo}/> : <></>
+        }
         </Grid>
+    </Grid>
+}
+
+function QRCode(props)
+{
+    return <Grid item justifySelf={'center'} alignSelf={'center'} width={'40%'} height={'50%'}>
+        <img className="qrCode" src={`${URL}/api/sheets/${props.characterInfo._id}/qr`}/>
+        <Typography>Share your character sheet</Typography>
     </Grid>
 }
 
 function InventoryAndArmor(props)
 {
-    return (<Grid height={'100%'}>
+    return (<Grid width={'100%'} height={'100%'}>
         <Weapons characterInfo={props.characterInfo}/>
         <Armor characterInfo={props.characterInfo}/>
         <Inventory characterInfo={props.characterInfo}/>

@@ -119,6 +119,11 @@ export function getSheet(ID)
     })
 }
 
+// export function getSheetQRCode(ID)
+// {
+
+// }
+
 export function getPictureOfSheet(ID)
 {
   return fetch(`${URL}/api/sheets/${ID}/pic`, {

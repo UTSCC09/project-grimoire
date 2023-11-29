@@ -103,7 +103,7 @@ function CharacterInfo(props)
     const GoToCharacterSheet = function(event) 
     {
         event.preventDefault();
-        navigate("/user/sheets", { state: {charSheetID: props.characterSheet.sheet._id} })
+        navigate(`/sheets/${props.characterSheet.sheet._id}`);
     }
     const dateArray = props.characterSheet.updatedAt.split('T');
     const dateString = dateArray[0];

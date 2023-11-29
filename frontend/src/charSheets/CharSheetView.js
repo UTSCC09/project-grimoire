@@ -4,13 +4,18 @@ import { getSheet } from "../api.mjs";
 import { useLocation } from "react-router";
 import DeathInSpaceCharacterSheet from "./DeathInSpaceCharacterSheet.js"
 
+function parseID(String)
+{
+    return ((String.split('/'))[2]);
+}
+
+
 function CharacterSheetView(props){
     const [sheet, setSheet] = useState(null)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true);
-    
-    const {state} = useLocation();
-    const sheetID = state.charSheetID;
+
+    const sheetID = parseID(useLocation().pathname);
 
     useEffect(function () {
         getSheet(sheetID).then(function (response) 
@@ -43,9 +48,8 @@ function CharacterSheetView(props){
 
 function CharacterSheet(props)
 {
-    const DeathInSpaceID = "65380cc7045073574113c6cd";
     //Need to map the game ID to the actual game which we need a character sheet for
-    if (props.character.game === DeathInSpaceID)
+    if (props.character.game.name === "Death In Space")
     {
         return <DeathInSpaceCharacterSheet stats = {props.character}/>
     }
