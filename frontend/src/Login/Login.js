@@ -7,6 +7,7 @@ import {setusername} from "../Template/NavBar.js"
 import { red } from "@mui/material/colors";
 import styled from "@emotion/styled";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
+import { isValidEmail } from "../helperFunctions/helper.mjs";
 
 const theme = createTheme({
     palette: 
@@ -160,17 +161,6 @@ function LogInForm(props)
         </ThemeProvider>
     )
 }
-
-const OFFICIALEMAILREGEX =  /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-
-function isValidEmail(email){    
-    try{
-        return String(email)
-        .toLowerCase()
-        .match(OFFICIALEMAILREGEX);
-    }catch(e){
-        return false
-    } 
-}   
+  
 
 export default Login
