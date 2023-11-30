@@ -30,7 +30,7 @@ UserRouter.get('/currUser', isAuthenticated, async (req, res, next) => {
     }).catch(e => next(e))
 })
 
-UserRouter.post('/:id/pic', isAuthenticated, async (req, res ,next) => {
+UserRouter.put('/:id/pic', isAuthenticated, async (req, res ,next) => {
     if(req.params.id !== req.userId)
         return res.status(403).json({body: `Do not have permission to edit user ${req.params.id}`})
     const user = await User.findById(req.userId).exec()

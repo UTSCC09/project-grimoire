@@ -257,7 +257,7 @@ export function UploadProfilePic(id, picture){
   const data = new FormData()
   data.append('image', picture)
   return fetch(`${URL}/api/users/${id}/pic`,{
-    method: 'POST',
+    method: 'PUT',
     credentials: 'include',
     body: data
   })

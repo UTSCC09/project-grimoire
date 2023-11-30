@@ -143,9 +143,12 @@ sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
 
     if(mapping.user != req.userId)
         return res.status(403).json({body: `user ${req.userId} does not have permission for this sheet`})
-
+    
+    const tempModel = new mongoose.model(mapping.sheetModel)
+    const m = await tempModel.findById(mapping.sheet).exec()
+    
     const up = sheetPortraitUpload.single('image')
-    up(async (req, res, err) => {
+    up(req, res, err => {
         if(err instanceof MulterError){
             if(err.message === 'File too large')
                 return res.status(422).json({body: "file too large"})
@@ -153,8 +156,6 @@ sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
         }
         if(!req.file)
             return res.status(422).json({body: "missing image"})
-        const tempModel = new mongoose.model(mapping.sheetModel)
-        const m = await tempModel.findById(mapping.sheet).exec()
 
         if(m.profilePicture && m.profilePicture.path){
             fs.unlink(m.profilePicture.path, (fserr) => {
