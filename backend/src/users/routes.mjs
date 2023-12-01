@@ -110,7 +110,7 @@ UserRouter.get('/:id/pic', async (req, res, err) => {
  * @param {ObjectId} id id of the user
  * @returns {Object} updated user
  */
-UserRouter.patch('/:id', isAuthenticated, async (req, res, err) => {
+UserRouter.patch('/:id', isAuthenticated, async (req, res, next) => {
     const id = req.params.id
     if(!id || !isValidObjectId(id))
         return res.status(400).json({body: "missing objectId of user"})
@@ -126,6 +126,8 @@ UserRouter.patch('/:id', isAuthenticated, async (req, res, err) => {
 
     User.findByIdAndUpdate(req.params.id, req.body, {returnDocument: 'after', runValidators:true, fields: {password: 0, salt: 0}}).then(result => {
         return res.json(result)
-    }).catch(e => next(e))
+    }).catch(e => {
+        return res.status(400).json({body: e.message})
+    })
 
 })
