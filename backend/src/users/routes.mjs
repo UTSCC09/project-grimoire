@@ -5,6 +5,7 @@ import { Group } from "../groups/schema.mjs";
 import multer, {MulterError} from 'multer'
 import { resolve } from "path";
 import fs from 'fs'
+import { isValidObjectId } from "mongoose";
 
 export const UserRouter = new Router()
 
@@ -19,6 +20,11 @@ fileFilter: function(req, file, cb){
           return cb(null, false);
      }}})
 
+/**
+ * route used to get profile of currently logged in user
+ * 
+ * @returns {Object} object representing logged in user, without password and salt
+ */
 UserRouter.get('/currUser', isAuthenticated, async (req, res, next) => {
     const uPromise = User.findById(req.userId, {password: 0, salt: 0}).exec()
     const uGroups = Group.find({members: {$in: [req.userId]}}).exec()
@@ -30,6 +36,11 @@ UserRouter.get('/currUser', isAuthenticated, async (req, res, next) => {
     }).catch(e => next(e))
 })
 
+/**
+ * changes the porfile picture of a given User
+ * @param {ObjectId} id id of the user
+ * @param {File} image the image to be used as a pfp
+ */
 UserRouter.put('/:id/pic', isAuthenticated, async (req, res ,next) => {
     if(req.params.id !== req.userId)
         return res.status(403).json({body: `Do not have permission to edit user ${req.params.id}`})
@@ -75,6 +86,11 @@ UserRouter.put('/:id/pic', isAuthenticated, async (req, res ,next) => {
     })
 })
 
+/**
+ * gets the profile picture of a user, if it exists
+ * @param {ObjectId} id id of the user
+ * @returns {File} profile picture of the user with given id
+ */
 UserRouter.get('/:id/pic', async (req, res, err) => {
     User.findById(req.params.id).exec().then((doc) => {
         if(!doc)
@@ -87,4 +103,29 @@ UserRouter.get('/:id/pic', async (req, res, err) => {
             res.status(404).send({body: `profile picture does not exist for sheet ${req.params.id}`})
         }
     })
+})
+
+/**
+ * updates user with corresponding json body, excluding password and salt
+ * @param {ObjectId} id id of the user
+ * @returns {Object} updated user
+ */
+UserRouter.patch('/:id', isAuthenticated, async (req, res, err) => {
+    const id = req.params.id
+    if(!id || !isValidObjectId(id))
+        return res.status(400).json({body: "missing objectId of user"})
+
+    if(req.userId !== id)
+        return res.status(403).json({body: `You do not have permission to edit user ${id}`})
+
+    const json = req.body
+
+    delete json.password
+    delete json.salt
+    delete json.email
+
+    User.findByIdAndUpdate(req.params.id, req.body, {returnDocument: 'after', runValidators:true, fields: {password: 0, salt: 0}}).then(result => {
+        return res.json(result)
+    }).catch(e => next(e))
+
 })

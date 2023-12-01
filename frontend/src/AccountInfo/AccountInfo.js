@@ -2,7 +2,7 @@ import { Avatar, Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Gr
 import React, { useEffect, useState } from "react";
 import { isObjectEmpty, isValidEmail } from "../helperFunctions/helper.mjs";
 import { useLocation, useNavigate } from "react-router";
-import { URL, UploadProfilePic, getUser } from "../api.mjs";
+import { URL, UploadProfilePic, editUser, getUser } from "../api.mjs";
 import AddIcon from '@mui/icons-material/Add';
 
 import "../styling/general.css"
@@ -14,6 +14,7 @@ function AccountInfo(props){
     const location = useLocation()
 
     const [currUser, setCurrUser] = useState({})
+    const [modifications, setModifications] = useState({})
     const [userHover, setUserHover] = useState(false)
     const [error, setError] = useState("")
 
@@ -29,11 +30,31 @@ function AccountInfo(props){
                 return
             }
             setCurrUser(json)
+            setModifications({})
         }).catch(e => {
             if(e.name !== 'AbortError'){
                 console.error('error', e)
                 setError("We encountered an error when trying to reach our server, please try again.")
             }
+        })
+    }
+
+    useEffect(()=>{
+        const newUser = {...currUser, ...modifications}
+        setCurrUser(newUser)
+    }, [modifications])
+
+    const saveUser = () => {
+        editUser(currUser._id, modifications).then(async (resp) => {
+            const json = await resp.json()
+            if(!resp.ok){
+                setError(json.body)
+                return
+            }
+            fetchUser()
+        }).catch(e => {
+            console.error(e)
+            setError("We encountered an error when trying to reach our server, please try again.")
         })
     }
 
@@ -45,9 +66,10 @@ function AccountInfo(props){
     }, [])
 
     function changeField(key, value){
-        let newUser = {...currUser}
+        let newUser = {...modifications}
         newUser[key] = value
-        setCurrUser(newUser)
+        setModifications(newUser)
+        console.log('modifications', newUser)
     }
 
     function getAvatar(){
@@ -112,15 +134,15 @@ function AccountInfo(props){
                                 <Divider sx={{background:'red', margin:'0.5%', marginBottom:'1.5%'}}/>
                                 <Grid item container xs={12} width="100%" spacing={1}>
                                     <Grid item xs={6}>
-                                        <TextField label="Name" value={currUser.name || ""}
+                                        <TextField label="Username" value={currUser.username || ""}
                                         fullWidth
-                                        onChange={(e) => {e.preventDefault(); changeField('name', e.target.value)}}/>
+                                        onChange={(e) => {e.preventDefault(); changeField('username', e.target.value)}}/>
                                     </Grid>
                                     <Grid item xs={6}>
                                         <TextField label="Email" required value={currUser.email}
                                         fullWidth
                                         error={!isValidEmail(currUser.email)}
-                                        onChange={(e) => {e.preventDefault(); changeField('name', e.target.value)}}/>
+                                        onChange={(e) => {e.preventDefault(); changeField('email', e.target.value)}}/>
                                     </Grid>
                                     <Grid item xs={6}>
                                     <FormGroup>
@@ -136,13 +158,14 @@ function AccountInfo(props){
                             <Typography>Your groups</Typography>
                                 {currUser.groups.map((g) => (
                                 <Grid item xs={12}>
+                                    <Divider/>
                                     <Typography>{g.name}</Typography>
                                 </Grid>
                                 ))}
                         </Grid>
                         <GridBreak/>
                         <Grid item xs={2}>
-                            <Button fullWidth>Save</Button>
+                            <Button fullWidth onClick={saveUser}>Save</Button>
                         </Grid>
                         
                     </Grid>

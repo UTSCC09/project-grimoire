@@ -29,11 +29,15 @@ export const UserSchema = new Schema({
         lowercase: true,
         required: true,
         index: true,
-        unqiue: true
+        unqiue: true,
+        immutable: true
     },
     password: {
         type: String,
         required: true
+    },
+    username: {
+        type: String
     },
     salt: {
         type: String,

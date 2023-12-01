@@ -262,3 +262,14 @@ export function UploadProfilePic(id, picture){
     body: data
   })
 }
+
+export function editUser(id, editObj){
+  return fetch(`${URL}/api/users/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(editObj),
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include"
+  })
+}
