@@ -19,7 +19,7 @@ const theme = createTheme({
                         backgroundColor: '#f5f6f7'
                     }
                 }
-            }
+            },
         }
 })
 
