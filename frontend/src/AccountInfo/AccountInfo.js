@@ -2,6 +2,7 @@ import { Avatar, Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Gr
 import React, { useEffect, useState } from "react";
 import { isObjectEmpty, isValidEmail } from "../helperFunctions/helper.mjs";
 import { useLocation, useNavigate } from "react-router";
+import ErrorAlert from '../globalComponents/ErrorAlert.js'
 import { URL, UploadProfilePic, editUser, getUser } from "../api.mjs";
 import AddIcon from '@mui/icons-material/Add';
 
@@ -142,6 +143,7 @@ function AccountInfo(props){
                                     </Grid>
                                     <Grid item xs={6}>
                                         <TextField label="Email" required value={currUser.email} disabled
+                                        variant="standard"
                                         fullWidth
                                         error={!isValidEmail(currUser.email)}
                                         onChange={(e) => {e.preventDefault(); changeField('email', e.target.value)}}/>
@@ -175,6 +177,7 @@ function AccountInfo(props){
                     </Grid>
                 </Box>
             }
+            <ErrorAlert open={Boolean(error)} error={error} onClose={() => setError("")}/>
         </Box>
     )
 }
