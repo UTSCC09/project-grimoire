@@ -13,6 +13,8 @@ function AccountInfo(props){
     const navigate = useNavigate()
     const location = useLocation()
 
+    const dividerStyle = {background:'red', margin:'0.5%', marginBottom:'1.5%'}
+
     const [currUser, setCurrUser] = useState({})
     const [modifications, setModifications] = useState({})
     const [userHover, setUserHover] = useState(false)
@@ -128,10 +130,10 @@ function AccountInfo(props){
                                         </label>
                                     </Grid>
                                     <Grid item xs={10}>
-                                        <Typography>Your Info</Typography>
+                                        <Typography variant="h6">Your Info</Typography>
                                     </Grid>
                                 </Grid>
-                                <Divider sx={{background:'red', margin:'0.5%', marginBottom:'1.5%'}}/>
+                                <Divider sx={dividerStyle}/>
                                 <Grid item container xs={12} width="100%" spacing={1}>
                                     <Grid item xs={6}>
                                         <TextField label="Username" value={currUser.username || ""}
@@ -155,13 +157,15 @@ function AccountInfo(props){
                             </Box>
                         </Grid>
                         <Grid item container xs={5} className="basic-panel">
-                            <Typography>Your groups</Typography>
-                                {currUser.groups.map((g) => (
-                                <Grid item xs={12}>
-                                    <Divider/>
-                                    <Typography>{g.name}</Typography>
-                                </Grid>
-                                ))}
+                            <Box className="fill">
+                                <Typography variant="h6">Your groups</Typography>
+                                    {currUser.groups.map((g) => (
+                                    <Grid item xs={12}>
+                                        <Divider sx={dividerStyle}/>
+                                        <Typography>{g.name}</Typography>
+                                    </Grid>
+                                    ))}
+                            </Box>
                         </Grid>
                         <GridBreak/>
                         <Grid item xs={2}>
