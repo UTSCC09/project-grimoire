@@ -27,7 +27,7 @@ const theme = createTheme({
 function DeathInSpaceCharacterSheet (props)
 {
     return <ThemeProvider theme={theme}>
-    <Grid marginTop={'5%'} backgroundColor={'#f5f6f7'} height={'80%'} width={'80%'} container flexDirection={'row'}>
+    <Grid marginTop={'5%'} backgroundColor={'#f5f6f7'} height={'89%'} width={'80%'} container flexDirection={'row'}>
         <LeftSideOfSheet characterInfo={props.stats}/>
         <RightSideOfSheet characterInfo={props.stats}/>
     </Grid>
@@ -36,7 +36,7 @@ function DeathInSpaceCharacterSheet (props)
 
 function LeftSideOfSheet(props)
 {
-    return <Grid container flexDirection={'column'} borderRight={3} borderColor={'#000000'} width={'50%'}>
+    return <Grid container height={'100%'} flexDirection={'column'} borderRight={3} borderColor={'#000000'} width={'50%'}>
         <Typography borderColor={'#000000'} borderBottom={6} textAlign={'center'} width={'100%'} height={'10%'} fontSize={'2rem'}>Death In Space</Typography>
         <BelowTitleContent characterInfo = {props.characterInfo}/>
     </Grid>
