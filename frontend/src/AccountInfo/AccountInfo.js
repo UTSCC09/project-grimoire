@@ -141,7 +141,7 @@ function AccountInfo(props){
                                         onChange={(e) => {e.preventDefault(); changeField('username', e.target.value)}}/>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <TextField label="Email" required value={currUser.email}
+                                        <TextField label="Email" required value={currUser.email} disabled
                                         fullWidth
                                         error={!isValidEmail(currUser.email)}
                                         onChange={(e) => {e.preventDefault(); changeField('email', e.target.value)}}/>
@@ -169,7 +169,7 @@ function AccountInfo(props){
                         </Grid>
                         <GridBreak/>
                         <Grid item xs={2}>
-                            <Button fullWidth onClick={saveUser}>Save</Button>
+                            <Button fullWidth onClick={saveUser} variant="outlined">Save</Button>
                         </Grid>
                         
                     </Grid>

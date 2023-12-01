@@ -34,13 +34,6 @@ const theme = createTheme({
             }
           }
         },
-        MuiTextField:{
-          styleOverrides:{
-            root:{
-              borderColor: '#ffffff'
-            }
-          }
-        },
         MuiAutocomplete: {
             styleOverrides: {
               option: {
@@ -56,63 +49,6 @@ const theme = createTheme({
             },
           },
       },
-      MuiTextField: {
-        styleOverrides: {
-          root: {
-            '--TextField-brandBorderColor': '#f44336',
-            '--TextField-brandBorderHoverColor': '#f44336',
-            '--TextField-brandBorderFocusedColor': '#f44336',
-            '& label.Mui-focused': {
-              color: 'var(--TextField-brandBorderFocusedColor)',
-            },
-          },
-        },
-      },
-      MuiOutlinedInput: {
-        styleOverrides: {
-          notchedOutline: {
-            borderColor: 'var(--TextField-brandBorderColor)',
-          },
-          root: {
-            [`&:hover .${outlinedInputClasses.notchedOutline}`]: {
-              borderColor: 'var(--TextField-brandBorderHoverColor)',
-            },
-            [`&.Mui-focused .${outlinedInputClasses.notchedOutline}`]: {
-              borderColor: 'var(--TextField-brandBorderFocusedColor)',
-            },
-          },
-        },
-      },
-      MuiFilledInput: {
-        styleOverrides: {
-          root: {
-            '&:before, &:after': {
-              borderBottom: '2px solid var(--TextField-brandBorderColor)',
-            },
-            '&:hover:not(.Mui-disabled, .Mui-error):before': {
-              borderBottom: '2px solid var(--TextField-brandBorderHoverColor)',
-            },
-            '&.Mui-focused:after': {
-              borderBottom: '2px solid var(--TextField-brandBorderFocusedColor)',
-            },
-          },
-        },
-      },
-      MuiInput: {
-        styleOverrides: {
-          root: {
-            '&:before': {
-              borderBottom: '2px solid var(--TextField-brandBorderColor)',
-            },
-            '&:hover:not(.Mui-disabled, .Mui-error):before': {
-              borderBottom: '2px solid var(--TextField-brandBorderHoverColor)',
-            },
-            '&.Mui-focused:after': {
-              borderBottom: '2px solid var(--TextField-brandBorderFocusedColor)',
-            },
-          },
-        },
-      },
       palette: {
         primary:
         {
@@ -124,7 +60,8 @@ const theme = createTheme({
         },
         text:{
           primary: '#ffffff',
-          secondary: '#f44336'
+          secondary: '#f44336',
+          disabled: '#f44336'
         }
     },
 })
