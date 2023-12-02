@@ -1,4 +1,4 @@
-const URL = process.env.REACT_APP_URL
+export const URL = process.env.REACT_APP_URL
 
 function buildGeneralSearch(url, searchParams, signal=undefined){
   let urlString = url + "?"
@@ -286,4 +286,31 @@ export function getLocationNamesFromCardinal(lat, lng)
           credentials: 'include'
         })
 
+}
+
+/*Getting a User's page info*/
+
+export function getUser(signal=undefined){
+  return buildGeneralSearch(`${URL}/api/users/currUser`, {}, signal)
+}
+
+export function UploadProfilePic(id, picture){
+  const data = new FormData()
+  data.append('image', picture)
+  return fetch(`${URL}/api/users/${id}/pic`,{
+    method: 'PUT',
+    credentials: 'include',
+    body: data
+  })
+}
+
+export function editUser(id, editObj){
+  return fetch(`${URL}/api/users/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(editObj),
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include"
+  })
 }
