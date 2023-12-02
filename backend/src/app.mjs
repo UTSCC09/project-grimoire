@@ -17,6 +17,7 @@ import { MHRouter } from "./monsterHearts/routes.mjs";
 import { gamesRouter } from "./games/routes.mjs";
 import { MapsRouter } from "./googleMaps/routes.mjs";
 import { domainToASCII } from "url";
+import { UserRouter } from "./users/routes.mjs";
 
 dotenv.config();
 //used for testing
@@ -77,6 +78,8 @@ app.use('/api/mhearts', MHRouter)
 app.use('/api/games', gamesRouter)
 
 app.use('/api/maps', MapsRouter)
+
+app.use('/api/users', UserRouter)
 
 /**
  * sanity check endpoint to test connection

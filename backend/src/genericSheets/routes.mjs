@@ -7,7 +7,7 @@ import { resolve } from "path";
 import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
 import QRCode from 'qrcode'
 import { PassThrough } from 'stream';
-
+import fs from 'fs'
 
 const sheetRouter = Router()
 
@@ -143,7 +143,10 @@ sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
 
     if(mapping.user != req.userId)
         return res.status(403).json({body: `user ${req.userId} does not have permission for this sheet`})
-
+    
+    const tempModel = new mongoose.model(mapping.sheetModel)
+    const m = await tempModel.findById(mapping.sheet).exec()
+    
     const up = sheetPortraitUpload.single('image')
     up(req, res, err => {
         if(err instanceof MulterError){
@@ -153,14 +156,29 @@ sheetRouter.post('/:id/pic', isAuthenticated, async(req, res, next) => {
         }
         if(!req.file)
             return res.status(422).json({body: "missing image"})
-        const tempModel = new mongoose.model(mapping.sheetModel)
-        tempModel.findOneAndUpdate({_id: mapping.sheet}, {characterPortrait: req.file}, 
-            {returnDocument: 'after', runValidators:true}).then((doc) => {
-            return res.status(201).json({body: "image successfully uploaded"})
-        }).catch(err => {
-            console.log('errors', err)
-            return res.status(400).json({errors: err})
-        })
+
+        if(m.profilePicture && m.profilePicture.path){
+            fs.unlink(m.profilePicture.path, (fserr) => {
+                if(fserr && fserr.code !== 'ENOENT')
+                    return next(err)
+                tempModel.findOneAndUpdate({_id: mapping.sheet}, {characterPortrait: req.file}, 
+                    {returnDocument: 'after', runValidators:true}).then((doc) => {
+                    return res.status(201).json({body: "image successfully uploaded"})
+                }).catch(err => {
+                    console.log('errors', err)
+                    return res.status(400).json({errors: err})
+                })
+            })
+        }else{
+            tempModel.findOneAndUpdate({_id: mapping.sheet}, {characterPortrait: req.file}, 
+                {returnDocument: 'after', runValidators:true}).then((doc) => {
+                return res.status(201).json({body: "image successfully uploaded"})
+            }).catch(err => {
+                console.log('errors', err)
+                return res.status(400).json({errors: err})
+            })
+        }
+        
     })
 })
 
