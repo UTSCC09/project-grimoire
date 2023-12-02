@@ -15,6 +15,7 @@ function LookingForGame(props) {
   const [hasLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
   const [gameId, setGameId] = useState("");
@@ -22,7 +23,7 @@ function LookingForGame(props) {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, searchTerm, filterType, gameId, userId]);
+  }, [searchTerm, filterType, gameId, userId]);
 
   const fetchData = async () => {
     try {
@@ -98,15 +99,15 @@ function LookingForGame(props) {
       </ul>
       <div>
         <Button
-          onClick={() => setCurrentPage(currentPage - 1)}
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
           Previous
         </Button>
-        <span>{`Page ${currentPage} of ${totalPages}`}</span>
+        <span>{`Page ${currentPage}`}</span>
         <Button
           onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          disabled={groups.length === 0}
         >
           Next
         </Button>
