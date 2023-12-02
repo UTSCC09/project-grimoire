@@ -85,8 +85,42 @@ const theme = createTheme({
               }
             }
           }
+        },
+        MuiCardContent:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogContent:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogTitle:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogActions:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiPaper:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background
+            }
+          }
         }
-
       },
       palette: {
         primary:

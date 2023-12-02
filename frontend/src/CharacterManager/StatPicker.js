@@ -131,7 +131,7 @@ function StatPicker(props){
                         )}
                     </Grid> : <></>
                 }
-                <Grid item container xs={12} sx={{justifyContent:'center'}}>
+                <Grid item container xs={12} sx={{justifyContent:'center'}} spacing={1}>
                     {props.customRollers.map((c) => (
                         <Grid item container xs={props.widthSx / NUMSTATS}>
                             <TextField type="number" fullWidth label={c.label} value={props.char[c.key] || ""}
@@ -140,8 +140,14 @@ function StatPicker(props){
                         </Grid>
                     ))}
                 </Grid>
-                    <Button fullWidth onClick={rollStats}>Roll Stats</Button>
-                    <Button fullWidth onClick={clearStats}>Clear Stats</Button>
+                <Grid item container>
+                    <Grid item xs={12}>
+                        <Button fullWidth onClick={rollStats}>Roll Stats</Button>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button fullWidth onClick={clearStats}>Clear Stats</Button>
+                    </Grid>
+                </Grid>
                 </Grid>
             </Grid>
         </Grid>
