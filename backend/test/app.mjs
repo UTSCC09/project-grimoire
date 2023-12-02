@@ -915,4 +915,3 @@ describe("Testing monster hearts", () => {
 
 
 })
-*/
