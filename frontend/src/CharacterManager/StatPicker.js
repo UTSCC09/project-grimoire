@@ -110,7 +110,7 @@ function StatPicker(props){
                 ))}
             </Grid>
             <Grid item container xs={12} sx={{justifyContent:'center'}}>
-                <Grid item container xs={12} className="normal-box-centered">
+                <Grid item container xs={12} className="normal-box-centered" spacing={1}>
                 {
                     rolledArray.length > 0 ? 
                     <Grid item container xs={12} sx={{justifyContent:'center'}}>
