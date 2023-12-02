@@ -1,29 +1,38 @@
 import { Router } from "express";
+import { server } from "../app.mjs";
 import { isAuthenticated } from "../helper.mjs";
 import { Message } from "./schema.mjs";
 import { Game, User } from "../schemas.mjs";
 import { Group } from "../groups/schema.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
-import { io } from "socket.io-client";
+import * as Server from 'socket.io';
 
 export const messageRouter = Router()
+
+const io = new Server.Server(server, {
+    pingTimeout: 60000,
+    cors: {
+      origin: 'http://localhost:3000',
+    },
+  });
 
 messageRouter.get('/messages/:groupId', isAuthenticated, async (req, res) => {
     const groupId = req.params.groupId
     if (!isValidObjectId(groupId)) {
         return res.status(400).json({ message: "Invalid group id" })
     }
-    const messages = await Message.find({ group: groupId }).sort( {createdAt: 1} )
+    const messages = await Message.find({ group: groupId })
+    .populate({
+        path: 'sender',
+        model: User,
+        select: 'username'
+    })
+    .populate({
+        path: 'group',
+        model: Group,
+        select: 'name'
+    })
     return res.status(200).json(messages)
-})
-
-// get latest 100 messages from a group
-messageRouter.get('/messages/:groupId/latest', isAuthenticated, async (req, res) => {
-    const groupId = req.params.groupId
-    if (!isValidObjectId(groupId)) {
-        return res.status(400).json({ message: "Invalid group id" })
-    }
-    const messages = await Message.find({ group: groupId }).sort( {createdAt: 1} ).limit(100)
 })
 
 messageRouter.post('/messages/:groupId', isAuthenticated, async (req, res) => {
@@ -31,55 +40,45 @@ messageRouter.post('/messages/:groupId', isAuthenticated, async (req, res) => {
     if (!isValidObjectId(groupId)) {
         return res.status(400).json({ message: "Invalid group id" })
     }
-    const message = new Message({
-        sender: req.user._id,
-        content: req.body.content,
-        group: groupId
+    // const message = new Message({
+    //     sender: req.user._id,
+    //     content: req.body.content,
+    //     group: groupId
+    // })
+    let message = await Message.create({ sender: req.user._id, content: req.body.content, group: groupId })
+    message = await (
+        await message.populate('sender', 'username')
+    ).populate({
+        path: 'group',
+        model: Group,
+        select: 'name',
+        populate: {
+            path: 'users',
+            model: User,
+            select: 'username'
+        }
     })
-    await message.save()
     return res.status(200).json(message)
-})
-
-// delete message if user sent it
-messageRouter.delete('/messages/:messageId', isAuthenticated, async (req, res) => {
-    const messageId = req.params.messageId
-    if (!isValidObjectId(messageId)) {
-        return res.status(400).json({ message: "Invalid message id" })
-    }
-    const message = await Message.findById(messageId)
-    if (!message) {
-        return res.status(404).json({ message: "Message not found" })
-    }
-    if (message.sender != req.user._id) {
-        return res.status(403).json({ message: "You are not the sender of this message" })
-    }
-    await message.delete()
-    return res.status(200).json({ message: "Message deleted" })
 })
 
 
 //socket io connection
 io.on('connection', (socket) => {
-    let roomid, username;
-    // var room,user;
-    socket.on('disconnect', () => {
-        console.log("connection closed");
+    socket.on('setup', (userData) => {
+      socket.join(userData.id);
+      socket.emit('connected');
     })
-    socket.on("new-join", ({ user, room }) => {
-        socket.join(room);
-        roomid = room;
-        username = user;
-        console.log("new joined");
+    socket.on('join room', (room) => {
+      socket.join(room)
     })
-    socket.on("new-msg", (msg) => {
-        socket.to(roomid).emit('new-msg', msg);
-        Message.create(msg, (err, data) => {
-            if (err) {
-                console.log(err.message);
-            } else {
-                console.log("data sent to database")
-            }
-        })
+  
+    socket.on('new message', (newMessageRecieve) => {
+      var chat = newMessageRecieve.chatId
+      if (!chat.users) console.log('chats.users is not defined')
+      chat.users.forEach((user) => {
+        if (user._id == newMessageRecieve.sender._id) return
+        socket.in(user._id).emit('message recieved', newMessageRecieve)
+      })
     })
 })
 
