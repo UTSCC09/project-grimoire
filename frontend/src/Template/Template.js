@@ -89,6 +89,18 @@ const theme = createTheme({
             }
           }
         },
+        MuiSelect:{
+          styleOverrides:{
+            root:{
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: primary
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: primary
+              },
+            }
+          }
+        },
         MuiCardContent:{
           styleOverrides:{
             root:{

@@ -113,7 +113,7 @@ function StatPicker(props){
                 <Grid item container xs={12} className="normal-box-centered" spacing={1}>
                 {
                     rolledArray.length > 0 ? 
-                    <Grid item container xs={12} sx={{justifyContent:'center'}}>
+                    <Grid item container xs={12} sx={{justifyContent:'center'}} spacing={1}>
                         {rolledArray.map((a, index) => 
                             <Grid item container xs={props.widthSx / NUMSTATS}>
                                 <FormControl fullWidth>
