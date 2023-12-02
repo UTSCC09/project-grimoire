@@ -5,7 +5,7 @@
 
 .normal-box{
     height:100%;
-    width:100%
+    width:100%;
 }
 
 .outlined-normal-box{
@@ -62,7 +62,9 @@
 /* Death in space mancer classes*/
 
 .dis-complete-card{
-    height:50%;
+    border: 1px red solid;
+    width: 100%;
+    padding: 1%;
 }
 
 .dis-select-card{

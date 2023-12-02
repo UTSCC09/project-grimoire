@@ -3,9 +3,12 @@ import NavBar from "./NavBar";
 import {Box, ThemeProvider, Typography, createTheme} from "@mui/material";
 import { outlinedInputClasses } from '@mui/material/OutlinedInput';
 
+export const dividerStyle = {background:'red', margin:'0.5%', marginBottom:'1.5%'}
+
 const primary = '#ffffff'
 const secondary = '#f44336'
 const background = '#000000'
+const disabled = "#5E1A1D"
 
 const theme = createTheme({
     components: {
@@ -120,7 +123,16 @@ const theme = createTheme({
               backgroundColor: background
             }
           }
-        }
+        },
+        MuiDivider:{
+          styleOverrides:{
+            root:{
+              background:secondary,
+              margin:'0.5%',
+              marginBottom:'1.5%'
+            }
+          }
+        },
       },
       palette: {
         primary:
@@ -131,10 +143,14 @@ const theme = createTheme({
         {
             main: secondary
         },
+        action:{
+          disabled: primary,
+          disabledBackground: disabled
+        },
         text:{
           primary: primary,
           secondary: secondary,
-          disabled: secondary
+          disabled: disabled
         }
     },
 })

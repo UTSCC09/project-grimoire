@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router";
 import ErrorAlert from '../globalComponents/ErrorAlert.js'
 import { URL, UploadProfilePic, editUser, getUser } from "../api.mjs";
 import AddIcon from '@mui/icons-material/Add';
+import { dividerStyle } from "../Template/Template.js";
 
 import "../styling/general.css"
 import "./info.css"
@@ -14,7 +15,6 @@ function AccountInfo(props){
     const navigate = useNavigate()
     const location = useLocation()
 
-    const dividerStyle = {background:'red', margin:'0.5%', marginBottom:'1.5%'}
 
     const [currUser, setCurrUser] = useState({})
     const [modifications, setModifications] = useState({})

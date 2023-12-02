@@ -70,6 +70,7 @@ function CreateCharacter(props){
                 getOptionLabel={(game) => game.name}
                 renderInput={(params) => (
                 <TextField
+                    focused
                     {...params}
                     variant="standard"
                     label="Game"
