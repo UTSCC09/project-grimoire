@@ -45,7 +45,7 @@ const theme = createTheme({
             styleOverrides: {
               option: {
                 '&[aria-selected="true"]': {
-                  backgroundColor: background,
+                  backgroundColor: secondary,
                 },
       
                 '&:hover': {
