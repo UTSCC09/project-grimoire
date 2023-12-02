@@ -138,6 +138,17 @@ describe("User creation", () => {
             done()
         })
     })
+
+    it("should get user progile", (done) => {
+        agent.get('/api/users/currUser')
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+            const json = JSON.parse(res.text)
+            expect(json.email).to.equal(testUsername.toLowerCase())
+            done()
+        })
+    })
 })
 
 describe("Group creation", () => {

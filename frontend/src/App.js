@@ -16,6 +16,8 @@ import DualFactorAuth from './Login/DualFactorAuth.js';
 import DeathInSpaceMancer from './CharacterManager/DeathInSpace/DeathInSpaceMancer.js';
 import MHeartsMancer from './CharacterManager/MonsterHearts/MHeartsMancer.js';
 import WindowFocusHandler from './FocusHandler.js';
+import Page404 from './Page404.js';
+import AccountInfo from './AccountInfo/AccountInfo.js';
 
 function getRoutes(){
   return (
@@ -23,6 +25,7 @@ function getRoutes(){
     <Route path="/" element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
     <Route path="/signup" element={<SignUp/>}/>
+    <Route path="/accountInfo" element={<AccountInfo/>}/>
     <Route path="/LookingForGame" element={<LookingForGame/>}/>
     <Route path="/CreateGame" element={<CreateGame/>}/>
     <Route path="/CreateCharacter" element={<CreateCharacter/>}/>
@@ -31,6 +34,7 @@ function getRoutes(){
     <Route path="/CharacterSheetHomePage" element={<CharacterSheetHomePage/>}/>
     <Route path='/user/sheets' element={<CharacterSheetView/>}/>
     <Route path='/DualFactorAuth' element={<DualFactorAuth/>}/>
+    <Route path="*" element={<Page404/>}/>
     </>
   )
 }

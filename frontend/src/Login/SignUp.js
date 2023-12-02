@@ -1,12 +1,12 @@
 import {React, useState} from "react"
-import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box, Checkbox, FormControlLabel, CheckBoxIcon} from "@mui/material"
+import {Button, TextField, Alert, Grid, ThemeProvider, createTheme, Typography, Box, Checkbox, FormControlLabel, CheckBoxIcon, Link} from "@mui/material"
 import {useNavigate} from "react-router-dom"
 import { signUp, getSessionCode } from "../api.mjs";
 import GrimoireSignUpImage from "../media/GrimoireSignUpImage.png"
 import "./signUp.css";
 import styled from "@emotion/styled";
 import { red } from "@mui/material/colors"; 
-
+import { isValidEmail } from "../helperFunctions/helper.mjs";
 
 const theme = createTheme({
     palette: 
@@ -158,23 +158,14 @@ function SignUpForm(props)
                     :
                     <Typography fontSize={'5vh'} color='red'>Sign Up</Typography>
                     )}
+        <Link variant="subtitle" component="button" color='secondary' onClick={() => navigate(`/login`)}>
+            Log in
+        </Link>
         </CustomTextContainer>
         </Grid>
         </ThemeProvider>
         
     )
-}
-
-const OFFICIALEMAILREGEX =  /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/
-
-function isValidEmail(email){    
-    try{
-        return String(email)
-        .toLowerCase()
-        .match(OFFICIALEMAILREGEX);
-    }catch(e){
-        return false
-    } 
 }
 
 export default SignUp
