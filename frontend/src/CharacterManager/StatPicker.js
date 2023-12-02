@@ -99,7 +99,7 @@ function StatPicker(props){
     }
 
     return(
-        <Grid item container xs={12} className={props.className}>
+        <Grid item container xs={12} spacing={1}>
             {props.children ? <>{props.children}</> : <></>}
             <Grid item container xs={12} spacing={1} sx={{justifyContent:'center'}}>
                 {props.stats.map((s) => (
