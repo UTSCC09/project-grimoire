@@ -3,7 +3,7 @@ import { isAuthenticated } from "../helper.mjs";
 import { Group } from "./schema.mjs";
 import { Game, User } from "../schemas.mjs";
 import mongoose, {isValidObjectId, mongo} from 'mongoose'
-import { DEFAULTLIMIT, DEFAULTPAGE } from "../app.mjs";
+import { DEFAULTPAGE, DEFAULTLIMIT } from "../app.mjs";
 
 export const groupRouter = Router()
 
@@ -49,42 +49,34 @@ groupRouter.post('/create', isAuthenticated, async (req, res, next) => {
 })
 
 // endpoint to get paginated list of game groups given page number and page size
-groupRouter.get('/page/', async (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const size = req.query.size || DEFAULTLIMIT
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
-        return
-    }
+groupRouter.get('/page', async (req, res, next) => {
+        const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
+    
+    // if(!page){
+    //     res.status(422).json({body: "missing page number"})
+    //     return
+    // }
+    // if(!size){
+    //     res.status(422).json({body: "missing page size"})
+    //     return
+    // }
     Group.find({}).skip(page * size).limit(size).exec()
     .then((docs) => {
-        res.status(200).json(docs)
+                res.status(200).json(docs)
     }).catch(err => {
-        res.status(500).json({errors: err})
+                res.status(500).json({errors: err})
     })
 })
 
 
 // endpoint to get paginated list of game groups for a specific game
-// the game is given in the request body
 groupRouter.get('/game/:id/page', async (req, res, next) => {
     const game = req.params.id
-    const page = req.query.page
-    const size = req.query.size
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
     if(!id){
         res.status(422).json({body: "missing game: id"})
-        return
-    }
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
         return
     }
     Group.find({game: game}).skip(page * size).limit(size).exec()
@@ -98,18 +90,10 @@ groupRouter.get('/game/:id/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups owned by a specific user
 groupRouter.get('/user/:id/owner/page', async (req, res, next) => {
     const id = req.params.id
-    const page = req.query.page
-    const size = req.query.size
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
     if(!isValidObjectId(req.params.id)) {
         res.status(400).json({body: "invalid object id"})
-        return
-    }
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
         return
     }
     Group.find({owner: id}).skip(page * size).limit(size).exec()
@@ -123,18 +107,10 @@ groupRouter.get('/user/:id/owner/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups a specific user is a member of
 groupRouter.get('/user/:id/member/page', async (req, res, next) => {
     const id = req.params.id
-    const page = req.query.page
-    const size = req.query.size
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
     if(!isValidObjectId(req.params.id)) {
         res.status(400).json({body: "invalid object id"})
-        return
-    }
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
         return
     }
     Group.find({members: id}).skip(page * size).limit(size).exec()
@@ -148,17 +124,9 @@ groupRouter.get('/user/:id/member/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups given a input of user preferences
 // the user preferences are given in the request body
 groupRouter.get('/preferences/page', async (req, res, next) => {
-    const page = req.query.page
-    const size = req.query.size
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
     const json = req.body
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
-        return
-    }
     // compare vector of user preferences to vector of game group preferences and find the closest matches
     // sort the matches by distance from the user preferences    
     Group.aggregate([
@@ -193,17 +161,9 @@ groupRouter.get('/preferences/page', async (req, res, next) => {
 // endpoint to get paginated list of game groups within a certain distance of a location
 // the location is given in the request body
 groupRouter.get('/location/page', async (req, res, next) => {
-    const page = req.query.page
-    const size = req.query.size
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const size = Number(req.query.size) || DEFAULTLIMIT
     const json = req.body
-    if(!page){
-        res.status(422).json({body: "missing page number"})
-        return
-    }
-    if(!size){
-        res.status(422).json({body: "missing page size"})
-        return
-    }
     // find game groups within a certain distance of the location
     Group
         .aggregate([
@@ -221,8 +181,7 @@ groupRouter.get('/location/page', async (req, res, next) => {
                 }
             },
             {$skip: page * size},
-            // {$limit: size},
-            {$limit: 10}
+            {$limit: size}
         ])
         .then((docs) => {
             res.status(200).json(docs)

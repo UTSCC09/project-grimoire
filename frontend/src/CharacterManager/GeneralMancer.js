@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useImperativeHandle } from "react";
 import PropTypes from 'prop-types'
 import {Button, Box, Stepper, StepButton, Step, Grid, Typography, IconButton, Icon } from "@mui/material";
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import "./characterCreation.css"
 
-function GeneralMancer(props){
+function GeneralMancer(props, ref){
     const [activeStep, setActiveStep] = useState(0);
     const [completed, setCompleted] = useState({});
     const [steps, setSteps] = useState(props.steps)
@@ -13,6 +13,21 @@ function GeneralMancer(props){
     useEffect(() => {
         setSteps(props.steps)
     }, [props.steps])
+
+    //seeing if need to update parent that ready
+    useEffect(()=>{
+      //if we aren't supposed to do nothing
+      if(!props.updateReady)
+          return
+
+      for(let i = 0; i < steps.length; i++){
+        if(steps[i].required && !completed[i]){
+          props.updateReady(false)
+          return
+        }
+      }
+      props.updateReady(true)
+    })
 
     const completedSteps = () => {
       return Object.keys(completed).length;
@@ -43,17 +58,25 @@ function GeneralMancer(props){
       setActiveStep(step);
     };
   
-    const handleComplete = () => {
+    const handleComplete = (value=true) => {
       const newCompleted = completed;
-      newCompleted[activeStep] = true;
+      newCompleted[activeStep] = value;
       setCompleted(newCompleted);
-      handleNext();
+      //handleNext();
     };
   
     const handleReset = () => {
       setActiveStep(0);
       setCompleted({});
     };
+
+
+    // Expose the function to the parent component
+    useImperativeHandle(ref, () => ({
+      handleNext,
+      handleComplete,
+      handleBack
+    }));
   
     return (
       <Grid item container xs={12} className="page-container-cover">
@@ -61,7 +84,7 @@ function GeneralMancer(props){
             {/* adding the sidebars and main content*/}
             <Grid item container xs={1} className="normal-box-centered">
                 <IconButton onClick={handleBack}>
-                    <ChevronLeftIcon/>
+                    <ChevronLeftIcon color="primary"/>
                 </IconButton>
             </Grid>
             <Grid item container xs={10} className="normal-box-centered">
@@ -77,7 +100,7 @@ function GeneralMancer(props){
             </Grid>
             <Grid item container xs={1} className="normal-box-centered">
                 <IconButton onClick={handleNext}>
-                    <ChevronRightIcon/>
+                    <ChevronRightIcon color="primary"/>
                 </IconButton>
             </Grid>
         </Grid>
@@ -93,4 +116,4 @@ GeneralMancer.propTypes = {
     
 }
 
-export default GeneralMancer
+export default React.forwardRef(GeneralMancer)

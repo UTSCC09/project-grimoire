@@ -30,7 +30,7 @@ export function removeSpacesFromQuery(queryObj){
 }
 
 export function isAuthenticated(req, res, next) {
-    if (!(req.user && req.userId)) return res.status(401).end("access denied");
+    if (!(req.user && req.userId)) return res.status(401).json({body:"access denied"});
     next();
 };
 

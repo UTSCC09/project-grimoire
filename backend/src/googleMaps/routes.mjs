@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLocalGames, testGeocode } from "./gMaps.mjs";
+import { formatReverseGeocode, getLocalGames, reverseGeocode } from "./gMaps.mjs";
 
 export const MapsRouter = new Router()
 
@@ -11,19 +11,25 @@ export const MapsRouter = new Router()
  */
 MapsRouter.get('/localStores', (req, res, next) => {
     const obj = req.query
+    if(!(obj.lat && obj.lng))
+        return res.status(400).json({body: "Need lat and lng values"})
     getLocalGames(obj.lat, obj.lng, obj.radius)
     .then(r => {
-        res.json(r.data.results)
+        return res.json(r.data.results)
     })
     .catch(e => {
         next(e)
     });
 })
 
-MapsRouter.get('/test', (req, res, next) => {
-    testGeocode()
-    .then(resp => res.json(resp.data.results))
-    .catch(e => {
+MapsRouter.get('/reverseGeocode', (req, res, next) => {
+    const obj = req.query
+    if(!(obj.lat && obj.lng))
+        return res.status(400).json({body: "Need lat and lng values"})
+    reverseGeocode(obj.lat, obj.lng)
+    .then(r => {
+        return res.json(formatReverseGeocode(r.data.results))
+    }).catch(e => {
         next(e)
     })
 })

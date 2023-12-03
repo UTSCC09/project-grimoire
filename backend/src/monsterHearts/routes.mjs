@@ -14,15 +14,15 @@ export const MHRouter = new Router()
  * @returns {Object} list of skins, and info involving pagination
  */
 MHRouter.get('/skins', (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page
     delete searchParams.limit
     if(searchParams.name)
         searchParams.name = mongoLikeString(searchParams.name)
-    MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).exec()
+    MHSkin.find(searchParams, null, {skip: page * limit, limit:limit+1, sort: {name: 1}}).populate('requiredMoves').exec()
     .then((docs) => {
         let nextPageExists = false
         if(docs.length > limit){
@@ -43,8 +43,8 @@ MHRouter.get('/skins', (req, res, next) => {
  * @returns {Object} list of moves, and info involving pagination
  */
 MHRouter.get('/moves', (req, res, next) => {
-    const page = req.query.page || DEFAULTPAGE
-    const limit = req.query.limit || DEFAULTLIMIT
+    const page = Number(req.query.page) || DEFAULTPAGE
+    const limit = Number(req.query.limit) || DEFAULTLIMIT
 
     const searchParams = removeSpacesFromQuery(req.query)
     delete searchParams.page

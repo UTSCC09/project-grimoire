@@ -1,6 +1,27 @@
+.center{
+    justify-content: center;
+    align-items: center;
+}
+
 .normal-box{
     height:100%;
-    width:100%
+    width:100%;
+}
+
+.outlined-normal-box{
+    height:100%;
+    width: 100%;
+}
+
+.next-button{
+    background-color: red;
+    border-radius: 2%;
+    justify-content:center;
+    align-items:center
+}
+
+.divided-grid{
+    border-bottom: 2px black solid;
 }
 
 .normal-box-centered{
@@ -19,18 +40,42 @@
 }
 
 .mancer-page{
-    height:100%;
-    width:100%;
+    display: flex;
+    width: 100%;
     justify-content: center;
-    padding-top: 0.5%;
+    height: 100%;
+    padding: 1%;
+    /* overflow-y: auto; */
+    min-height: 100vh;
 }
 
 .page-container-cover{
     display: flex;
     width: 100%;
     justify-content: center;
-    height: 100vh;
-    overflow-y: auto;
+    height: 100%;
     padding: 1%;
+    /* overflow-y: auto; */
     min-height: 100vh;
+}
+
+/* Death in space mancer classes*/
+
+.dis-complete-card{
+    border: 1px red solid;
+    width: 100%;
+    padding: 1%;
+}
+
+.dis-select-card{
+    border: 1px red solid;
+    width: 100%;
+}
+
+.dis-stats-alert{
+    justify-content: center;
+    align-items: center;
+    border: 1px red solid;
+    margin: 1%;
+    padding: 0.5%;
 }

@@ -280,7 +280,7 @@ const DISSheetSchema = new Schema({
 }, {
     methods: {
         getPopulationFields(){
-            return ['origin', 'mutations']
+            return ['origin', 'mutations', 'game']
         }
     },
     strict: true,

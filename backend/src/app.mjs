@@ -15,18 +15,12 @@ import { sendEmail, sendValidationEmail } from "./aws/ses_helper.mjs";
 import cors from 'cors'
 import { MHRouter } from "./monsterHearts/routes.mjs";
 import { gamesRouter } from "./games/routes.mjs";
+import { messageRouter } from "./chat/routes.mjs";
+import { MapsRouter } from "./googleMaps/routes.mjs";
+import { domainToASCII } from "url";
+import { UserRouter } from "./users/routes.mjs";
 
 dotenv.config();
-
-// const privateKey = readFileSync( process.env.SERVER_KEY );
-// const certificate = readFileSync(process.env.SERVER_CERT );
-// const config = {
-//         key: privateKey,
-//         cert: certificate
-// };
-
-
-// const HTTPSPORT = 8000;
 //used for testing
 const HTTPPORT = 8000
 
@@ -39,6 +33,7 @@ export async function connectToDb(connectionString){
     await mongoose.disconnect()
     return mongoose.connect(connectionString)
 }
+
 
 await connectToDb(process.env.MONGO_URL)
 
@@ -59,6 +54,9 @@ app.use(
       secret: process.env.SESSION_KEY,
       resave: false,
       saveUninitialized: false,
+      httpOnly: true,
+      secure: true,
+      sameSite: true
     })
 );
 
@@ -80,6 +78,12 @@ app.use('/api/mhearts', MHRouter)
 
 app.use('/api/games', gamesRouter)
 
+app.use('/api/maps', MapsRouter)
+
+app.use('/api/users', UserRouter)
+
+app.use('/api/messages', messageRouter)
+
 /**
  * sanity check endpoint to test connection
  */
@@ -96,14 +100,17 @@ app.post('/api/validate/email', (req, res, next) => {
     const json = req.body
     if(req.session.validationCode && json.validation == req.session.validationCode){
         if(req.session.validateSignIn){
+            req.session.user = req.session.tempUser.email
+            req.session.userId = req.session.tempUser._id
             req.session.tempUser = undefined
             req.session.validationCode = undefined
             req.session.validateSignin = undefined
-            req.session.user = req.session.tempUser.email
-            req.session.userId = req.session.tempUser._id
+            
             res.setHeader(
                 "Set-Cookie",
                 serialize("Username", req.session.user, {
+                  secure: true,
+                  sameSite: true,
                   path: "/",
                   maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                 }),
@@ -121,6 +128,8 @@ app.post('/api/validate/email', (req, res, next) => {
                 res.setHeader(
                   "Set-Cookie",
                   serialize("Username", newUser.email, {
+                    sameSite: true,
+                    secure: true,
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -213,13 +222,15 @@ app.post("/api/signin", (req, res, next) => {
             // result is true is the password matches the salted hash from the database
             if (!result) return res.status(401).json({body: "access denied"});
             //write email into session
+            
             if(!doc.twofa){
                 req.session.user = email;
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
-
                   serialize("Username", doc.email, {
+                    secure: true,
+                    sameSite: true,
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -233,10 +244,10 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.tempUser = doc
                 req.session.validateSignIn = true
                 //if testing add code
-                let body = {email: email}
+                let body = {email: email, dfa: doc.twofa}
                 if(process.env.TESTING)
                     body.code = code
-                return res.json(email)
+                return res.json(body)
             }).catch(e => next(e))
         });
     }).catch(err => {
@@ -250,6 +261,7 @@ app.post("/api/signin", (req, res, next) => {
  */
 app.post('/api/signout', (req, res, next) => {
     req.session.destroy((err) => {
+        res.clearCookie("Username")
         res.status(200).json({body: "logout successful"})
     })
 })
@@ -261,11 +273,6 @@ app.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).json({body: 'Something broke!', err: err.name, errText: err.message})
 })
-
-
-// export const httpsServer = https.createServer(config, app).listen(HTTPSPORT, function (err) {
-//     if (err) console.log(err);
-//     else console.log("HTTPS server on http://localhost:%s", HTTPSPORT);
 
 
 export const server = http.createServer(app).listen(HTTPPORT, function (err){

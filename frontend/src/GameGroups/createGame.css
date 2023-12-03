@@ -5,41 +5,47 @@
 }
 
 .entireScreen {
+    padding-top: 0;
     background-color: black;
-    height: 100vh;
+    height: 200vh;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     width: 100%;
     margin-top: 0%;
+    display: flex;
 }
 
-.imageContainer {
-    justify-content: center; 
-    align-items: center;
+.imgContainer {
+    justify-content: center;
+    align-items: flex-start;
+    justify-self: center;
+    align-self: center;
     margin: auto;
-    width: 100%;
-    height: 20%;
+    margin-top: 0;
+    width: 50%;
+    height: 40vh;
     margin-bottom: 0px;
 }
 
-.signUpImage {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+img.signUpImage {
+    max-height: 100%;
+    max-width: 100%;
     object-fit: fill;
 }
 
 .inputField {
     color: white;
-    margin-top: 30%;
-    margin-bottom: 40%;
-    width: 100%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    width: 80%;
 }
 
 .form {
     margin-left: auto;
     margin-right: auto;
-    margin-top: 0%;
     background-color: #18191c;
+    height: 100%;
+    max-width: 40%;
+    margin-top: 0;
 }

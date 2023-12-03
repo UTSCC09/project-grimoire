@@ -16,6 +16,9 @@ import DualFactorAuth from './Login/DualFactorAuth.js';
 import DeathInSpaceMancer from './CharacterManager/DeathInSpace/DeathInSpaceMancer.js';
 import MHeartsMancer from './CharacterManager/MonsterHearts/MHeartsMancer.js';
 import WindowFocusHandler from './FocusHandler.js';
+import Page404 from './Page404.js';
+import AccountInfo from './AccountInfo/AccountInfo.js';
+import Credits from './Credits.js';
 
 function getRoutes(){
   return (
@@ -23,14 +26,17 @@ function getRoutes(){
     <Route path="/" element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
     <Route path="/signup" element={<SignUp/>}/>
+    <Route path='/credits' element={<Credits/>}/>
+    <Route path="/accountInfo" element={<AccountInfo/>}/>
     <Route path="/LookingForGame" element={<LookingForGame/>}/>
     <Route path="/CreateGame" element={<CreateGame/>}/>
     <Route path="/CreateCharacter" element={<CreateCharacter/>}/>
     <Route path="/CreateCharacter/DeathInSpace" element={<DeathInSpaceMancer/>}/>
-    <Route path="/CreateCharacter/MonsterHearts" element={<MHeartsMancer/>}/>
+    {/* <Route path="/CreateCharacter/MonsterHearts" element={<MHeartsMancer/>}/> */}
     <Route path="/CharacterSheetHomePage" element={<CharacterSheetHomePage/>}/>
-    <Route path='/user/sheets' element={<CharacterSheetView/>}/>
+    <Route path={`/sheets/*`} element={<CharacterSheetView/>}/>
     <Route path='/DualFactorAuth' element={<DualFactorAuth/>}/>
+    <Route path="*" element={<Page404/>}/>
     </>
   )
 }

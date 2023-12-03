@@ -48,13 +48,17 @@ function CreateCharacter(props){
         }
     }, [searchObj])
 
-    function navigateToGame(gameName){
-        gameName = gameName.replace(/\s+/g, ''); //removing spaces
+    function navigateToGame(game){
+        if(!game.deployed){
+            setError(`${game.name} is still in development, please try a different game`)
+            return
+        }
+        const gameName = game.name.replace(/\s+/g, ''); //removing spaces
         navigate(`./${gameName}`)
     }
 
     return (
-        <Grid item container xs={12} className="page-container" spacing={.5}>
+        <Grid item container xs={12} className="page-container-cover" spacing={.5}>
             <Grid item container xs={12} spacing={2}>
                 <Grid item container xs={6}>
                 <Autocomplete
@@ -66,6 +70,7 @@ function CreateCharacter(props){
                 getOptionLabel={(game) => game.name}
                 renderInput={(params) => (
                 <TextField
+                    focused
                     {...params}
                     variant="standard"
                     label="Game"
@@ -75,7 +80,7 @@ function CreateCharacter(props){
                 />
                 </Grid>
                 <Grid item container xs={6}>
-                    <Typography variant="h4">
+                    <Typography variant="h4" color="secondary">
                         Please pick your Game
                     </Typography>
                 </Grid>
@@ -83,15 +88,15 @@ function CreateCharacter(props){
             <Grid item container xs={12} spacing={2}>
                 {games.map((g) => (
                     <Grid item container xs={Math.max(4, 12 / (games.length || 1))}>
-                        <GameCard name={g.name} description={g.description} sx={{width:'100%', paddingBottom:"0.5%"}}
-                        gameId={g._id}
-                        onClick={(e)=> {e.preventDefault(); navigateToGame(g.name)}}/>
+                        <GameCard {...g}  sx={{width:'100%', paddingBottom:"0.5%"}}
+                        onClick={(e)=> {e.preventDefault(); navigateToGame(g)}}/>
                     </Grid>
                 ))}
                 {games.map}
             </Grid>
             <Grid item container xs={12} sx={{justifyContent:'center', alignItems:'center'}}>
                 <Pagination count={Math.ceil(numGames / 10)} page={searchObj.page + 1} //have to offset because mui starts at index 1
+                color="secondary"
                 onChange={(e,value) => {e.preventDefault(); editSearchObj('page', value - 1)}}/>
             </Grid>
             <ErrorAlert error={error} onClose={(e) => {e.preventDefault(); setError("")}}/>
