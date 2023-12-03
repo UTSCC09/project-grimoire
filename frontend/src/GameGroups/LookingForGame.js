@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from "react"
-import { Button, TextField, Select, MenuItem } from "@mui/material";
+import { Button, TextField, Select, MenuItem, Box, Typography, Grid, Card, CardContent } from "@mui/material";
 import { getGroups } from "../api.mjs"
+import "../styling/general.css"
+import { URL } from "../api.mjs";
 
 function getPrefString(prefObj){
     let str = ""
@@ -15,7 +17,7 @@ function LookingForGame(props) {
   const [hasLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [groups, setGroups] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
   const [gameId, setGameId] = useState("");
@@ -27,7 +29,7 @@ function LookingForGame(props) {
 
   const fetchData = async () => {
     try {
-      let endpoint = "/api/groups/page";
+      let endpoint = `${URL}/api/groups/page`;
 
       if (filterType === "game") {
         endpoint = `/api/groups/game/${gameId}/page`;
@@ -40,12 +42,13 @@ function LookingForGame(props) {
       } else if (filterType === "location") {
         endpoint = `/api/groups/location/page`;
       }
-
-      const response = await fetch(
-        `${endpoint}?page=${currentPage}&search=${searchTerm}`
-      );
+      const response = await fetch(`${endpoint}?page=${currentPage}&search=${searchTerm}`,{
+        credentials: 'include',
+        method: 'GET',
+      });
 
       const json = await response.json();
+      console.log('json', json)
       setGroups(json);
       setSuccess(true);
       setLoaded(true);
@@ -55,9 +58,9 @@ function LookingForGame(props) {
   };
 
   return (
-    <div>
-      <h1>Group List</h1>
-      <div>
+    <Grid item container xs={12} className="full" flexDirection="column" spacing={1}>
+      <Typography variant="h1">Group List</Typography>
+      <Grid item container xs={12}>
         <TextField
           type="text"
           placeholder="Search"
@@ -66,6 +69,7 @@ function LookingForGame(props) {
         />
         <Select
           value={filterType}
+          label="Sort By"
           onChange={(e) => setFilterType(e.target.value)}
         >
           <MenuItem value="">All</MenuItem>
@@ -91,28 +95,34 @@ function LookingForGame(props) {
             onChange={(e) => setUserId(e.target.value)}
           />
         )}
-      </div>
-      <ul>
+      </Grid>
+      <Grid item container xs={12} spacing={1}>
         {groups.map((group) => (
-          <li key={group.id}>{group.name}</li>
+          <Grid item container xs={4}>
+            <Card sx={{border: '1px red solid', width:'100%'}} borderColor="secondary.main">
+              <CardContent>
+                <Typography key={group.id}>{group.name}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </ul>
-      <div>
+      </Grid>
+      <Grid item container>
         <Button
           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
           Previous
         </Button>
-        <span>{`Page ${currentPage}`}</span>
+        <Typography>{`Page ${currentPage}`}</Typography>
         <Button
           onClick={() => setCurrentPage(currentPage + 1)}
           disabled={groups.length === 0}
         >
           Next
         </Button>
-      </div>
-    </div>
+      </Grid>
+    </Grid>
   );
 }
 
