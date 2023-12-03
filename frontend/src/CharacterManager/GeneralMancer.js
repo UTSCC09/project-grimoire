@@ -84,7 +84,7 @@ function GeneralMancer(props, ref){
             {/* adding the sidebars and main content*/}
             <Grid item container xs={1} className="normal-box-centered">
                 <IconButton onClick={handleBack}>
-                    <ChevronLeftIcon/>
+                    <ChevronLeftIcon color="primary"/>
                 </IconButton>
             </Grid>
             <Grid item container xs={10} className="normal-box-centered">
@@ -100,7 +100,7 @@ function GeneralMancer(props, ref){
             </Grid>
             <Grid item container xs={1} className="normal-box-centered">
                 <IconButton onClick={handleNext}>
-                    <ChevronRightIcon/>
+                    <ChevronRightIcon color="primary"/>
                 </IconButton>
             </Grid>
         </Grid>

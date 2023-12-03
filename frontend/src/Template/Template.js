@@ -3,9 +3,12 @@ import NavBar from "./NavBar";
 import {Box, ThemeProvider, Typography, createTheme} from "@mui/material";
 import { outlinedInputClasses } from '@mui/material/OutlinedInput';
 
+export const dividerStyle = {background:'red', margin:'0.5%', marginBottom:'1.5%'}
+
 const primary = '#ffffff'
 const secondary = '#f44336'
 const background = '#000000'
+const disabled = "#5E1A1D"
 
 const theme = createTheme({
     components: {
@@ -42,7 +45,7 @@ const theme = createTheme({
             styleOverrides: {
               option: {
                 '&[aria-selected="true"]': {
-                  backgroundColor: background,
+                  backgroundColor: secondary,
                 },
       
                 '&:hover': {
@@ -85,8 +88,63 @@ const theme = createTheme({
               }
             }
           }
-        }
-
+        },
+        MuiSelect:{
+          styleOverrides:{
+            root:{
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: primary
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: primary
+              },
+            }
+          }
+        },
+        MuiCardContent:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogContent:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogTitle:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiDialogActions:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background,
+            }
+          }
+        },
+        MuiPaper:{
+          styleOverrides:{
+            root:{
+              backgroundColor: background
+            }
+          }
+        },
+        MuiDivider:{
+          styleOverrides:{
+            root:{
+              background:secondary,
+              margin:'0.5%',
+              marginBottom:'1.5%'
+            }
+          }
+        },
       },
       palette: {
         primary:
@@ -97,10 +155,14 @@ const theme = createTheme({
         {
             main: secondary
         },
+        action:{
+          disabled: primary,
+          disabledBackground: disabled
+        },
         text:{
           primary: primary,
           secondary: secondary,
-          disabled: secondary
+          disabled: disabled
         }
     },
 })

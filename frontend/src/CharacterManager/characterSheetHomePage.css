@@ -1,0 +1,15 @@
+.imageContainer {
+    width: 15%;
+    height: 100%;
+    margin-right: 5%;
+}
+
+.SystemName {
+    height: 33%;
+}
+
+.Date {
+    margin-top: 10%;
+    align-self: flex-end;
+    justify-self: end;
+}

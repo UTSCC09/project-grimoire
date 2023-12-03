@@ -58,7 +58,7 @@ function CreateCharacter(props){
     }
 
     return (
-        <Grid item container xs={12} className="page-container" spacing={.5}>
+        <Grid item container xs={12} className="page-container-cover" spacing={.5}>
             <Grid item container xs={12} spacing={2}>
                 <Grid item container xs={6}>
                 <Autocomplete
@@ -70,6 +70,7 @@ function CreateCharacter(props){
                 getOptionLabel={(game) => game.name}
                 renderInput={(params) => (
                 <TextField
+                    focused
                     {...params}
                     variant="standard"
                     label="Game"
@@ -79,7 +80,7 @@ function CreateCharacter(props){
                 />
                 </Grid>
                 <Grid item container xs={6}>
-                    <Typography variant="h4">
+                    <Typography variant="h4" color="secondary">
                         Please pick your Game
                     </Typography>
                 </Grid>
@@ -95,6 +96,7 @@ function CreateCharacter(props){
             </Grid>
             <Grid item container xs={12} sx={{justifyContent:'center', alignItems:'center'}}>
                 <Pagination count={Math.ceil(numGames / 10)} page={searchObj.page + 1} //have to offset because mui starts at index 1
+                color="secondary"
                 onChange={(e,value) => {e.preventDefault(); editSearchObj('page', value - 1)}}/>
             </Grid>
             <ErrorAlert error={error} onClose={(e) => {e.preventDefault(); setError("")}}/>

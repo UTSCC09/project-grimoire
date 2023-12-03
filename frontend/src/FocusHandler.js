@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 
 //code taken from stack overflow
+//https://stackoverflow.com/a/54820741
 const WindowFocusHandler = () => {
     
     const FOCUSED_TITLE = "Grimoire 📖"
