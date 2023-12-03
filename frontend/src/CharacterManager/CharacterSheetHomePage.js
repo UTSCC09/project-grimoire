@@ -26,7 +26,7 @@ function CharacterSheetList(props)
 
     const navigate = useNavigate()
     const location = useLocation()
-
+    
     useEffect(function () 
     {
         setLoading(true)
