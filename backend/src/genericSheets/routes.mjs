@@ -33,10 +33,11 @@ fileFilter: function(req, file, cb){
 sheetRouter.get("/", isAuthenticated, async (req, res, next) => {
     const page = req.query.page || DEFAULTPAGE
     const limit = req.query.limit || DEFAULTLIMIT
-
-    UserSheetMapping.find({user: req.userId}, null, {skip: page * limit, limit: limit, sort: {createdOn: 1}})
+    console.log('page', page, 'limit', limit)
+    UserSheetMapping.find({user: req.userId}, null, {skip: page * limit, limit: limit, sort: {createdAt: 1}})
     .populate(['sheet', 'game']).exec()
     .then(sheets => {
+        console.log('sheets', sheets.length)
         return res.json({sheets})
     }).catch((err) => {
         return res.status(500).json({err})

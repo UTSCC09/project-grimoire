@@ -10,7 +10,7 @@ const URL = process.env.REACT_APP_URL
 
 function CharacterSheetHomePage(props){
 
-    return <Grid spacing={1} height={'100vh'} container alignItems={'flex-start'} justifyContent={'center'}>
+    return <Grid spacing={1} minHeight={'100vh'} display="flex" container alignItems={'flex-start'} justifyContent={'center'}>
         <CharacterSheetList/>
     </Grid> 
 }
@@ -48,7 +48,6 @@ function CharacterSheetList(props)
         response.json().then((json) => 
         {
             const sheets = json.sheets;
-            sheets.pop();
             if(sheets.length === 6)
             {
                 sheets.pop();
@@ -72,9 +71,9 @@ function CharacterSheetList(props)
         }) 
         : <></>
         }
-        <Grid width={'100%'} container justifySelf={'center'} justifyContent={'center'} alignSelf={'center'}>
-        {leftPageBtn ? <Button onClick={function(event) {event.preventDefault(); setPage(page - 1)}}>Previous</Button> : <></>}
-        {rightPageBtn ? <Button onClick={function(event) {event.preventDefault(); setPage(page + 1)}}>Next</Button> : <></>}
+        <Grid width={'100%'} container justifySelf={'center'} justifyContent={'center'} alignSelf={'center'} border="1px blue solid">
+        <Button disabled={!leftPageBtn} variant="contained" onClick={function(event) {event.preventDefault(); setPage(page - 1)}}>Previous</Button>
+        <Button disabled={!rightPageBtn} variant="contained" onClick={function(event) {event.preventDefault(); setPage(page + 1)}}>Next</Button>
         </Grid>
     </Grid>
 }

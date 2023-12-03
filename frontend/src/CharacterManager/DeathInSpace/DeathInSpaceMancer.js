@@ -8,7 +8,8 @@ import DISComplete from "./DISComplete";
 import DISOrigin from "./DISOrigin";
 import DISEquipment from "./DISEquipment";
 import { createDISSheet } from "../../api.mjs";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import ErrorAlert from "../../globalComponents/ErrorAlert";
 
 function DeathInSpaceMancer(props){
     const [char, setChar]  = useState({})
@@ -16,7 +17,9 @@ function DeathInSpaceMancer(props){
     const [loading, setLoading] = useState(false)
     const [error, setError]= useState(false)
     const DISRef = useRef()
+
     const navigate = useNavigate()
+    const location = useLocation()
 
     useEffect(()=>{
       if(char.functions && char.functions.markComplete !== 'ignore')
@@ -58,11 +61,13 @@ function DeathInSpaceMancer(props){
         setLoading(false)
         const json = await resp.json()
         if(!resp.ok){
+          if(resp.status === 401){
+            navigate("/login", {state: {path: location.pathname}})
+          }
           setError(json.body)
-          console.error(json.body)
           return
         }
-        navigate(`../DeathInSpace/sheet/${json._id}`)
+        navigate(`/sheets/${json._id}`)
       }).catch(e => {
         console.error(e)
         setError("an unexpected Error occured please refresh the page and try again")
@@ -87,7 +92,10 @@ function DeathInSpaceMancer(props){
     ]
 
     return (
+      <>
       <GeneralMancer steps={steps} ref={DISRef} updateReady={setReadyToComplete}/>
+      <ErrorAlert open={Boolean(error)} error={error} onClose={() => setError("")}/>
+      </>
     );
 }
 

@@ -245,7 +245,7 @@ disRouter.post("/sheets/random", isAuthenticated, async (req, res, next) => {
         inventory: [],
         mutations: [],
         voidPoints: 0,
-        defenseRating: 12 + dex,
+        defenseRating: 12 + Number(dex),
         maxHitPoints: hitPoints,
         hitPoints: hitPoints,
         origin: randomOrigin._id,
@@ -349,7 +349,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
         holos: json.holos,
         mutations: json.mutations,
         voidPoints: 0,
-        defenseRating: 12 + json.stats.dex,
+        defenseRating: 12 + Number(json.stats.dex),
         maxHitPoints: json.hitPoints,
         hitPoints: json.hitPoints,
         origin: json.origin,
@@ -391,7 +391,7 @@ disRouter.post("/sheets/create", isAuthenticated, async(req, res, next) => {
         })
     }).catch(err => {
         if(err.name === "ValidationError"){
-            return res.status(403).json({error: err.errors})
+            return res.status(400).json({error: err.message})
         }
         return next(err)
     })
@@ -417,7 +417,7 @@ disRouter.patch('/sheets/:id', isAuthenticated, async (req, res, next) => {
     DeathInSpaceSheet.findByIdAndUpdate(req.params.id, req.body, {returnDocument: 'after', runValidators:true}).then(result => {
         return res.json(result)
     }).catch(err => {
-        return res.status(400).json(err)
+        return res.status(400).json(err.message)
     })
 })
 
