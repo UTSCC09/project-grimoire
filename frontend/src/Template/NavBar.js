@@ -107,12 +107,13 @@ function NavBar(props){
       <AppBar position="sticky" sx={{borderBottom: '1px red solid', borderColor:'secondary'}}>
         <Toolbar disableGutters>
           <Grid item container xs={12} direction ={"row"}>
-              <CustomGrid item container xs={8}>
+              <CustomGrid item container xs={7}>
               <img className="logoPicture" src={GrimoireLogo} onClick={event => navigate("./")}/>
               <DropDownMenu ButtonText ="Character Sheet" DropDownArray={CharacterJSON.textArray} linksArray={CharacterJSON.linksArray}/>
               <DropDownMenu ButtonText ="Groups" DropDownArray={lfgJSON.textArray} linksArray={lfgJSON.linksArray}/>
               </CustomGrid>
-              <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={4}>
+              <CustomGrid sx={{alignItems:'right', alignSelf: 'right', display:'flex', justifyContent:'flex-end'}} item container xs={5}>
+                <RightCustomButton onClick={() => navigate('/credits')}>Credits</RightCustomButton>
               {
                 getCurrentUser() ?
               <RightDropDownButton ButtonText={getCurrentUser()} DropDownArray={accountJSON.textArray} linksArray={accountJSON.linksArray} functionNamesArray={accountJSON.functionNameArray} functionsArray = {accountJSON.functionArray}/> :

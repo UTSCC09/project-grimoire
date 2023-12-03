@@ -18,6 +18,7 @@ import MHeartsMancer from './CharacterManager/MonsterHearts/MHeartsMancer.js';
 import WindowFocusHandler from './FocusHandler.js';
 import Page404 from './Page404.js';
 import AccountInfo from './AccountInfo/AccountInfo.js';
+import Credits from './Credits.js';
 
 function getRoutes(){
   return (
@@ -25,6 +26,7 @@ function getRoutes(){
     <Route path="/" element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
     <Route path="/signup" element={<SignUp/>}/>
+    <Route path='/credits' element={<Credits/>}/>
     <Route path="/accountInfo" element={<AccountInfo/>}/>
     <Route path="/LookingForGame" element={<LookingForGame/>}/>
     <Route path="/CreateGame" element={<CreateGame/>}/>
