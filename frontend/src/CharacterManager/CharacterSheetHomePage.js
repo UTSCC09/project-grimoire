@@ -4,6 +4,10 @@ import { getCharacterSheets, getPictureOfSheet } from "../api.mjs"
 import "./characterSheetHomePage.css"
 import {useNavigate} from "react-router-dom"
 
+const URL = process.env.REACT_APP_URL
+
+
+
 function CharacterSheetHomePage(props){
 
     return <Grid spacing={1} height={'100vh'} container alignItems={'flex-start'} justifyContent={'center'}>
@@ -35,7 +39,6 @@ function CharacterSheetList(props)
         //Run normal functionality
         response.json().then((json) => 
         {
-            console.log(json)
             const sheets = json.sheets;
             sheets.pop();
             if(sheets.length === 6)
@@ -71,26 +74,10 @@ function CharacterSheetList(props)
 //An individual character sheet link
 function CharacterSheet(props)
 {
-    const [image, setImage] = useState(null);
-    getPictureOfSheet(props.characterSheet._id).then(async function (res)
-    {
-        //Not all that complete, need to return after image uploads are done
-        if (res.ok)
-        {
-            const json = res.json()
-            setImage(json.image) 
-        }
-        else 
-        {
-            console.log("Error retrieving character sheet picture for character ID " + props.characterSheet._id + ". Status returned is " + res.status);
-        }
-    })
-
     return (
         <Grid container spacing={0} alignItems={'flex'} flexDirection={'row'} sx={{marginTop: '0%', height: '15vh'}} width={'100%'} backgroundColor={"#ffffff"}>
         <div className="imageContainer">
-            {/* TODO: Implant a character image here */}
-            <img></img>
+            <img className="characterPicture" src={`${URL}/api/sheets/${props.characterSheet.sheet._id}/pic`}></img>
         </div>
         <CharacterInfo characterSheet={props.characterSheet}/>
         </Grid>)

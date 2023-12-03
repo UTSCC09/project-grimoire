@@ -2,10 +2,12 @@ import { Button, CircularProgress, Divider, FormControl, FormControlLabel, Grid,
 import { useEffect, useState } from "react"
 import './DeathInSpaceCharacterSheet.css'
 import DISStatsContainer from './CharacterSheetMedia/DISStatsContainer.png'
-import { getDISOrigins, patchSheet } from "../api.mjs"
+import { UploadCharacterPic, getCharacterSheetPicture, getDISOrigins, patchSheet } from "../api.mjs"
+import { useLocation } from "react-router"
 
 
 const URL = process.env.REACT_APP_URL
+const domain = process.env.REACT_APP_FULL_DOMAIN_NAME
 
 const theme = createTheme({
     components:
@@ -27,7 +29,7 @@ const theme = createTheme({
 function DeathInSpaceCharacterSheet (props)
 {
     return <ThemeProvider theme={theme}>
-    <Grid marginTop={'5%'} backgroundColor={'#f5f6f7'} height={'89%'} width={'80%'} container flexDirection={'row'}>
+    <Grid marginTop={'5%'} backgroundColor={'#f5f6f7'} height={'100%'} width={'80%'} container flexDirection={'row'}>
         <LeftSideOfSheet characterInfo={props.stats}/>
         <RightSideOfSheet characterInfo={props.stats}/>
     </Grid>
@@ -44,7 +46,7 @@ function LeftSideOfSheet(props)
 
 function BelowTitleContent(props)
 {
-    return <Grid container height={'89%'} flexDirection={'row'}>
+    return <Grid sx={{marginBottom: '0'}} container height={'89%'} flexDirection={'row'}>
         <Stats characterInfo = {props.characterInfo}/>
         <GeneralCharacterInfo characterInfo = {props.characterInfo}/>
     </Grid>
@@ -87,8 +89,50 @@ function GeneralCharacterInfo(props)
 
 function CharacterNameAndPic(props)
 {
+    const [imageExists, setImageExists] = useState(false)
+
+    const submitPicture = function() 
+    {
+        UploadCharacterPic(props.characterInfo._id, document.getElementById("picFile").files[0]).then((resp) =>
+        {
+            if (!resp.ok)
+            {
+                resp.json().then((json) => 
+                {
+                    console.log("Error uploading a character picture with status: " + resp.status)
+                    if (json.body)
+                    {
+                        console.log(json.body)
+                    }
+                    if (json.errors)
+                    {
+                        console.log(json.errors)
+                    }
+                    
+                })
+                
+            }
+        })
+    }
+
+    useEffect(function ()
+    {
+        getCharacterSheetPicture(props.characterInfo._id).then(function(resp)
+        {
+            setImageExists(199 < parseInt(resp.status) && parseInt(resp.status) < 300)
+            console.log("Response status: " + resp.status)
+        })
+    }, [])
+
     return <Grid container height={'25%'} width={'100%'} flexDirection={'column'} borderRight={5} borderColor={'#000000'} borderBottom={5}>
-        <div className="characterImageContainer"></div>
+        <div className="characterImageContainer">
+            {(imageExists) ? 
+            <img className="characterPicture" src={`${URL}/api/sheets/${props.characterInfo._id}/pic`}></img> : 
+            <Grid>
+            <input id="picFile" maxLength={"100%"} type="file" accept="image/*"></input>
+            <Button onClick={() => {submitPicture()}}>Submit Portrait</Button>
+            </Grid>}
+        </div>
         <CharacterInfoText characterInfo = {props.characterInfo}/>
     </Grid>
 }
@@ -159,6 +203,7 @@ function GeneralInformation(props)
         <FormControl
             width={'100%'}
             height={'20%'}
+            sx={{marginBottom: '0'}}
         >
             <RadioGroup
                 value={option}
@@ -404,7 +449,7 @@ function RightSideOfSheet(props)
             variant='fullWidth'>
                 <Tab disabled={page === "Inventory"} value={"Inventory"} label="Inventory"/>
                 <Tab disabled={page === "Background Info"} value={"Background Info"} label="Background Info"/>
-                <Tab disabled={page === "Current Situation"} value={"Current Situation"} label="Current Situation"/>
+                {/* <Tab disabled={page === "Current Situation"} value={"Current Situation"} label="Current Situation"/> */}
                 <Tab disabled={page === "QR Code"} value={"QR Code"} label="QR Code"/>
             </Tabs>
         </Grid>
@@ -415,9 +460,9 @@ function RightSideOfSheet(props)
         {
             (page === "Background Info") ? <BackgroundInfo characterInfo={props.characterInfo}/> : <></>
         }
-        {
+        {/* {
             (page === "Current Situation") ? <CurrentSituation characterInfo={props.characterInfo}/> : <></>
-        }
+        } */}
         {
             (page === "QR Code") ? <QRCode characterInfo={props.characterInfo}/> : <></>
         }
@@ -427,83 +472,462 @@ function RightSideOfSheet(props)
 
 function QRCode(props)
 {
+    const [copied, setCopied] = useState(false)
+    const copytoClipboard = function()
+    {
+        navigator.clipboard.writeText(document.getElementById("linkName").value)
+        setCopied(true)
+    }
+
+
     return <Grid item justifySelf={'center'} alignSelf={'center'} width={'40%'} height={'50%'}>
         <img className="qrCode" src={`${URL}/api/sheets/${props.characterInfo._id}/qr`}/>
         <Typography>Share your character sheet</Typography>
+        <TextField id="linkName" disabled defaultValue={domain + useLocation().pathname}></TextField>
+        <Button onClick={() => {copytoClipboard()}}>Copy to Clipboard</Button>
+        {(copied) ?
+        <Typography>Copied!</Typography> : <></>}
     </Grid>
 }
 
 function InventoryAndArmor(props)
 {
+    const [elementType, setElementType] = useState(null)
+    const [showFullData, setShowFullData] = useState(false)
+    const [elementID, setElementID] = useState(null)
+
+    useEffect(function ()
+    {
+        setShowFullData(elementType && elementID)
+    }, [elementType, elementID])
+
+
     return (<Grid width={'100%'} height={'100%'}>
-        <Weapons characterInfo={props.characterInfo}/>
-        <Armor characterInfo={props.characterInfo}/>
-        <Inventory characterInfo={props.characterInfo}/>
+        {
+            (showFullData) ? <FullInformation setElementID={setElementID} setElementType={setElementType} setShowFullData={setShowFullData} elementID = {elementID} elementType = {elementType} characterInfo={props.characterInfo}/>
+            :
+            <Overview setElementID={setElementID} setElementType={setElementType} characterInfo={props.characterInfo}/>
+        }
+        
     </Grid>)
+}
+
+function FullInformation(props)
+{
+    
+    return (<Grid> 
+        {(props.elementType === 'item') ? <ItemInformation setElementType={props.setElementType} setElementID={props.setElementID} setShowFullData={props.setShowFullData} characterInfo={props.characterInfo} elementID = {props.elementID}/> : <></>}
+        {(props.elementType === 'armor') ? <ArmorInformation setElementType={props.setElementType} setElementID={props.setElementID} setShowFullData={props.setShowFullData} characterInfo={props.characterInfo} elementID = {props.elementID}/> : <></>}
+        {(props.elementType === 'weapon') ? <WeaponInformation setElementType={props.setElementType} setElementID={props.setElementID} setShowFullData={props.setShowFullData} characterInfo={props.characterInfo} elementID = {props.elementID}/> : <></>}
+    </Grid>
+    )
+}
+
+function ItemInformation(props)
+{
+    const item = props.characterInfo.inventory.find(function(item)
+    {
+        return item._id === props.elementID; 
+    })
+    return <Grid>
+        <Button onClick={function(event) {event.preventDefault(); props.setShowFullData(false); props.setElementID(null); props.setElementType(null);}}>Back</Button>
+        <Typography variant="h4">{item.name}</Typography>
+        {(item.cost || item.cost === 0) ? <Typography>Cost: {item.cost} holos</Typography> : <></>}
+        {(item.weight || item.weight === 0) ? <Typography>Weight: {item.weight} pounds</Typography> : <></>}
+        {(item.condition || item.condition === 0) ? <Typography>Condition: {item.condition}</Typography> : <></>}
+        {(item.maxCondition) ? <Typography>Max Condition: {item.maxCondition}</Typography> : <></>}
+        {(item.description) ? <Typography>Description: {item.description}</Typography> : <></>}
+    </Grid>
+}
+
+function ArmorInformation(props)
+{
+    const item = props.characterInfo.armor.find(function(armor)
+    {
+        return armor._id === props.elementID; 
+    })
+    return <Grid>
+        <Button onClick={function(event) {event.preventDefault(); props.setShowFullData(false); props.setElementID(null); props.setElementType(null);}}>Back</Button>
+        <Typography variant="h4">{item.base.name}</Typography>
+        {(item.drBonus) ? <Typography>Defense Rating Bonus: {item.drBonus}</Typography> : <></>}
+        {(item.protectsAgainst) ? <Typography>Protects from: {item.protectsAgainst}</Typography> : <></>}
+        {(item.type) ? <Typography>Type: {item.type}</Typography> : <></>}
+        {(item.equipped) ? <Typography>Equipped</Typography> : <Typography>Not Equipped</Typography>}
+        {(item.cost || item.cost === 0) ? <Typography>Cost: {item.cost} holos</Typography> : <></>}
+        {(item.weight || item.weight === 0) ? <Typography>Weight: {item.weight} pounds</Typography> : <></>}
+        {(item.condition || item.condition === 0) ? <Typography>Condition: {item.condition}</Typography> : <></>}
+    </Grid>
+}
+
+
+function WeaponInformation(props)
+{
+    const item = props.characterInfo.weapons.find(function(item)
+    {
+        return item._id === props.elementID; 
+    })
+    return <Grid>
+        <Button onClick={function(event) {event.preventDefault(); props.setShowFullData(false); props.setElementID(null); props.setElementType(null);}}>Back</Button>
+        <Typography variant="h4">{item.base.name}</Typography>
+        {(item.damage) ? <Typography>Damage Bonus: {item.damage}</Typography> : <></>}
+        {(item.modifier) ? <Typography>Modifier: {item.modifier}</Typography> : <></>}
+        {(item.uses) ? <Typography>Number of Uses: {item.uses}</Typography> : <></>}
+        {(item.type) ? <Typography>Type: {item.type}</Typography> : <></>}
+        {(item.equipped) ? <Typography>Equipped</Typography> : <Typography>Not Equipped</Typography>}
+        {(item.cost || item.cost === 0) ? <Typography>Cost: {item.cost} holos</Typography> : <></>}
+        {(item.weight || item.weight === 0) ? <Typography>Weight: {item.weight} pounds</Typography> : <></>}
+        {(item.condition || item.condition === 0) ? <Typography>Condition: {item.condition}</Typography> : <></>}
+    </Grid>
+}
+
+
+function Overview(props)
+{
+    return( 
+    <Grid width={'100%'} height={'100%'}>
+    <Weapons setElementID={props.setElementID} setElementType={props.setElementType} characterInfo={props.characterInfo}/>
+    <Armor setElementID={props.setElementID} setElementType={props.setElementType} characterInfo={props.characterInfo}/>
+    <Inventory setElementID={props.setElementID} setElementType={props.setElementType} characterInfo={props.characterInfo}/>
+    </Grid>
+    )
 }
 
 function Weapons(props)
 {
+    const [allowUserInput, setAllowUserInput] = useState(false)
+
+
     return <Grid height={'30%'}>
-    <Typography width={'100%'}  textAlign={'center'} variant='h5'>Weapons:</Typography>
+    <Grid container flexDirection={'row'}>
+            <Typography width={'60%'} textAlign={'end'} variant='h5'>Weapons:</Typography>
+            {(!allowUserInput) ? <Button onClick={() => {setAllowUserInput(true)}} sx={{width: '20%', marginLeft: '20%', textAlign: 'flex-end'}}>Add Weapon</Button> : <></>}
+    </Grid>
+    {(!allowUserInput) ?
     <List sx=
     {{width: '100%', 
-    maxHeight: '70%', 
-    overflow: 'auto'}}>
+    maxHeight: '20vh', 
+    overflow: 'auto',
+    '&:hover': {
+        cursor: 'pointer'
+    }}}>
         {props.characterInfo.weapons.map(function(weapon)
         {
             return (<Grid>
             <ListItem key={`weapon${weapon}` }>
-                <ListItemText primary={`${weapon.name}`}/>
+                <ListItemText onClick={function(event) {event.preventDefault(); props.setElementID(weapon._id); props.setElementType('weapon');}} primary={`${weapon.base.name}`}/>
             </ListItem>
             <Divider/>
             </Grid>)
         })}
-    </List>
-</Grid>
+    </List> : <ManualWeaponInput setAllowUserInput={setAllowUserInput} characterInfo = {props.characterInfo}/>}
+    </Grid>
+}
+
+function ManualWeaponInput(props)
+{
+    const [name, setName] = useState("");
+    const [damage, setDamage] = useState("");
+    const [modifier, setModifier] = useState("");
+    const [uses, setUses] = useState("");
+    const [type, setType] = useState("");
+    const [weight, setWeight] = useState("");
+
+    const handleSubmit = function()
+    {
+        const newWeapon = {
+            base: {
+                condition: 0,
+                maxCondition: 0,
+                cost: 0,
+                description: "",
+                name: name,
+                weight: parseInt(weight),
+            },
+            equipped: true,
+            damage: damage,
+            modifier: modifier,
+            uses: parseInt(uses),
+            type: type
+        }
+        let copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.weapons.push(newWeapon);
+        patchSheet(copyOfCharacterJSON._id, copyOfCharacterJSON).then((r) =>
+        {
+            if (!r.ok)
+            {
+                r.json().then((json) =>
+                {
+                    console.log("Error patching item to the sheet, error code: " + r.status);
+                    console.log(json)
+                })
+            }
+            else 
+            {
+                
+                
+            }
+        })
+    }
+
+    const handleNumericChange = function(value, setFunction)
+    {
+        if (parseInt(value) || value === 0)
+        {
+            setFunction(value)
+        }
+        else
+        {
+            setFunction(null);
+        }
+    }
+
+    return (<Grid container justifyContent={'center'} height={'80%'} width={'100%'} justifySelf={'center'} alignSelf={'center'}>
+        <Grid container flexDirection={'row'}>
+            <TextField onChange={(e) => {setName(e.target.value)}} sx={{marginRight: '5%'}} label="Weapon Name" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setDamage)}} label="Damage (Numeric)" size="small"></TextField>
+            <ModifierMenu setModifier={setModifier}/>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setUses)}} label="Uses (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setWeight)}} label="Weight (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {setType(e.target.value)}} label="Type" size="small"></TextField>
+        </Grid>
+        {(name && damage && modifier && weight && uses && type) ?
+                <Button onClick={() => {props.setAllowUserInput(false); handleSubmit()}}>Submit</Button> 
+                : <Typography color={'#ff0000'}>Check Inputs (Ensure a modifier is selected)</Typography>
+        }
+    </Grid>)
+}
+
+function ModifierMenu(props)
+{
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = (stat) => {
+    props.setModifier(stat)
+    setAnchorEl(null);
+  };
+
+  return (
+    <div>
+      <Button
+        id="basic-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+      >
+        Modifier
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem onClick={(event) => {event.preventDefault(); handleClose('svy')}}>Savvy</MenuItem>
+        <MenuItem onClick={(event) => {event.preventDefault(); handleClose('bdy')}}>Body</MenuItem>
+        <MenuItem onClick={(event) => {event.preventDefault(); handleClose('tech')}}>Tech</MenuItem>
+        <MenuItem onClick={(event) => {event.preventDefault(); handleClose('dex')}}>Dex</MenuItem>
+      </Menu>
+    </div>
+  );
 }
 
 
 function Inventory(props)
 {   
+    const [allowUserInput, setAllowUserInput] = useState(false)
+
     return <Grid height={'40%'}>
-        <Typography width={'100%'}  textAlign={'center'} variant='h5'>Inventory:</Typography>
+        <Grid container flexDirection={'row'}>
+            <Typography width={'60%'} textAlign={'end'} variant='h5'>Inventory:</Typography>
+            {(!allowUserInput) ? <Button onClick={() => {setAllowUserInput(true)}} sx={{width: '20%', marginLeft: '20%', textAlign: 'flex-end'}}>Add Item</Button> : <></>}
+        </Grid>
+        {(!allowUserInput) ?
         <List sx=
         {{width: '100%', 
-        maxHeight: '78%', 
-        overflow: 'auto'}}>
+        maxHeight: '25vh', 
+        overflow: 'auto',
+        '&:hover': {
+            cursor: 'pointer'
+        }}}>
             {props.characterInfo.inventory.map(function(item, index)
             {
                 return (<Grid key={`GridOfinventoryItem${index}`}>
                 <ListItem key={`inventoryItem${index}` }>
-                    <ListItemText key={`inventoryIteText${index}`} primary={`${item.name}`}/>
+                    <ListItemText onClick={function(event) {event.preventDefault(); props.setElementID(item._id); props.setElementType('item');}} key={`inventoryItemText${index}`} primary={`${item.name}`}/>
                 </ListItem>
                 <Divider/>
                 </Grid>)
             })}
-        </List>
+        </List> : <ManualInputItem setAllowUserInput={setAllowUserInput} characterInfo={props.characterInfo}/>}
     </Grid>
+}
+
+
+function ManualInputItem(props)
+{
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [condition, setCondition] = useState("");
+    const [maxCondition, setMaxCondition] = useState("");
+    const [weight, setWeight] = useState("");
+    const [cost, setCost] = useState("");
+
+    const handleSubmit = function()
+    {
+        const newItem = {
+            cost: cost,
+            name: name,
+            weight: weight,
+            description: description,
+            condition: condition,
+            maxCondition: maxCondition
+        }
+        let copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.inventory.push(newItem);
+        patchSheet(copyOfCharacterJSON._id, copyOfCharacterJSON).then((r) =>
+        {
+            if (r.ok)
+            {
+                r.json().then((json) =>
+                {
+                    console.log("New inventory for this player is: ")
+                    console.log(json.inventory);
+                })
+            }
+            else 
+            {
+                console.log("Error patching item to the sheet, error code: " + r.status)
+            }
+        })
+    }
+
+    const handleNumericChange = function(value, setFunction)
+    {
+        if (parseInt(value) || parseInt(value) === 0)
+        {
+            setFunction(value)
+        }
+        else
+        {
+            setFunction(null)
+        }
+    }
+
+    return (<Grid container justifyContent={'center'} height={'80%'} width={'100%'} justifySelf={'center'} alignSelf={'center'}>
+        <Grid container flexDirection={'row'}>
+            <TextField onChange={(e) => {setName(e.target.value)}} sx={{marginRight: '5%'}} label="Item Name" size="small"></TextField>
+            <TextField onChange={(e) => {setDescription(e.target.value)}} label="Description" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setCondition)}} label="Condition (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setMaxCondition)}} label="Max Condition (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setWeight)}} label="Weight (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setCost)}} label="Cost (Numeric)" size="small"></TextField>
+        </Grid>
+        {(condition && maxCondition && weight && cost) ? 
+                <Button onClick={() => {props.setAllowUserInput(false); handleSubmit()}}>Submit</Button>
+        : <Typography color={'#ff0000'}>Check Inputs</Typography> 
+        }
+    </Grid>)
 }
 
 function Armor(props)
 {
-    return (
+    const [allowUserInput, setAllowUserInput] = useState(false)
+
+
+    return ((!allowUserInput) ? 
     <Grid height={'30%'}>
-        <Typography maxHeight={'20%'} width={'100%'}  textAlign={'center'} variant='h5'>Armor:</Typography>
+        <Grid container flexDirection={'row'}>
+            <Typography width={'60%'} textAlign={'end'} variant='h5'>Armor:</Typography>
+            <Button onClick={() => {setAllowUserInput(true)}} sx={{width: '20%', marginLeft: '20%', textAlign: 'flex-end'}}>Add Armor</Button>
+        </Grid>
         <List sx=
         {{width: '100%', 
-        maxHeight: '70%', 
-        overflow: 'auto'}}>
+        maxHeight: '20vh',
+        overflow: 'auto',
+        '&:hover': {
+            cursor: 'pointer'
+        }}}>
             {props.characterInfo.armor.map(function(item)
             {
                 return (<Grid>
                 <ListItem key={`Armor${item}`}>
-                    <ListItemText primary={`${item.name}`}/>
+                    <ListItemText onClick={function(event) {event.preventDefault(); props.setElementID(item._id); props.setElementType('armor');}} primary={`${item.base.name}`}/>
                 </ListItem>
                 <Divider/>
                 </Grid>)
             })}
         </List>
+    </Grid> 
+    : <ManualInputArmor setAllowUserInput={setAllowUserInput} characterInfo={props.characterInfo}/>
+)
+}
+
+
+function ManualInputArmor(props)
+{
+    const [name, setName] = useState("");
+    const [weight, setWeight] = useState("");
+    const [defenseRating, setDefenseRating] = useState(null)
+    const [protectsAgainst, setProtectsAgainst] = useState(null)
+    const [type, setType] = useState(null)
+
+    const handleSubmit = function()
+    {
+        const newArmor = {
+            base: {
+            cost: 0,
+            name: name,
+            weight: parseInt(weight),
+            description: "",
+            condition: 0,
+            maxCondition: 0
+            },
+            drBonus: parseInt(defenseRating),
+            protectsAgainst: protectsAgainst,
+            type: type,
+            equipped: true
+        }
+
+        let copyOfCharacterJSON = props.characterInfo;
+        copyOfCharacterJSON.armor.push(newArmor);
+        patchSheet(copyOfCharacterJSON._id, copyOfCharacterJSON).then((r) =>
+        {
+            if (!r.ok)
+                console.log("Error patching item to the sheet, error code: " + r.status)
+        })
+    }
+
+    const handleNumericChange = function (value, setFunction) {
+        if(parseInt(value) || parseInt(value) === 0)
+        {
+            setFunction(value);
+        }
+        else
+        {
+            setFunction(null);
+        }
+    }
+
+    return (<Grid container justifyContent={'center'} height={'30%'} width={'100%'} justifySelf={'center'} alignSelf={'center'}>
+        <Grid container flexDirection={'row'}>
+            <TextField onChange={(e) => {setName(e.target.value)}} sx={{marginRight: '5%'}} label="Armor Name" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setWeight)}} sx={{marginRight: '5%'}} label="Weight (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {handleNumericChange(e.target.value, setDefenseRating)}} label="DefenseRating (Numeric)" size="small"></TextField>
+            <TextField onChange={(e) => {setProtectsAgainst(e.target.value)}} label="Protects Against" size="small"></TextField>
+            <TextField onChange={(e) => {setType(e.target.value)}} label="Type" size="small"></TextField>
+        </Grid>
+        {(weight && defenseRating && protectsAgainst && name) ?
+                <Button onClick={() => {props.setAllowUserInput(false); handleSubmit()}}>Submit</Button>
+                :
+                <Typography color={'#ff0000'}>Check Inputs</Typography>
+            }
     </Grid>)
 }
 
@@ -718,7 +1142,6 @@ function Origin(props)
 
 function CurrentSituation(props)
 {
-    console.log(props.characterInfo)
     return (<Grid height={'90%'}>
         <MutationsList characterInfo={props.characterInfo}/>
         <VoidCorruptions characterInfo={props.characterInfo}/>

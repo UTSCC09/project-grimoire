@@ -38,7 +38,7 @@ function CharacterSheetView(props){
     }, [])
 
     return(
-        <Grid container justifyContent={'center'} height={'100vh'}>
+        <Grid container justifyContent={'center'} height={'fit-content'}>
             {loading ? <CircularProgress/> : <></>}
             {error ? <Alert severity={'error'}>{error}</Alert> : <></>}
             {sheet ? <CharacterSheet character={sheet}/> : <></>}    

@@ -36,8 +36,8 @@ code {
   animation: fadeInFromAbove 2s ease-out;
   font-size: 50px;
   position: absolute;
-  top: 30%;
-  left: 10%;
+  top: 35%;
+  left: 15%;
 }
 
 .textPictureContainer {
@@ -45,6 +45,6 @@ code {
   display: inline-block;
   justify-content: center;
   height: 101svh;
-  width: 100%;
+  width: 70%;
   background-color: black;
 }

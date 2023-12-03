@@ -147,6 +147,13 @@ export function getCharacterSheets(page=0, limit=10)
 })
 }
 
+export function getCharacterSheetPicture(ID)
+{
+  return fetch(`${URL}/api/sheets/${ID}/pic`, {
+    method: 'GET',
+    credentials: 'include'})
+}
+
 //Calls a patch method, which updates a character sheet
 export function patchSheet(sheetID, CharacterSheetJSON)
 {
@@ -235,6 +242,17 @@ export function getMoves(searchCritera, signal=undefined){
     method: 'GET',
     credentials: 'include',
     signal: signal
+  })
+}
+
+
+export function UploadCharacterPic(id, picture){
+  const data = new FormData()
+  data.append('image', picture)
+  return fetch(`${URL}/api/sheets/${id}/pic`, {
+    method: 'POST',
+    credentials: 'include',
+    body: data
   })
 }
 

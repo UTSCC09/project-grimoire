@@ -22,7 +22,7 @@
     color: white;
     font-size: 50px;
     position: absolute;
-    top: 23%;
+    top: 27%;
     left: 40%;
     max-height: 10%;
     max-width: 10%;
@@ -37,4 +37,11 @@
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+.characterPicture {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: fill;
+    height: 100%;
 }
