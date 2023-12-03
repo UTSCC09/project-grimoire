@@ -59,6 +59,7 @@ function DISStats(props){
     useEffect(()=>{
         const abortCont = new AbortController()
         const finish = () => abortCont.abort()
+        console.log('areStatsLow', areStatsLow())
         if(!areStatsLow()){
             setStartingBonus({})
             props.onUpdate({startingBonus: undefined}, false, 'ignore')
@@ -88,11 +89,11 @@ function DISStats(props){
     }, [props.char.stats])
 
     return (
-        <StatPicker rollStats={() => rollNSidedDie(4) - rollNSidedDie(4)} rolledKey="DISRolled" className="mancer-page"
+        <StatPicker rollStats={() => rollNSidedDie(4) - rollNSidedDie(4)} rolledKey="DISRolled" className="page-container-cover"
         stats={stats} onUpdate={props.onUpdate} char={props.char}
         customRollers={customRollers}>
             {!isObjectEmpty(startingBonus) ? 
-            <Paper elevation={1} className='cenetered' sx={{margin:'1%'}}>
+            <Paper elevation={1} className='dis-stats-alert'>
                     UH-oh! your stats are low, we've randomly chosen to add the following to your character sheet.
                 <Divider/>
                     <Typography>Type: {startingBonus.startingBonus.type}</Typography>

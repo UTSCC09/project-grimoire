@@ -4,7 +4,7 @@ import {Autocomplete, GoogleMap, Marker, useJsApiLoader} from "@react-google-map
 import "./createGame.css"
 import GrimoireCreateGroup from '../media/CreateGroupPicture.png'
 import { getGames, getLocationNamesFromCardinal, postGroup } from "../api.mjs"
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import styled from "@emotion/styled"
 import { Form } from "react-router-dom"
 
@@ -130,6 +130,7 @@ function TextForm(props)
     const [homebrew, setHomebrew] = useState(null);
 
     const navigate = useNavigate();
+    const location = useLocation();
     
     const handleSubmission = function () {
         if (props.latitude === 0 && props.longtitude === 0 && props.isInPersonGame)
@@ -156,6 +157,10 @@ function TextForm(props)
             {
                 if (!resp.ok)
                 {
+                    if(resp.status === 401){
+                        navigate("/login", {state: {path: location.pathname}})
+                        return
+                    }
                     setError("Connection to server could not be established, please check your inputs")
                     console.log(resp.json())
                 }

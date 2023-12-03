@@ -104,7 +104,7 @@ function NavBar(props){
 
     return(
       <ThemeProvider theme = {theme}>
-      <AppBar position="sticky">
+      <AppBar position="sticky" sx={{borderBottom: '1px red solid', borderColor:'secondary'}}>
         <Toolbar disableGutters>
           <Grid item container xs={12} direction ={"row"}>
               <CustomGrid item container xs={8}>

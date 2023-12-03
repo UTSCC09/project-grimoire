@@ -2,7 +2,7 @@ import {React, useState, useEffect} from "react"
 import {Button, Grid, Typography, Alert, CircularProgress} from "@mui/material"
 import { getCharacterSheets, getPictureOfSheet } from "../api.mjs"
 import "./characterSheetHomePage.css"
-import {useNavigate} from "react-router-dom"
+import {useLocation, useNavigate} from "react-router-dom"
 
 const URL = process.env.REACT_APP_URL
 
@@ -24,15 +24,23 @@ function CharacterSheetList(props)
     const [rightPageBtn, setRightPageBtn] = useState(false)
     const [leftPageBtn, setLeftPageBtn] = useState(false)
 
+    const navigate = useNavigate()
+    const location = useLocation()
+    
     useEffect(function () 
     {
         setLoading(true)
         setLeftPageBtn(page >= 1)
-        getCharacterSheets(page, 6).then((response) => 
+        getCharacterSheets(page, 6).then(async (response) => 
         {
         if (!response.ok)
         {
-            setError("Sheets could not be retrieved from the server.")
+            setLoading(false)
+            if(response.status === 401){
+                navigate("/login", {state: {path: location.pathname}})
+                return
+            }
+            setError((await response.json()).body)
             console.log(response.status)
             return
         }

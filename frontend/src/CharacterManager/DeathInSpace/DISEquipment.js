@@ -32,7 +32,7 @@ function EquipmentCard(props){
     }
 
     return (
-        <Card sx={{width:'100%'}}>
+        <Card sx={{width:'100%'}} className="dis-select-card">
             <Grid item container xs={12}>
             <Grid container item xs={10} sx={{flexDirection:'row', display:'flex'}}>
                 <CardContent>
@@ -48,7 +48,7 @@ function EquipmentCard(props){
                     </Grid>
                 </CardContent>
             </Grid>
-            <Grid item container xs={2} backgroundColor="#bfb2ae">
+            <Grid item container xs={2} backgroundColor="secondary.main">
                 <CardActionArea onClick={chooseEquip}>
                         <ArrowForwardIosIcon/>
                 </CardActionArea>

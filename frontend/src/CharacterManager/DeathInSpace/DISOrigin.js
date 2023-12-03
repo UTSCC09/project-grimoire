@@ -27,7 +27,7 @@ function OriginCard(props){
 
     return (
         <>
-        <Card sx={{width:'100%'}}>
+        <Card className="dis-select-card">
             {/* <CardMedia/> */}
             <CardActionArea>
                 <CardContent onClick={() => {setExpanded(true)}}>
