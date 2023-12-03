@@ -1,5 +1,5 @@
 import {React, useState, useEffect} from "react"
-import {Alert, Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Slider, TextField, ThemeProvider, Typography, createTheme} from "@mui/material"
+import {Alert, Box, Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Slider, TextField, ThemeProvider, Typography, createTheme} from "@mui/material"
 import {Autocomplete, GoogleMap, Marker, useJsApiLoader} from "@react-google-maps/api"
 import "./createGame.css"
 import GrimoireCreateGroup from '../media/CreateGroupPicture.png'
@@ -51,9 +51,9 @@ function CreateGame(props){
       return (
         <ThemeProvider theme={theme}>
       <Box container='true' justifyContent={'center'} alignItems={'center'} className='entireScreen'>
-        <Box className='imageContainer'>
+        <div className='imgContainer'>
             <img alt='SignUpImage' className='signUpImage' src={GrimoireCreateGroup}/>
-        </Box>
+        </div>
         <CreateGameForm/>
       </Box>
       </ThemeProvider>
@@ -101,17 +101,17 @@ function CreateGameForm(props)
       }
 
 
-    return (<Grid className="form" container justifyContent={'flex-start'} flexDirection={'column'} alignItems={'center'} height={'50%'} margin={'auto'} marginTop={'0vh'} width={'40%'}>
+    return (<Grid className="form" container justifyContent={'flex-start'} flexDirection={'column'} alignItems={'center'}>
         <TextForm isInPersonGame={isInPersonGame} setisInPersonGame={setisInPersonGame} latitude={latitude} longtitude={longtitude} setLongtitude = {setLongtitude} setLatitude={setLatitude}/>
         {(APILoaded.isLoaded && isInPersonGame) ? <Grid width= '80%' height='50vh' container alignItems={'center'}> 
-        <Autocomplete sx={{width: '300px'}} onLoad={onLoadAutoComplete} onPlaceChanged={onPlaceChanged}>
-            <TextField inputProps={{style: {color: "white"}}} focused className="inputField" color="textprimary" label={'Manually Input a Location'}></TextField>
+        <Autocomplete sx={{width: 300}} onLoad={onLoadAutoComplete} onPlaceChanged={onPlaceChanged}>
+            <TextField inputProps={{style: {color: "white", width: '30vw'}}} focused color="textprimary" label={'Manually Input a Location'}></TextField>
         </Autocomplete>
-        <GoogleMap mapContainerStyle={{width: '100%', height: '100%', padding: '0'}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
+        <GoogleMap mapContainerStyle={{marginTop: '5%', width: '100%', height: '80%', padding: '0'}} zoom={zoom} center = {{lat: latitude, lng: longtitude}}>
         </GoogleMap>
         
         </Grid> 
-         : <Typography>Loading</Typography> }  
+         : <CircularProgress/> }  
     </Grid>)
 }
 
@@ -187,12 +187,18 @@ function TextForm(props)
             }
             else 
             {
+                let admin_3 = "";
+                let admin_2 = "";
                 const json = await res.json()
                 const address_info = json.address_components
                 if (json.address_components)
                 {
-                    setDisplayLocation(address_info.administrative_area_level_3.long_name + ", " +
-                                        address_info.administrative_area_level_1.long_name + ". " +
+                    if (address_info.administrative_area_level_3)
+                        admin_3 = address_info.administrative_area_level_3.long_name + ", ";
+                    if (address_info.administrative_area_level_1.long_name)
+                        admin_2 = address_info.administrative_area_level_1.long_name + ". "
+                    setDisplayLocation(admin_3 + admin_2
+                                        +
                                         address_info.country.long_name)
                 }
             }
@@ -219,7 +225,7 @@ function TextForm(props)
         <Typography fontSize={'2rem'} color={"white"}>Make a Group</Typography>
         <TextField className="inputField" color="textprimary" inputProps={{style: {color: "white"}}} variant="filled" focused label='Group Name' onChange={(e) => {e.preventDefault(); setgroupName((e.target.value));}}/>
         <SystemPick setgameName={setgameName} setError={setError}/>
-        <Typography fontSize={'2rem'} color={"white"}>Indicate your preference for the following: (Optional)</Typography>
+        <Typography fontSize={'1.4rem'} color={"white"}>Indicate your preference for the following: (Optional)</Typography>
         <Preferences PreferenceStateChangeArray={PreferenceStateChangeArray} PreferenceArray={PreferenceArray}/>
         <LocationServices setRemote={props.setisInPersonGame}/>
         {props.isInPersonGame ?
@@ -233,10 +239,10 @@ function TextForm(props)
             <Alert severity="error">{error}</Alert> :
             <></>
         }
-        <Typography fontSize={'2rem'} color={"white"}>Location set to:</Typography>
+        <Typography fontSize={'1.4rem'} color={"white"}>Location set to:</Typography>
         {
             (displayLocation) ? 
-                <Typography fontSize={'2rem'} color={"white"}>{displayLocation}</Typography> 
+                <Typography fontSize={'1.4rem'} color={"white"}>{displayLocation}</Typography> 
                 : <></>
         }
     </Grid>

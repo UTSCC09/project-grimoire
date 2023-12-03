@@ -32,7 +32,7 @@ function getRoutes(){
     <Route path="/CreateCharacter/DeathInSpace" element={<DeathInSpaceMancer/>}/>
     {/* <Route path="/CreateCharacter/MonsterHearts" element={<MHeartsMancer/>}/> */}
     <Route path="/CharacterSheetHomePage" element={<CharacterSheetHomePage/>}/>
-    <Route path='/user/sheets' element={<CharacterSheetView/>}/>
+    <Route path={`/sheets/*`} element={<CharacterSheetView/>}/>
     <Route path='/DualFactorAuth' element={<DualFactorAuth/>}/>
     <Route path="*" element={<Page404/>}/>
     </>

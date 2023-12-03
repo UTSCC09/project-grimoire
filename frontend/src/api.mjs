@@ -119,6 +119,54 @@ export function getSheet(ID)
     })
 }
 
+// export function getSheetQRCode(ID)
+// {
+
+// }
+
+export function getPictureOfSheet(ID)
+{
+  return fetch(`${URL}/api/sheets/${ID}/pic`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+})
+}
+
+
+export function getCharacterSheets(page=0, limit=10)
+{
+  return fetch(`${URL}/api/sheets/?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+})
+}
+
+export function getCharacterSheetPicture(ID)
+{
+  return fetch(`${URL}/api/sheets/${ID}/pic`, {
+    method: 'GET',
+    credentials: 'include'})
+}
+
+//Calls a patch method, which updates a character sheet
+export function patchSheet(sheetID, CharacterSheetJSON)
+{
+  return fetch(`${URL}/api/dis/sheets/${sheetID}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(CharacterSheetJSON)
+})
+}
+
 export function deleteSheet(ID)
 {
     return fetch(`${URL}/api/sheets/${ID}`, {
@@ -194,6 +242,17 @@ export function getMoves(searchCritera, signal=undefined){
     method: 'GET',
     credentials: 'include',
     signal: signal
+  })
+}
+
+
+export function UploadCharacterPic(id, picture){
+  const data = new FormData()
+  data.append('image', picture)
+  return fetch(`${URL}/api/sheets/${id}/pic`, {
+    method: 'POST',
+    credentials: 'include',
+    body: data
   })
 }
 

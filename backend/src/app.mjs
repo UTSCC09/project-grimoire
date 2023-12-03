@@ -115,6 +115,8 @@ app.post('/api/validate/email', (req, res, next) => {
             res.setHeader(
                 "Set-Cookie",
                 serialize("Username", req.session.user, {
+                  secure: true,
+                  sameSite: true,
                   path: "/",
                   maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                 }),
@@ -132,6 +134,8 @@ app.post('/api/validate/email', (req, res, next) => {
                 res.setHeader(
                   "Set-Cookie",
                   serialize("Username", newUser.email, {
+                    sameSite: true,
+                    secure: true,
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
@@ -230,8 +234,9 @@ app.post("/api/signin", (req, res, next) => {
                 req.session.userId = doc._id
                 res.setHeader(
                   "Set-Cookie",
-
                   serialize("Username", doc.email, {
+                    secure: true,
+                    sameSite: true,
                     path: "/",
                     maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
                   }),
