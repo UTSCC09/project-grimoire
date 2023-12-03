@@ -49,17 +49,8 @@ groupRouter.post('/create', isAuthenticated, async (req, res, next) => {
 
 // endpoint to get paginated list of game groups given page number and page size
 groupRouter.get('/page/', async (req, res, next) => {
-        const page = Number(req.query.page) || DEFAULTPAGE
+    const page = Number(req.query.page) || DEFAULTPAGE
     const size = Number(req.query.size) || DEFAULTLIMIT
-    
-    // if(!page){
-    //     res.status(422).json({body: "missing page number"})
-    //     return
-    // }
-    // if(!size){
-    //     res.status(422).json({body: "missing page size"})
-    //     return
-    // }
     Group.find({}).skip(page * size).limit(size).exec()
     .then((docs) => {
                 res.status(200).json(docs)
