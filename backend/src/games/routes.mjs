@@ -46,7 +46,6 @@ gamesRouter.get("/:id/pic", (req, res, next) => {
     Game.findById(id).exec().then((doc) => {
         const img = doc.banner
         const dirname = resolve()
-        console.log('img', img, 'dirname', dirname, 'resolved path', String(join(dirname, img.path)))
         if(img){    
             res.setHeader("Content-Type", img.mimetype);
             res.sendFile(join(dirname, img.path));
