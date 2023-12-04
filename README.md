@@ -76,33 +76,33 @@ easier collection of elements and drop down menus, we used the components librar
 # Describe the contribution of each team member to the project. Please provide the full name of each team member (but no student number). 
 
 Casper Sajewski-Lee:
- Frontend Menu Screen
- Frontend Navigation and Routing
- Frontend Sign Up, Log In, and Validation Code Design and Implementation
- Frontend Create Groups Page Design, Implementation, and Logic
- Frontend Character Sheet Home Page
+ Frontend Menu Screen,
+ Frontend Navigation and Routing,
+ Frontend Sign Up, Log In, and Validation Code Design and Implementation,
+ Frontend Create Groups Page Design, Implementation, and Logic,
+ Frontend Character Sheet Home Page,
  Frontend Individual Character Sheet View, Logic, and Implementation
 
 Justin Wang:
- Backend Groups Routes
- Backend Groups Schema
- Backend Chat Routes
- Frontend Looking For Group
+ Backend Groups Routes,
+ Backend Groups Schema,
+ Backend Chat Routes,
+ Frontend Looking For Group,
  Frontend Live Chat
 
 Kyle Lewis:
- Backend Death in Space Character Routes
- Backend Death in Space Database Character Schema
- Backend MonsterHearts Character Routes 
- Backend MonsterHearts Database Character Schema
- General Game Database Schema
- Backend General Character Sheets Schema
- Backend User Database Schema
- Backend Signup/Login
- Backend Amazon Web Services Email Validation
- Backend Google Maps API Geocoding and Reverse Geocoding
- Frontend Character Creation Page
- Frontend Page Not Found
+ Backend Death in Space Character Routes,
+ Backend Death in Space Database Character Schema,
+ Backend MonsterHearts Character Routes,
+ Backend MonsterHearts Database Character Schema,
+ General Game Database Schema,
+ Backend General Character Sheets Schema,
+ Backend User Database Schema,
+ Backend Signup/Login,
+ Backend Amazon Web Services Email Validation,
+ Backend Google Maps API Geocoding and Reverse Geocoding,
+ Frontend Character Creation Page,
+ Frontend Page Not Found,
  Deployment (Domain Name, Certificate Finding, and VM creation)
 
 # One more thing? 
